@@ -12,7 +12,7 @@ import {
 
 function RoomCard({ room, formatCurrency }) {
   const isVacant = room.status === 'vacant';
-  const borderColor = isVacant ? 'border-t-[#12B76A]' : 'border-t-[#F04438]';
+  const borderColor = isVacant ? 'border-t-[#12B76A]' : 'border-t-[#EF4444]';
   const maxAmenities = 3;
 
   return (
@@ -47,10 +47,10 @@ function RoomCard({ room, formatCurrency }) {
         {/* Status badge */}
         <div className="mb-3">
           <Badge
-            variant={isVacant ? 'success' : 'danger'}
+            variant={isVacant ? 'success' : 'destructive'}
             dot
           >
-            {room.status.charAt(0).toUpperCase() + room.status.slice(1)}
+            {isVacant ? 'Vacant' : 'Room Full'}
           </Badge>
         </div>
 

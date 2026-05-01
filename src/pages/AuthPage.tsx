@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { setToken } from '../lib/api';
 
 function AuthPage() {
@@ -71,43 +72,18 @@ function AuthPage() {
     }`;
 
   return (
-    <div className="min-h-screen bg-[#F8F5F0] flex items-center justify-center p-4 md:p-6">
-      <div className="w-full max-w-[920px] bg-white shadow-md p-5 rounded-[40px] border border-gray-200">
+    <div className="h-screen flex items-center justify-center p-4 md:p-6" style={{ background: 'linear-gradient(135deg, #1C6C41 0%, #F8F5F0 60%)' }}>
+      <div className="w-full max-w-[920px] bg-white shadow-md p-4 rounded-[40px] border border-gray-200">
         <div className="w-full flex flex-col-reverse md:flex-row">
 
           {/* Left Column — Decorative image panel */}
           <div className="w-full flex items-center justify-center md:max-w-[420px] mt-6 md:mt-0">
-            <div className="relative w-full rounded-[30px] overflow-hidden bg-gradient-to-br from-[#d4f5e0] to-[#a8e6c3] flex items-center justify-center min-h-[380px] md:min-h-[460px]">
-              {/* Sunburst decorative background */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                <div className="w-[300px] h-[300px] rounded-full" style={{
-                  background: 'repeating-conic-gradient(#1C6C41 0deg 15deg, transparent 15deg 30deg)',
-                }} />
-              </div>
-              {/* Content */}
-              <div className="relative z-10 text-center px-6">
-                <h2 className="text-[18px] md:text-[20px] font-bold text-gray-800 mb-3">
-                  Reliable Pros, Trusted by Your Circle
-                </h2>
-                <p className="text-[13px] text-gray-600">
-                  Manage your properties with confidence
-                </p>
-              </div>
-              {/* Floating card */}
-              <div className="absolute bottom-6 left-6 bg-white rounded-xl shadow-lg px-4 py-3 max-w-[200px]">
-                <p className="text-[13px] font-semibold text-gray-800">PG Manager</p>
-                <p className="text-[11px] text-gray-500 mt-0.5">Crafted to last, built with care</p>
-                <div className="flex items-center gap-1 mt-2">
-                  <div className="flex -space-x-1.5">
-                    {[0, 1, 2].map(i => (
-                      <div key={i} className="w-5 h-5 rounded-full bg-gradient-to-br from-[#1C6C41] to-[#3DBF7E] border-2 border-white text-[8px] text-white flex items-center justify-center font-bold">
-                        {String.fromCharCode(65 + i)}
-                      </div>
-                    ))}
-                  </div>
-                  <span className="text-[10px] text-gray-400 ml-1">+3 more recommend this</span>
-                </div>
-              </div>
+            <div className="relative w-full h-full rounded-[30px] overflow-hidden">
+              <img
+                src="/login-hero.png"
+                alt="PG Management illustration"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
 
@@ -126,27 +102,43 @@ function AuthPage() {
             </p>
 
             {/* Toggle Tabs */}
-            <div className="flex w-full bg-[#F3F4F6] rounded-full p-1 mb-5">
+            <div className="relative flex w-full bg-[#F3F4F6] rounded-full p-1 mb-5">
               <button
+                type="button"
                 onClick={() => { setActiveTab('login'); setErrors({}); }}
-                className={`flex-1 py-2 rounded-full text-[13px] font-semibold transition-all ${
+                className={`relative z-10 flex-1 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 ${
                   activeTab === 'login'
-                    ? 'bg-[#1C6C41] text-white shadow-sm'
+                    ? 'text-white'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 Login
               </button>
               <button
+                type="button"
                 onClick={() => { setActiveTab('signup'); setErrors({}); }}
-                className={`flex-1 py-2 rounded-full text-[13px] font-semibold transition-all ${
+                className={`relative z-10 flex-1 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 ${
                   activeTab === 'signup'
-                    ? 'bg-[#1C6C41] text-white shadow-sm'
+                    ? 'text-white'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 Sign Up
               </button>
+              
+              {/* Animated sliding pill */}
+              <motion.div
+                className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#1C6C41] rounded-full shadow-sm z-0"
+                initial={false}
+                animate={{ 
+                  x: activeTab === 'login' ? 0 : '100%' 
+                }}
+                transition={{ 
+                  type: 'tween', 
+                  duration: 0.4, 
+                  ease: 'easeInOut' 
+                }}
+              />
             </div>
 
             {/* Forms */}
