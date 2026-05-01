@@ -1,0 +1,405 @@
+import { useEffect, useState, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { Plus, ChevronDown, MoreHorizontal, Wrench, Calendar } from 'lucide-react';
+import { apiRequest, unwrapData } from '../lib/api';
+import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
+import Badge from '../components/ui/Badge';
+import Drawer from '../components/ui/Drawer';
+
+const CATEGORIES = ['plumbing', 'electrical', 'furniture', 'cleaning', 'other'];
+const PRIORITIES = ['high', 'medium', 'low'];
+const STATUSES = ['open', 'in_progress', 'resolved', 'closed'];
+
+const CATEGORY_COLORS = {
+  plumbing:   { bg: '#EFF8FF', text: '#2E90FA' },
+  electrical: { bg: '#FFFAEB', text: '#F79009' },
+  furniture:  { bg: '#F5F3FF', text: '#7C3AED' },
+  cleaning:   { bg: '#ECFDF3', text: '#12B76A' },
+  other:      { bg: '#F3F4F6', text: '#6B7280' },
+};
+
+const PRIORITY_DOTS = {
+  high:   '#F04438',
+  medium: '#F79009',
+  low:    '#2E90FA',
+};
+
+const STATUS_BADGE = {
+  open:        { variant: 'danger',  label: 'Open' },
+  in_progress: { variant: 'warning', label: 'In Progress' },
+  resolved:    { variant: 'success', label: 'Resolved' },
+  closed:      { variant: 'neutral', label: 'Closed' },
+};
+
+function capitalize(str) {
+  return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+}
+
+function Maintenance() {
+  const [tickets, setTickets] = useState([]);
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [filterPriority, setFilterPriority] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadTickets = async () => {
+      try {
+        const payload = await apiRequest('/api/v1/tickets/my');
+        const data = unwrapData(payload, []);
+        if (mounted && Array.isArray(data) && !data.detail) {
+          setTickets(data.map((ticket) => ({
+            id: ticket.id,
+            title: ticket.title || 'Untitled ticket',
+            description: ticket.description || '',
+            category: ticket.category || 'other',
+            priority: ticket.priority || 'medium',
+            status: ticket.status || 'open',
+            createdAt: ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'N/A',
+            rawCreatedAt: ticket.created_at ? new Date(ticket.created_at).toLocaleString() : 'N/A',
+          })));
+        }
+      } catch {
+        if (mounted) setTickets([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    loadTickets();
+    return () => { mounted = false; };
+  }, []);
+
+  // Close overflow menu on outside click
+  useEffect(() => {
+    if (!openMenuId) return;
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setOpenMenuId(null);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [openMenuId]);
+
+  const updateTicketStatus = (ticketId, newStatus) => {
+    setTickets((prev) =>
+      prev.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t))
+    );
+    if (selectedTicket?.id === ticketId) {
+      setSelectedTicket((prev) => ({ ...prev, status: newStatus }));
+    }
+    setOpenMenuId(null);
+  };
+
+  const filteredTickets = tickets.filter((ticket) => {
+    if (filterCategory !== 'all' && ticket.category !== filterCategory) return false;
+    if (filterPriority !== 'all' && ticket.priority !== filterPriority) return false;
+    if (filterStatus !== 'all' && ticket.status !== filterStatus) return false;
+    return true;
+  });
+
+  const menuOptions = (ticket) => {
+    const options = [];
+    if (ticket.status === 'open') options.push({ label: 'Start Progress', status: 'in_progress' });
+    if (ticket.status === 'in_progress') options.push({ label: 'Mark Resolved', status: 'resolved' });
+    if (ticket.status === 'resolved') options.push({ label: 'Close', status: 'closed' });
+    options.push({ label: 'View Details', action: 'view' });
+    return options;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh] text-[#6B7280]">
+        Loading tickets...
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      className="h-full flex flex-col"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      {/* Top Toolbar - Title + New Ticket */}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-[#111827]">Maintenance Tickets</h1>
+        <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#2E90FA] hover:bg-[#1C7ED6] text-white text-sm font-medium rounded-lg transition-colors cursor-pointer">
+          <Plus size={16} />
+          New Ticket
+        </button>
+      </div>
+
+      {/* Filters Row */}
+      <div className="flex items-center gap-3 mb-5 flex-wrap">
+        {/* Category filter */}
+        <div className="relative">
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="appearance-none pl-3 pr-8 py-2 text-sm rounded-lg border border-[#E5E7EB] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#2E90FA]/20 focus:border-[#2E90FA]"
+          >
+            <option value="all">All Categories</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>{capitalize(cat)}</option>
+            ))}
+          </select>
+          <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+        </div>
+
+        {/* Priority filter */}
+        <div className="relative">
+          <select
+            value={filterPriority}
+            onChange={(e) => setFilterPriority(e.target.value)}
+            className="appearance-none pl-3 pr-8 py-2 text-sm rounded-lg border border-[#E5E7EB] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#2E90FA]/20 focus:border-[#2E90FA]"
+          >
+            <option value="all">All Priorities</option>
+            {PRIORITIES.map((pri) => (
+              <option key={pri} value={pri}>{capitalize(pri)}</option>
+            ))}
+          </select>
+          <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+        </div>
+
+        {/* Status filter */}
+        <div className="relative">
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="appearance-none pl-3 pr-8 py-2 text-sm rounded-lg border border-[#E5E7EB] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#2E90FA]/20 focus:border-[#2E90FA]"
+          >
+            <option value="all">All Status</option>
+            {STATUSES.map((st) => (
+              <option key={st} value={st}>{st.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</option>
+            ))}
+          </select>
+          <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+        </div>
+
+        {/* Ticket count */}
+        <span className="ml-auto text-sm text-[#6B7280]">
+          {filteredTickets.length} ticket{filteredTickets.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
+      {/* Table Card */}
+      <div className="flex-1 bg-white rounded-xl shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-auto">
+          {filteredTickets.length === 0 ? (
+            <div className="py-16 text-center text-[#6B7280]">No tickets found</div>
+          ) : (
+            <table className="w-full border-collapse">
+              <thead className="sticky top-0 bg-[#F9FAFB] z-10">
+                <tr>
+                  {['Title', 'Category', 'Priority', 'Status', 'Created', 'Action'].map((header) => (
+                    <th
+                      key={header}
+                      className={`text-left px-6 py-4 text-[12px] font-bold text-[#6B7280] uppercase tracking-wide border-b border-[#E5E7EB] ${header === 'Action' ? 'w-16 text-center' : ''}`}
+                    >
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <motion.tbody variants={staggerContainer} initial="initial" animate="animate">
+                {filteredTickets.map((ticket) => {
+                  const catColor = CATEGORY_COLORS[ticket.category] || CATEGORY_COLORS.other;
+                  const priorityDot = PRIORITY_DOTS[ticket.priority] || PRIORITY_DOTS.medium;
+                  const statusBadge = STATUS_BADGE[ticket.status] || STATUS_BADGE.open;
+
+                  return (
+                    <motion.tr
+                      key={ticket.id}
+                      variants={fadeUp}
+                      className="h-14 border-b border-[#F3F4F6] hover:bg-[#F9FAFB] cursor-pointer transition-colors"
+                      onClick={() => setSelectedTicket(ticket)}
+                    >
+                      {/* Title (no description) */}
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-medium text-[#111827]">{ticket.title}</span>
+                      </td>
+
+                      {/* Category chip */}
+                      <td className="px-6 py-4">
+                        <span
+                          className="inline-block px-2 py-0.5 rounded text-[11px] font-medium"
+                          style={{ backgroundColor: catColor.bg, color: catColor.text }}
+                        >
+                          {capitalize(ticket.category)}
+                        </span>
+                      </td>
+
+                      {/* Priority dot + text */}
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center gap-1.5 text-sm text-[#374151]">
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: priorityDot }}
+                          />
+                          {capitalize(ticket.priority)}
+                        </span>
+                      </td>
+
+                      {/* Status badge */}
+                      <td className="px-6 py-4">
+                        <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
+                      </td>
+
+                      {/* Created */}
+                      <td className="px-6 py-4 text-sm text-[#6B7280]">{ticket.createdAt}</td>
+
+                      {/* Overflow menu */}
+                      <td className="px-6 py-4 text-center relative">
+                        <button
+                          className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] transition-colors cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuId(openMenuId === ticket.id ? null : ticket.id);
+                          }}
+                        >
+                          <MoreHorizontal size={18} />
+                        </button>
+
+                        {openMenuId === ticket.id && (
+                          <div
+                            ref={menuRef}
+                            className="absolute right-4 top-full mt-1 w-44 bg-white rounded-lg shadow-lg border border-[#E5E7EB] py-1 z-50"
+                          >
+                            {menuOptions(ticket).map((opt) => (
+                              <button
+                                key={opt.label}
+                                className="w-full text-left px-3 py-2 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-colors cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (opt.action === 'view') {
+                                    setSelectedTicket(ticket);
+                                    setOpenMenuId(null);
+                                  } else {
+                                    updateTicketStatus(ticket.id, opt.status);
+                                  }
+                                }}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </motion.tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
+      {/* Maintenance Detail Drawer */}
+      <Drawer
+        open={!!selectedTicket}
+        onClose={() => setSelectedTicket(null)}
+        title={selectedTicket?.title || 'Ticket'}
+      >
+        {selectedTicket && (() => {
+          const catColor = CATEGORY_COLORS[selectedTicket.category] || CATEGORY_COLORS.other;
+          const priorityDot = PRIORITY_DOTS[selectedTicket.priority] || PRIORITY_DOTS.medium;
+          const statusBadge = STATUS_BADGE[selectedTicket.status] || STATUS_BADGE.open;
+
+          return (
+            <div className="flex flex-col gap-6">
+              {/* Description */}
+              <div>
+                <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-2">Description</h3>
+                <div className="bg-[#F9FAFB] rounded-lg p-4 text-sm text-[#374151] leading-relaxed">
+                  {selectedTicket.description || 'No description provided.'}
+                </div>
+              </div>
+
+              {/* Meta info grid */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Category */}
+                <div>
+                  <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1.5">Category</h3>
+                  <span
+                    className="inline-block px-2 py-0.5 rounded text-[11px] font-medium"
+                    style={{ backgroundColor: catColor.bg, color: catColor.text }}
+                  >
+                    {capitalize(selectedTicket.category)}
+                  </span>
+                </div>
+
+                {/* Priority */}
+                <div>
+                  <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1.5">Priority</h3>
+                  <span className="inline-flex items-center gap-1.5 text-sm text-[#374151]">
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: priorityDot }}
+                    />
+                    {capitalize(selectedTicket.priority)}
+                  </span>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1.5">Status</h3>
+                  <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
+                </div>
+
+                {/* Created */}
+                <div>
+                  <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1.5">Created</h3>
+                  <span className="inline-flex items-center gap-1.5 text-sm text-[#374151]">
+                    <Calendar size={14} className="text-[#9CA3AF]" />
+                    {selectedTicket.rawCreatedAt}
+                  </span>
+                </div>
+              </div>
+
+              {/* Status change buttons */}
+              <div className="pt-4 border-t border-[#E5E7EB]">
+                <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-3">Update Status</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedTicket.status === 'open' && (
+                    <button
+                      className="px-4 py-2 bg-[#FFFAEB] text-[#F79009] text-sm font-medium rounded-lg hover:bg-[#FEF0C7] transition-colors cursor-pointer"
+                      onClick={() => updateTicketStatus(selectedTicket.id, 'in_progress')}
+                    >
+                      Start Progress
+                    </button>
+                  )}
+                  {selectedTicket.status === 'in_progress' && (
+                    <button
+                      className="px-4 py-2 bg-[#ECFDF3] text-[#12B76A] text-sm font-medium rounded-lg hover:bg-[#D1FADF] transition-colors cursor-pointer"
+                      onClick={() => updateTicketStatus(selectedTicket.id, 'resolved')}
+                    >
+                      Mark Resolved
+                    </button>
+                  )}
+                  {selectedTicket.status === 'resolved' && (
+                    <button
+                      className="px-4 py-2 bg-[#F3F4F6] text-[#6B7280] text-sm font-medium rounded-lg hover:bg-[#E5E7EB] transition-colors cursor-pointer"
+                      onClick={() => updateTicketStatus(selectedTicket.id, 'closed')}
+                    >
+                      Close Ticket
+                    </button>
+                  )}
+                  {selectedTicket.status === 'closed' && (
+                    <span className="text-sm text-[#9CA3AF] italic">This ticket is closed.</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+      </Drawer>
+    </motion.div>
+  );
+}
+
+export default Maintenance;

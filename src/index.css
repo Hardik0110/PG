@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/*  Tailwind v4 theme — TrustCircle light design system               */
+/* ------------------------------------------------------------------ */
+@theme {
+  --header-height: 60px;
+
+  --font-sans: 'Manrope', sans-serif;
+  --font-display: 'Manrope', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 0.625rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Brand green scale */
+  --color-brand-50: #EEFBF4;
+  --color-brand-100: #D5F5E3;
+  --color-brand-200: #A8E6C3;
+  --color-brand-300: #6FD19E;
+  --color-brand-400: #3DBF7E;
+  --color-brand-500: #1C6C41;
+  --color-brand-600: #155331;
+  --color-brand-700: #104027;
+  --color-brand-800: #0C2E1C;
+  --color-brand-900: #071D12;
+
+  /* Mint scale (kept for compat, now maps to brand green) */
+  --color-mint-50: #EEFBF4;
+  --color-mint-100: #D5F5E3;
+  --color-mint-200: #A8E6C3;
+  --color-mint-300: #6FD19E;
+  --color-mint-400: #3DBF7E;
+  --color-mint-500: #1C6C41;
+  --color-mint-600: #155331;
+  --color-mint-700: #104027;
+  --color-mint-800: #0C2E1C;
+  --color-mint-900: #071D12;
+
+  /* Semantic tokens — light theme */
+  --color-background: #F8F5F0;
+  --color-foreground: #111827;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #111827;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #111827;
+  --color-primary: #1C6C41;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #F3F4F6;
+  --color-secondary-foreground: #111827;
+  --color-muted: #F3F4F6;
+  --color-muted-foreground: #6B7280;
+  --color-accent: #F3F4F6;
+  --color-accent-foreground: #111827;
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: #E5E7EB;
+  --color-input: #E5E7EB;
+  --color-ring: #1C6C41;
+  --color-sidebar: #FFFFFF;
+  --color-sidebar-foreground: #374151;
+  --color-sidebar-primary: #1C6C41;
+  --color-sidebar-primary-foreground: #FFFFFF;
+  --color-sidebar-accent: rgba(28, 108, 65, 0.08);
+  --color-sidebar-accent-foreground: #111827;
+  --color-sidebar-border: #E5E7EB;
+  --color-sidebar-ring: #1C6C41;
+  --color-chart-1: #1C6C41;
+  --color-chart-2: #2E90FA;
+  --color-chart-3: #F79009;
+  --color-chart-4: #B692F6;
+  --color-chart-5: #F472B6;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                               */
+/* ------------------------------------------------------------------ */
+@layer base {
+  *, *::before, *::after { border-color: var(--color-border); }
+
+  html, body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    color-scheme: light;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root { min-height: 100vh; background: var(--color-background); }
+
+  input, textarea, select, button { font-family: inherit; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.16); }
+  * { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.08) transparent; }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+}
