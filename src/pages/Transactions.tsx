@@ -1,12 +1,13 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  TrendingUp, Clock, CalendarDays, Download, Plus, Calendar,
+  TrendingUp, Clock, CalendarDays, Download, Plus, Calendar, TrendingDown,
 } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
 import Badge, { BADGE_MAP } from '../components/ui/Badge';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import RecordPaymentModal from '../components/RecordPaymentModal';
+import AddExpenseModal from '../components/AddExpenseModal';
 import Select from '../components/ui/Select';
 
 const MOCK_TRANSACTIONS = [
@@ -31,6 +32,7 @@ const TYPE_CHIP_COLORS = {
   rent: 'bg-[#DCEEDF] text-[#1C6C41]',
   deposit: 'bg-[#E8E1F5] text-[#6D28D9]',
   maintenance: 'bg-[#FCF1DC] text-[#B45309]',
+  expense: 'bg-[#FBE5E0] text-[#A04D3A]',
 };
 
 function getMonthOptions() {
@@ -54,6 +56,7 @@ function Transactions() {
   const [loading, setLoading] = useState(true);
   const [hoveredRow, setHoveredRow] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExpenseOpen, setIsExpenseOpen] = useState(false);
 
   const monthOptions = useMemo(() => getMonthOptions(), []);
 
@@ -159,6 +162,14 @@ function Transactions() {
             Export CSV
           </button>
           <button
+            onClick={() => setIsExpenseOpen(true)}
+            className="h-10 px-4 border border-[#E6CB9A] rounded-lg text-sm font-semibold text-[#B45309]
+                       bg-white hover:bg-[#FCF1DC] inline-flex items-center gap-2 transition-colors cursor-pointer"
+          >
+            <TrendingDown size={16} />
+            Add Expense
+          </button>
+          <button
             onClick={() => setIsModalOpen(true)}
             className="h-10 px-4 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
                        inline-flex items-center gap-2 transition-colors cursor-pointer"
@@ -201,6 +212,7 @@ function Transactions() {
             { value: 'all', label: 'All Types' },
             { value: 'rent', label: 'Rent' },
             { value: 'deposit', label: 'Deposit' },
+            { value: 'expense', label: 'Expense' },
           ]}
         />
       </div>
@@ -359,6 +371,26 @@ function Transactions() {
             pgName: 'Sunrise PG',
             amount: parseInt(data.amount, 10),
             type: data.type,
+            dateRaw: data.date,
+            date: new Date(data.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            status: 'paid',
+            method: data.method.toUpperCase(),
+          }, ...transactions]);
+        }}
+      />
+
+      <AddExpenseModal
+        open={isExpenseOpen}
+        onClose={() => setIsExpenseOpen(false)}
+        onSubmit={(data) => {
+          // Demo: log expense as an outgoing transaction in the same list
+          setTransactions([{
+            id: 'ex-' + Math.random().toString(36).substr(2, 9),
+            tenantName: data.vendor || `Expense (${data.category})`,
+            room: '—',
+            pgName: data.pg === 'pg-001' ? 'Sunrise PG' : 'Cozy Living PG',
+            amount: parseInt(data.amount, 10),
+            type: 'expense',
             dateRaw: data.date,
             date: new Date(data.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
             status: 'paid',
