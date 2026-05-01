@@ -128,7 +128,7 @@ function Maintenance() {
       {/* Top Toolbar - Title + New Ticket */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-[#111827]">Maintenance Tickets</h1>
-        <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#2E90FA] hover:bg-[#1C7ED6] text-white text-sm font-medium rounded-lg transition-colors cursor-pointer">
+        <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-medium rounded-lg transition-colors cursor-pointer">
           <Plus size={16} />
           New Ticket
         </button>
