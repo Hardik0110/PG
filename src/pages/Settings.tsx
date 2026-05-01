@@ -58,7 +58,7 @@ function SettingsPage() {
 
   return (
     <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-foreground)', marginBottom: '8px' }}>
+      <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-foreground)', marginBottom: '32px' }}>
         Settings
       </h1>
 
@@ -84,12 +84,12 @@ function SettingsPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {/* Notifications */}
         <div style={{
           background: 'var(--color-card)',
           borderRadius: 'var(--radius-lg)',
-          padding: '6px',
+          padding: '24px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
           border: '1px solid var(--color-border)'
         }}>
@@ -97,16 +97,16 @@ function SettingsPage() {
             fontSize: '16px',
             fontWeight: 600,
             color: 'var(--color-foreground)',
-            marginBottom: '5px',
+            marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
-            gap: '3px'
+            gap: '12px'
           }}>
             <Bell size={20} color='#1C6C41' />
             Notifications
           </h2>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {[
               { key: 'email', label: 'Email Notifications', desc: 'Receive updates via email' },
               { key: 'push', label: 'Push Notifications', desc: 'Browser push notifications' },
@@ -166,7 +166,7 @@ function SettingsPage() {
         <div style={{
           background: 'var(--color-card)',
           borderRadius: 'var(--radius-lg)',
-          padding: '6px',
+          padding: '24px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
           border: '1px solid var(--color-border)'
         }}>
@@ -174,10 +174,10 @@ function SettingsPage() {
             fontSize: '16px',
             fontWeight: 600,
             color: 'var(--color-foreground)',
-            marginBottom: '5px',
+            marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
-            gap: '3px'
+            gap: '12px'
           }}>
             <Shield size={20} color='#1C6C41' />
             Security

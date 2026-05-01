@@ -49,7 +49,7 @@ function Profile() {
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-foreground)', marginBottom: '8px' }}>
+      <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-foreground)', marginBottom: '32px' }}>
         Profile
       </h1>
 
@@ -78,15 +78,15 @@ function Profile() {
       <form onSubmit={handleSubmit} style={{
         background: 'var(--color-card)',
         borderRadius: 'var(--radius-xl)',
-        padding: '8px',
+        padding: '32px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
         border: '1px solid var(--color-border)'
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '4px',
-          marginBottom: '8px'
+          gap: '16px',
+          marginBottom: '32px'
         }}>
           <div style={{
             width: 80,
@@ -112,7 +112,7 @@ function Profile() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <label style={{
               display: 'block',
@@ -238,7 +238,7 @@ function Profile() {
             fontSize: '15px',
             fontWeight: 600,
             cursor: 'pointer',
-            marginTop: '6px',
+            marginTop: '24px',
             transition: 'transform 150ms ease'
           }}
           onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}

@@ -12,6 +12,7 @@ import Rooms from './pages/Rooms';
 import Transactions from './pages/Transactions';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import Notifications from './pages/Notifications';
 import MainLayout from './components/MainLayout';
 import CommandPalette from './components/ui/CommandPalette';
 import { ToastProvider } from './components/ui/Toast';
@@ -140,6 +141,16 @@ function AppRoutes() {
             <MainLayout>
               <AnimatedPage>
                 <Settings />
+              </AnimatedPage>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <MainLayout>
+              <AnimatedPage>
+                <Notifications />
               </AnimatedPage>
             </MainLayout>
           }
