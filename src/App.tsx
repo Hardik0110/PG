@@ -5,7 +5,7 @@ import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import AddPG from './pages/AddPG';
 import EditPG from './pages/EditPG';
-import Inquiries from './pages/Inquiries';
+// import Inquiries from './pages/Inquiries';
 import Maintenance from './pages/Maintenance';
 import Tenants from './pages/Tenants';
 import Rooms from './pages/Rooms';
@@ -13,6 +13,7 @@ import Transactions from './pages/Transactions';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
+import MyPGs from './pages/MyPGs';
 import MainLayout from './components/MainLayout';
 import CommandPalette from './components/ui/CommandPalette';
 import { ToastProvider } from './components/ui/Toast';
@@ -75,7 +76,7 @@ function AppRoutes() {
             </MainLayout>
           }
         />
-        <Route
+        {/* <Route
           path="/inquiries"
           element={
             <MainLayout>
@@ -84,7 +85,7 @@ function AppRoutes() {
               </AnimatedPage>
             </MainLayout>
           }
-        />
+        /> */}
         <Route
           path="/maintenance"
           element={
@@ -151,6 +152,16 @@ function AppRoutes() {
             <MainLayout>
               <AnimatedPage>
                 <Notifications />
+              </AnimatedPage>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/pgs"
+          element={
+            <MainLayout>
+              <AnimatedPage>
+                <MyPGs />
               </AnimatedPage>
             </MainLayout>
           }

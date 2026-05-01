@@ -7,6 +7,7 @@ import {
 import { apiRequest, unwrapData } from '../lib/api';
 import Badge, { BADGE_MAP } from '../components/ui/Badge';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
+import RecordPaymentModal from '../components/RecordPaymentModal';
 
 const MOCK_TRANSACTIONS = [
   { id: "tx-001", tenantName: "Rahul Sharma", room: "101", pgName: "Sunrise PG", amount: 8000, type: "rent", date: "2026-04-25T10:00:00Z", status: "paid", method: "UPI" },
@@ -52,6 +53,7 @@ function Transactions() {
   const [filterType, setFilterType] = useState('all');
   const [loading, setLoading] = useState(true);
   const [hoveredRow, setHoveredRow] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const monthOptions = useMemo(() => getMonthOptions(), []);
 
@@ -157,6 +159,7 @@ function Transactions() {
             Export CSV
           </button>
           <button
+            onClick={() => setIsModalOpen(true)}
             className="h-10 px-4 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
                        inline-flex items-center gap-2 transition-colors cursor-pointer"
           >
@@ -352,6 +355,26 @@ function Transactions() {
           )}
         </div>
       </div>
+
+      <RecordPaymentModal 
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={(data) => {
+          // Dummy demo logic
+          setTransactions([{
+            id: 'tx-' + Math.random().toString(36).substr(2, 9),
+            tenantName: data.tenant.split(' (')[0],
+            room: data.tenant.match(/\d+/) ? data.tenant.match(/\d+/)[0] : 'N/A',
+            pgName: 'Sunrise PG',
+            amount: parseInt(data.amount, 10),
+            type: data.type,
+            dateRaw: data.date,
+            date: new Date(data.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            status: 'paid',
+            method: data.method.toUpperCase(),
+          }, ...transactions]);
+        }}
+      />
     </motion.div>
   );
 }

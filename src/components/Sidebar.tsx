@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  Building,
 } from 'lucide-react';
 import { clearToken, setToken } from '../lib/api';
 import { sidebarVariants, backdropVariants } from '../lib/animations';
@@ -37,9 +38,10 @@ const NAV_SECTIONS = [
   {
     label: 'MANAGE',
     items: [
+      { path: '/pgs', icon: Building, label: 'My PGs' },
       { path: '/tenants', icon: Users, label: 'Tenants' },
       { path: '/rooms', icon: Home, label: 'Rooms' },
-      { path: '/inquiries', icon: MessageSquare, label: 'Inquiries', badgeKey: 'inquiries' },
+      // { path: '/inquiries', icon: MessageSquare, label: 'Inquiries', badgeKey: 'inquiries' },
       { path: '/maintenance', icon: Wrench, label: 'Maintenance', badgeKey: 'maintenance' },
       { path: '/transactions', icon: CreditCard, label: 'Transactions' },
     ],

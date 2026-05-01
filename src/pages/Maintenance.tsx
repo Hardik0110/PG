@@ -5,6 +5,7 @@ import { apiRequest, unwrapData } from '../lib/api';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import Badge from '../components/ui/Badge';
 import Drawer from '../components/ui/Drawer';
+import NewTicketModal from '../components/NewTicketModal';
 
 const CATEGORIES = ['plumbing', 'electrical', 'furniture', 'cleaning', 'other'];
 const PRIORITIES = ['high', 'medium', 'low'];
@@ -43,6 +44,7 @@ function Maintenance() {
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -128,7 +130,10 @@ function Maintenance() {
       {/* Top Toolbar - Title + New Ticket */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-[#111827]">Maintenance Tickets</h1>
-        <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-medium rounded-lg transition-colors cursor-pointer">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
+        >
           <Plus size={16} />
           New Ticket
         </button>
@@ -398,6 +403,24 @@ function Maintenance() {
           );
         })()}
       </Drawer>
+
+      <NewTicketModal 
+        open={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={(data) => {
+          // Dummy update logic for demo
+          setTickets([{
+            id: 'tkt-' + Math.random().toString(36).substr(2, 9),
+            title: data.subject,
+            description: data.description,
+            category: data.category,
+            priority: data.priority,
+            status: 'open',
+            createdAt: new Date().toLocaleDateString(),
+            rawCreatedAt: new Date().toLocaleString()
+          }, ...tickets]);
+        }}
+      />
     </motion.div>
   );
 }

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Search, ChevronRight, UserPlus, ChevronDown } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
+import AddTenantDrawer from '../components/AddTenantDrawer';
 
 const PG_COLORS = {
   default: { bg: 'bg-teal-50', text: 'text-teal-700' },
@@ -36,6 +37,7 @@ function Tenants() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [hoveredRow, setHoveredRow] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -163,7 +165,7 @@ function Tenants() {
 
           {/* Add Tenant */}
           <button
-            onClick={() => navigate('/tenants/add')}
+            onClick={() => setIsDrawerOpen(true)}
             className="h-10 px-4 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
                        inline-flex items-center gap-2 transition-colors cursor-pointer"
           >
@@ -265,6 +267,26 @@ function Tenants() {
           )}
         </div>
       </div>
+
+      <AddTenantDrawer 
+        open={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSubmit={(data) => {
+          // Dummy demo logic
+          setTenants([{
+            id: 'tnt-' + Math.random().toString(36).substr(2, 9),
+            name: `${data.firstName} ${data.lastName}`,
+            email: data.email || 'N/A',
+            phone: data.phone,
+            pgId: 'pg-001',
+            pgName: 'Sunrise PG',
+            room: 'Unassigned',
+            rent: 0,
+            moveInRaw: new Date().toISOString(),
+            moveIn: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+          }, ...tenants]);
+        }}
+      />
     </motion.div>
   );
 }

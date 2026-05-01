@@ -9,8 +9,9 @@ import {
   fadeUp,
   cardHover,
 } from '../lib/animations';
+import BookRoomModal from '../components/BookRoomModal';
 
-function RoomCard({ room, formatCurrency }) {
+function RoomCard({ room, formatCurrency, onBook }) {
   const isVacant = room.status === 'vacant';
   const borderColor = isVacant ? 'border-t-[#12B76A]' : 'border-t-[#EF4444]';
   const maxAmenities = 3;
@@ -78,7 +79,10 @@ function RoomCard({ room, formatCurrency }) {
 
         {/* Action button */}
         {isVacant ? (
-          <button className="w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold transition-colors cursor-pointer">
+          <button 
+            onClick={() => onBook(room)}
+            className="w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold transition-colors cursor-pointer"
+          >
             <CalendarCheck size={15} />
             Book
           </button>
@@ -98,6 +102,7 @@ function Rooms() {
   const [filterPg, setFilterPg] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [selectedRoomToBook, setSelectedRoomToBook] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -260,6 +265,7 @@ function Rooms() {
                     key={room.id}
                     room={room}
                     formatCurrency={formatCurrency}
+                    onBook={setSelectedRoomToBook}
                   />
                 ))}
               </motion.div>
@@ -279,10 +285,24 @@ function Rooms() {
               key={room.id}
               room={room}
               formatCurrency={formatCurrency}
+              onBook={setSelectedRoomToBook}
             />
           ))}
         </motion.div>
       )}
+
+      <BookRoomModal 
+        open={!!selectedRoomToBook}
+        onClose={() => setSelectedRoomToBook(null)}
+        roomLabel={selectedRoomToBook ? `${selectedRoomToBook.roomNumber} (${selectedRoomToBook.pgName})` : ''}
+        onSubmit={(data) => {
+          if (!selectedRoomToBook) return;
+          // Dummy demo logic
+          setRooms((prev) => 
+            prev.map(r => r.id === selectedRoomToBook.id ? { ...r, status: 'occupied' } : r)
+          );
+        }}
+      />
     </motion.div>
   );
 }

@@ -139,33 +139,33 @@ function AddPG() {
       <form onSubmit={handleSubmit} style={{
         background: 'var(--color-card)',
         borderRadius: 'var(--radius-xl)',
-        padding: '8px',
+        padding: '24px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
         border: '1px solid var(--color-border)'
       }}>
         {/* Basic Info Section */}
-        <div style={{ marginBottom: '8px' }}>
+        <div style={{ marginBottom: '24px' }}>
           <h2 style={{
             fontSize: '16px',
             fontWeight: 600,
             color: 'var(--color-foreground)',
-            marginBottom: '5px',
+            marginBottom: '16px',
             display: 'flex',
             alignItems: 'center',
-            gap: '2px'
+            gap: '8px'
           }}>
             <Home size={18} color='#1C6C41' />
             Basic Information
           </h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
             <div>
               <label style={{
                 display: 'block',
                 fontSize: '13px',
                 fontWeight: 500,
                 color: 'var(--color-muted-foreground)',
-                marginBottom: '2px'
+                marginBottom: '6px'
               }}>
                 PG Name *
               </label>
@@ -195,7 +195,7 @@ function AddPG() {
                 fontSize: '13px',
                 fontWeight: 500,
                 color: 'var(--color-muted-foreground)',
-                marginBottom: '2px'
+                marginBottom: '6px'
               }}>
                 PG Type *
               </label>
@@ -224,28 +224,28 @@ function AddPG() {
         </div>
 
         {/* Location Section */}
-        <div style={{ marginBottom: '8px' }}>
+        <div style={{ marginBottom: '24px' }}>
           <h2 style={{
             fontSize: '16px',
             fontWeight: 600,
             color: 'var(--color-foreground)',
-            marginBottom: '5px',
+            marginBottom: '16px',
             display: 'flex',
             alignItems: 'center',
-            gap: '2px'
+            gap: '8px'
           }}>
             <MapPin size={18} color='#1C6C41' />
             Location
           </h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={{
                 display: 'block',
                 fontSize: '13px',
                 fontWeight: 500,
                 color: 'var(--color-muted-foreground)',
-                marginBottom: '2px'
+                marginBottom: '6px'
               }}>
                 Address *
               </label>
@@ -274,7 +274,7 @@ function AddPG() {
                 fontSize: '13px',
                 fontWeight: 500,
                 color: 'var(--color-muted-foreground)',
-                marginBottom: '2px'
+                marginBottom: '6px'
               }}>
                 City *
               </label>
@@ -303,7 +303,7 @@ function AddPG() {
                 fontSize: '13px',
                 fontWeight: 500,
                 color: 'var(--color-muted-foreground)',
-                marginBottom: '2px'
+                marginBottom: '6px'
               }}>
                 State *
               </label>
@@ -332,7 +332,7 @@ function AddPG() {
                 fontSize: '13px',
                 fontWeight: 500,
                 color: 'var(--color-muted-foreground)',
-                marginBottom: '2px'
+                marginBottom: '6px'
               }}>
                 Pincode *
               </label>
@@ -359,15 +359,15 @@ function AddPG() {
         </div>
 
         {/* Description */}
-        <div style={{ marginBottom: '8px' }}>
+        <div style={{ marginBottom: '24px' }}>
           <h2 style={{
             fontSize: '16px',
             fontWeight: 600,
             color: 'var(--color-foreground)',
-            marginBottom: '5px',
+            marginBottom: '16px',
             display: 'flex',
             alignItems: 'center',
-            gap: '2px'
+            gap: '8px'
           }}>
             <FileText size={18} color='#1C6C41' />
             Description
@@ -392,19 +392,19 @@ function AddPG() {
         </div>
 
         {/* Amenities */}
-        <div style={{ marginBottom: '8px' }}>
+        <div style={{ marginBottom: '32px' }}>
           <h2 style={{
             fontSize: '16px',
             fontWeight: 600,
             color: 'var(--color-foreground)',
-            marginBottom: '5px'
+            marginBottom: '16px'
           }}>
             Amenities
           </h2>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-            gap: '3px'
+            gap: '10px'
           }}>
             {amenityOptions.map((amenity) => (
               <button
