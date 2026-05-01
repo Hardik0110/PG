@@ -442,7 +442,7 @@ function Dashboard() {
         />
       </Card>
 
-      {/* 2-col: Inquiries | Tickets */}
+      {/* 2-col: Recent Tenants | Tickets */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <SectionCard
           title="Recent Tenants"
