@@ -199,12 +199,12 @@ function Maintenance() {
             <div className="py-16 text-center text-[#6B7280]">No tickets found</div>
           ) : (
             <table className="w-full border-collapse">
-              <thead className="sticky top-0 bg-[#F9FAFB] z-10">
+              <thead className="sticky top-0 bg-[#1C6C41] z-10">
                 <tr>
                   {['Title', 'Category', 'Priority', 'Status', 'Created', 'Action'].map((header) => (
                     <th
                       key={header}
-                      className={`text-left px-6 py-4 text-[12px] font-bold text-[#6B7280] uppercase tracking-wide border-b border-[#E5E7EB] ${header === 'Action' ? 'w-16 text-center' : ''}`}
+                      className={`text-left px-6 py-4 text-[12px] font-semibold text-white/90 uppercase tracking-[0.08em] ${header === 'Action' ? 'w-16 text-center' : ''}`}
                     >
                       {header}
                     </th>

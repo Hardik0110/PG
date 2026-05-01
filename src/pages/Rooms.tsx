@@ -1,8 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Home, Plus, Eye, CalendarCheck } from 'lucide-react';
+import { Home, Plus, Eye, CalendarCheck, Users } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
-import Badge from '../components/ui/Badge';
 import {
   pageVariants,
   staggerContainer,
@@ -10,88 +9,111 @@ import {
   cardHover,
 } from '../lib/animations';
 import BookRoomModal from '../components/BookRoomModal';
+import RoomDetailsModal from '../components/RoomDetailsModal';
+import Select from '../components/ui/Select';
 
-function RoomCard({ room, formatCurrency, onBook }) {
+function RoomCard({ room, formatCurrency, onBook, onView, tenantCount }) {
   const isVacant = room.status === 'vacant';
-  const borderColor = isVacant ? 'border-t-[#12B76A]' : 'border-t-[#EF4444]';
   const maxAmenities = 3;
+  const baseCapacity = room.type === 'single' ? 1 : room.type === 'double' ? 2 : 3;
+  const capacity = Math.max(baseCapacity, tenantCount);
+
+  const bannerColor = isVacant ? 'bg-[#DCEEDF]' : 'bg-[#FBDED8]';
+  const accentText = isVacant ? 'text-[#1C6C41]' : 'text-[#B91C1C]';
+  const badgeRing = isVacant ? 'ring-[#1C6C41]/30' : 'ring-[#B91C1C]/30';
+  const badgeText = accentText;
 
   return (
     <motion.div
       variants={fadeUp}
       initial="rest"
       whileHover="hover"
-      className={`bg-white rounded-xl border border-[#E8E9ED] shadow-sm border-t-2 ${borderColor} flex flex-col`}
+      className="relative overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_-12px_rgba(60,30,15,0.25)] border border-[#E8DFD2] flex flex-col"
     >
-      <motion.div variants={cardHover} className="flex flex-col flex-1 p-6">
-        {/* Room number + PG name */}
-        <div className="mb-1">
-          <h3 className="font-semibold text-lg text-[#1F2937]">
-            Room {room.roomNumber}
-          </h3>
-          <p className="text-sm text-[#6B7280]">{room.pgName}</p>
-        </div>
-
-        {/* Type + Floor */}
-        <p className="text-sm text-[#9CA3AF] capitalize">
-          {room.type} &middot; Floor {room.floor}
-        </p>
-
-        {/* Rent */}
-        <p className="font-mono font-bold text-lg text-[#1C6C41] mt-2">
-          {formatCurrency(room.rent)}/mo
-        </p>
-
-        {/* Divider */}
-        <div className="border-t border-[#E8E9ED] my-3" />
-
-        {/* Status badge */}
-        <div className="mb-3">
-          <Badge
-            variant={isVacant ? 'success' : 'destructive'}
-            dot
-          >
-            {isVacant ? 'Vacant' : 'Room Full'}
-          </Badge>
-        </div>
-
-        {/* Amenities */}
-        {room.amenities.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {room.amenities.slice(0, maxAmenities).map((a) => (
-              <span
-                key={a}
-                className="px-2 py-0.5 rounded-full bg-[#F3F4F6] text-[11px] font-medium text-[#6B7280]"
-              >
-                {a}
-              </span>
-            ))}
-            {room.amenities.length > maxAmenities && (
-              <span className="px-2 py-0.5 rounded-full bg-[#F3F4F6] text-[11px] font-medium text-[#9CA3AF]">
-                +{room.amenities.length - maxAmenities} more
-              </span>
-            )}
+      <motion.div variants={cardHover} className="flex flex-col flex-1">
+        {/* Banner */}
+        <div className={`relative h-20 ${bannerColor} px-5 py-3`}>
+          <div className={`relative opacity-75 ${accentText}`}>
+            <span className="text-[10px] font-semibold tracking-[0.2em] uppercase">
+              {isVacant ? 'Available' : 'Fully Booked'}
+            </span>
           </div>
-        )}
+          <h2 className={`relative mt-1 text-xl font-black tracking-wide ${accentText}`}>
+            {isVacant ? 'VACANT' : 'ROOM FULL'}
+          </h2>
 
-        {/* Spacer to push button to bottom */}
-        <div className="flex-1" />
-
-        {/* Action button */}
-        {isVacant ? (
-          <button 
-            onClick={() => onBook(room)}
-            className="w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold transition-colors cursor-pointer"
+          {/* Occupancy badge — vertically centered inside banner */}
+          <div
+            className={`absolute top-1/2 -translate-y-1/2 right-5 h-14 w-14 rounded-full bg-white ring-4 ${badgeRing} shadow-md flex flex-col items-center justify-center`}
           >
-            <CalendarCheck size={15} />
-            Book
-          </button>
-        ) : (
-          <button className="w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg border border-[#E8E9ED] bg-white hover:bg-[#F9FAFB] text-[#374151] text-sm font-semibold transition-colors cursor-pointer">
-            <Eye size={15} />
-            View
-          </button>
-        )}
+            <Users className={`h-3.5 w-3.5 ${badgeText}`} strokeWidth={2.5} />
+            <span className={`text-sm font-bold leading-none mt-0.5 ${badgeText}`}>
+              {tenantCount}/{capacity}
+            </span>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="px-5 py-5 flex flex-col flex-1">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-xl font-bold text-[#2B1D14] leading-tight">
+                Room {room.roomNumber}
+              </span>
+              <p className="mt-1 text-sm text-[#6B5847] leading-tight capitalize">
+                {room.type} · Floor {room.floor}
+              </p>
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-[#8B7355] font-medium">
+                Monthly
+              </p>
+              <p className="mt-1 text-lg font-bold text-[#1C6C41] font-mono leading-tight">
+                {formatCurrency(room.rent)}
+              </p>
+            </div>
+          </div>
+
+          {/* Amenities */}
+          {room.amenities.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {room.amenities.slice(0, maxAmenities).map((a) => (
+                <span
+                  key={a}
+                  className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#EFE7DA] text-[#5C4632] border border-[#E0D3BD]"
+                >
+                  {a}
+                </span>
+              ))}
+              {room.amenities.length > maxAmenities && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#EFE7DA] text-[#8B7355] border border-[#E0D3BD]">
+                  +{room.amenities.length - maxAmenities} more
+                </span>
+              )}
+            </div>
+          )}
+
+          <div className="flex-1" />
+
+          {/* CTA */}
+          {isVacant ? (
+            <button
+              onClick={() => onBook(room)}
+              className="mt-4 w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all bg-[#1C6C41] hover:bg-[#155232] text-[#F8F5F0] cursor-pointer"
+            >
+              <CalendarCheck className="h-4 w-4" />
+              Book This Room
+            </button>
+          ) : (
+            <button
+              onClick={() => onView(room)}
+              className="mt-4 w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all bg-transparent hover:bg-[#EFE7DA] text-[#5C4632] border border-[#E0D3BD] cursor-pointer"
+            >
+              <Eye className="h-4 w-4" />
+              View Room Details
+            </button>
+          )}
+        </div>
       </motion.div>
     </motion.div>
   );
@@ -99,20 +121,27 @@ function RoomCard({ room, formatCurrency, onBook }) {
 
 function Rooms() {
   const [rooms, setRooms] = useState([]);
+  const [tenants, setTenants] = useState([]);
   const [filterPg, setFilterPg] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [loading, setLoading] = useState(true);
   const [selectedRoomToBook, setSelectedRoomToBook] = useState(null);
+  const [selectedRoomToView, setSelectedRoomToView] = useState(null);
 
   useEffect(() => {
     let mounted = true;
-    const loadRooms = async () => {
+    const loadData = async () => {
       try {
-        const payload = await apiRequest('/api/v1/rooms/');
-        const data = unwrapData(payload, []);
-        if (mounted && Array.isArray(data)) {
+        const [roomsPayload, tenantsPayload] = await Promise.all([
+          apiRequest('/api/v1/rooms/'),
+          apiRequest('/api/v1/tenants/'),
+        ]);
+        const roomsData = unwrapData(roomsPayload, []);
+        const tenantsData = unwrapData(tenantsPayload, []);
+
+        if (mounted && Array.isArray(roomsData)) {
           setRooms(
-            data.map((r) => ({
+            roomsData.map((r) => ({
               id: r.id,
               pgId: r.pg_id,
               pgName:
@@ -126,17 +155,44 @@ function Rooms() {
             })),
           );
         }
+        if (mounted && Array.isArray(tenantsData)) {
+          setTenants(tenantsData);
+        }
       } catch {
-        if (mounted) setRooms([]);
+        if (mounted) {
+          setRooms([]);
+          setTenants([]);
+        }
       } finally {
         if (mounted) setLoading(false);
       }
     };
-    loadRooms();
+    loadData();
     return () => {
       mounted = false;
     };
   }, []);
+
+  const tenantsForSelectedRoom = useMemo(() => {
+    if (!selectedRoomToView) return [];
+    return tenants.filter(
+      (t) =>
+        t.pg_id === selectedRoomToView.pgId &&
+        String(t.room_number) === String(selectedRoomToView.roomNumber),
+    );
+  }, [tenants, selectedRoomToView]);
+
+  const tenantCountByRoom = useMemo(() => {
+    const map = new Map();
+    tenants.forEach((t) => {
+      const key = `${t.pg_id}:${t.room_number}`;
+      map.set(key, (map.get(key) || 0) + 1);
+    });
+    return map;
+  }, [tenants]);
+
+  const getTenantCount = (room) =>
+    tenantCountByRoom.get(`${room.pgId}:${room.roomNumber}`) || 0;
 
   const filteredRooms = useMemo(
     () =>
@@ -206,28 +262,25 @@ function Rooms() {
 
         {/* Right: filters + add button */}
         <div className="flex items-center gap-2 flex-wrap">
-          <select
+          <Select
             value={filterPg}
-            onChange={(e) => setFilterPg(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-[#E8E9ED] bg-white text-sm text-[#374151] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/30"
-          >
-            <option value="all">All PG</option>
-            {pgOptions.map((pg) => (
-              <option key={pg.id} value={pg.id}>
-                {pg.name}
-              </option>
-            ))}
-          </select>
+            onChange={setFilterPg}
+            options={[
+              { value: 'all', label: 'All PG' },
+              ...pgOptions.map((pg) => ({ value: pg.id, label: pg.name })),
+            ]}
+          />
 
-          <select
+          <Select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-[#E8E9ED] bg-white text-sm text-[#374151] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/30"
-          >
-            <option value="all">All Status</option>
-            <option value="occupied">Occupied</option>
-            <option value="vacant">Vacant</option>
-          </select>
+            onChange={setFilterStatus}
+            minWidth={150}
+            options={[
+              { value: 'all', label: 'All Status' },
+              { value: 'occupied', label: 'Occupied' },
+              { value: 'vacant', label: 'Vacant' },
+            ]}
+          />
 
           <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold transition-colors cursor-pointer">
             <Plus size={16} />
@@ -266,6 +319,8 @@ function Rooms() {
                     room={room}
                     formatCurrency={formatCurrency}
                     onBook={setSelectedRoomToBook}
+                    onView={setSelectedRoomToView}
+                    tenantCount={getTenantCount(room)}
                   />
                 ))}
               </motion.div>
@@ -286,22 +341,31 @@ function Rooms() {
               room={room}
               formatCurrency={formatCurrency}
               onBook={setSelectedRoomToBook}
+              onView={setSelectedRoomToView}
+              tenantCount={getTenantCount(room)}
             />
           ))}
         </motion.div>
       )}
 
-      <BookRoomModal 
+      <BookRoomModal
         open={!!selectedRoomToBook}
         onClose={() => setSelectedRoomToBook(null)}
         roomLabel={selectedRoomToBook ? `${selectedRoomToBook.roomNumber} (${selectedRoomToBook.pgName})` : ''}
         onSubmit={(data) => {
           if (!selectedRoomToBook) return;
           // Dummy demo logic
-          setRooms((prev) => 
+          setRooms((prev) =>
             prev.map(r => r.id === selectedRoomToBook.id ? { ...r, status: 'occupied' } : r)
           );
         }}
+      />
+
+      <RoomDetailsModal
+        open={!!selectedRoomToView}
+        onClose={() => setSelectedRoomToView(null)}
+        room={selectedRoomToView}
+        tenants={tenantsForSelectedRoom}
       />
     </motion.div>
   );

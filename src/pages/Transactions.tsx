@@ -1,13 +1,13 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  TrendingUp, Clock, CalendarDays, Download, Plus,
-  ChevronDown,
+  TrendingUp, Clock, CalendarDays, Download, Plus, Calendar,
 } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
 import Badge, { BADGE_MAP } from '../components/ui/Badge';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import RecordPaymentModal from '../components/RecordPaymentModal';
+import Select from '../components/ui/Select';
 
 const MOCK_TRANSACTIONS = [
   { id: "tx-001", tenantName: "Rahul Sharma", room: "101", pgName: "Sunrise PG", amount: 8000, type: "rent", date: "2026-04-25T10:00:00Z", status: "paid", method: "UPI" },
@@ -23,14 +23,14 @@ const MOCK_TRANSACTIONS = [
 ];
 
 const PG_CHIP_COLORS = {
-  'Sunrise PG': 'bg-teal-50 text-teal-700',
-  'Cozy Living PG': 'bg-indigo-50 text-indigo-700',
+  'Sunrise PG': 'bg-[#DCEEDF] text-[#1C6C41]',
+  'Cozy Living PG': 'bg-[#FCF1DC] text-[#B45309]',
 };
 
 const TYPE_CHIP_COLORS = {
-  rent: 'bg-blue-50 text-blue-700',
-  deposit: 'bg-purple-50 text-purple-700',
-  maintenance: 'bg-amber-50 text-amber-700',
+  rent: 'bg-[#DCEEDF] text-[#1C6C41]',
+  deposit: 'bg-[#E8E1F5] text-[#6D28D9]',
+  maintenance: 'bg-[#FCF1DC] text-[#B45309]',
 };
 
 function getMonthOptions() {
@@ -152,8 +152,8 @@ function Transactions() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleExportCSV}
-            className="h-10 px-4 border border-[#D1D5DB] rounded-lg text-sm font-medium text-[#374151]
-                       bg-white hover:bg-[#F9FAFB] inline-flex items-center gap-2 transition-colors cursor-pointer"
+            className="h-10 px-4 border border-[#E0D3BD] rounded-lg text-sm font-medium text-[#5C4632]
+                       bg-white hover:bg-[#FAF7F2] inline-flex items-center gap-2 transition-colors cursor-pointer"
           >
             <Download size={16} />
             Export CSV
@@ -171,50 +171,38 @@ function Transactions() {
 
       {/* Filter Row */}
       <div className="flex items-center gap-3 mb-5 flex-wrap">
-        <span className="text-sm font-medium text-[#6B7280]">Filter:</span>
+        <span className="text-sm font-medium text-[#8B7355]">Filter:</span>
 
-        <div className="relative">
-          <select
-            value={filterPg}
-            onChange={e => setFilterPg(e.target.value)}
-            className="h-9 pl-3 pr-7 border border-[#D1D5DB] rounded-lg text-sm bg-white cursor-pointer
-                       appearance-none focus:outline-none focus:border-[#1C6C41] focus:ring-2 focus:ring-[#1C6C41]/12 transition-all"
-          >
-            <option value="all">All PG</option>
-            <option value="Sunrise PG">Sunrise PG</option>
-            <option value="Cozy Living PG">Cozy Living PG</option>
-          </select>
-          <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
-        </div>
+        <Select
+          value={filterPg}
+          onChange={setFilterPg}
+          options={[
+            { value: 'all', label: 'All PG' },
+            { value: 'Sunrise PG', label: 'Sunrise PG' },
+            { value: 'Cozy Living PG', label: 'Cozy Living PG' },
+          ]}
+        />
 
-        <div className="relative">
-          <select
-            value={filterMonth}
-            onChange={e => setFilterMonth(e.target.value)}
-            className="h-9 pl-3 pr-7 border border-[#D1D5DB] rounded-lg text-sm bg-white cursor-pointer
-                       appearance-none focus:outline-none focus:border-[#1C6C41] focus:ring-2 focus:ring-[#1C6C41]/12 transition-all"
-          >
-            <option value="all">All Months</option>
-            {monthOptions.map(m => (
-              <option key={m.value} value={m.value}>Month: {m.label}</option>
-            ))}
-          </select>
-          <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
-        </div>
+        <Select
+          value={filterMonth}
+          onChange={setFilterMonth}
+          minWidth={160}
+          options={[
+            { value: 'all', label: 'All Months' },
+            ...monthOptions.map(m => ({ value: m.value, label: m.label })),
+          ]}
+        />
 
-        <div className="relative">
-          <select
-            value={filterType}
-            onChange={e => setFilterType(e.target.value)}
-            className="h-9 pl-3 pr-7 border border-[#D1D5DB] rounded-lg text-sm bg-white cursor-pointer
-                       appearance-none focus:outline-none focus:border-[#1C6C41] focus:ring-2 focus:ring-[#1C6C41]/12 transition-all"
-          >
-            <option value="all">All Types</option>
-            <option value="rent">Rent</option>
-            <option value="deposit">Deposit</option>
-          </select>
-          <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
-        </div>
+        <Select
+          value={filterType}
+          onChange={setFilterType}
+          minWidth={140}
+          options={[
+            { value: 'all', label: 'All Types' },
+            { value: 'rent', label: 'Rent' },
+            { value: 'deposit', label: 'Deposit' },
+          ]}
+        />
       </div>
 
       {/* Summary Cards */}
@@ -227,64 +215,64 @@ function Transactions() {
         {/* Total Collected */}
         <motion.div
           variants={fadeUp}
-          className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-5 flex items-center gap-4"
+          className="bg-white rounded-2xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] p-5 flex items-center gap-4"
         >
-          <div className="w-12 h-12 rounded-lg bg-[#ECFDF3] flex items-center justify-center shrink-0">
-            <TrendingUp size={22} className="text-[#12B76A]" />
+          <div className="w-12 h-12 rounded-xl bg-[#DCEEDF] flex items-center justify-center shrink-0">
+            <TrendingUp size={22} className="text-[#1C6C41]" />
           </div>
           <div>
-            <p className="text-[13px] text-[#6B7280] mb-0.5">Total Collected</p>
-            <p className="text-xl font-bold text-[#111827] font-mono">{formatCurrency(totalCollected)}</p>
+            <p className="text-[11px] uppercase tracking-[0.15em] text-[#8B7355] font-medium mb-0.5">Total Collected</p>
+            <p className="text-xl font-bold text-[#1C6C41] font-mono leading-tight">{formatCurrency(totalCollected)}</p>
           </div>
         </motion.div>
 
         {/* Pending Dues */}
         <motion.div
           variants={fadeUp}
-          className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-5 flex items-center gap-4"
+          className="bg-white rounded-2xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] p-5 flex items-center gap-4"
         >
-          <div className="w-12 h-12 rounded-lg bg-[#FFFAEB] flex items-center justify-center shrink-0">
-            <Clock size={22} className="text-[#F79009]" />
+          <div className="w-12 h-12 rounded-xl bg-[#FCF1DC] flex items-center justify-center shrink-0">
+            <Clock size={22} className="text-[#B45309]" />
           </div>
           <div>
-            <p className="text-[13px] text-[#6B7280] mb-0.5">
-              Pending Dues <span className="text-[#9CA3AF]">({pendingTx.length})</span>
+            <p className="text-[11px] uppercase tracking-[0.15em] text-[#8B7355] font-medium mb-0.5">
+              Pending Dues <span className="text-[#A89580] normal-case tracking-normal">({pendingTx.length})</span>
             </p>
-            <p className="text-xl font-bold text-[#111827] font-mono">{formatCurrency(totalPending)}</p>
+            <p className="text-xl font-bold text-[#B45309] font-mono leading-tight">{formatCurrency(totalPending)}</p>
           </div>
         </motion.div>
 
         {/* This Month */}
         <motion.div
           variants={fadeUp}
-          className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-5 flex items-center gap-4"
+          className="bg-white rounded-2xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] p-5 flex items-center gap-4"
         >
-          <div className="w-12 h-12 rounded-lg bg-[#EFF8FF] flex items-center justify-center shrink-0">
-            <CalendarDays size={22} className="text-[#2E90FA]" />
+          <div className="w-12 h-12 rounded-xl bg-[#EFE7DA] flex items-center justify-center shrink-0">
+            <CalendarDays size={22} className="text-[#5C4632]" />
           </div>
           <div>
-            <p className="text-[13px] text-[#6B7280] mb-0.5">This Month</p>
-            <p className="text-xl font-bold text-[#111827] font-mono">{formatCurrency(thisMonthTotal)}</p>
+            <p className="text-[11px] uppercase tracking-[0.15em] text-[#8B7355] font-medium mb-0.5">This Month</p>
+            <p className="text-xl font-bold text-[#2B1D14] font-mono leading-tight">{formatCurrency(thisMonthTotal)}</p>
           </div>
         </motion.div>
       </motion.div>
 
       {/* Table */}
-      <div className="flex-1 bg-white rounded-xl shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col">
+      <div className="flex-1 bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
         <div className="flex-1 overflow-auto">
           {filteredTx.length === 0 ? (
-            <div className="py-16 text-center text-[#6B7280]">
+            <div className="py-16 text-center text-[#8B7355]">
               <p className="text-base font-medium">No transactions found</p>
               <p className="text-sm mt-1">Try adjusting your filters</p>
             </div>
           ) : (
             <table className="w-full border-collapse">
-              <thead className="sticky top-0 bg-[#F9FAFB] z-[1]">
+              <thead className="sticky top-0 bg-[#1C6C41] z-[1]">
                 <tr>
                   {['Tenant', 'PG', 'Room', 'Amount', 'Date', 'Status', 'Type'].map(h => (
                     <th
                       key={h}
-                      className="text-left px-4 py-3 text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wider border-b border-[#E5E7EB]"
+                      className="text-left px-4 py-4 text-[12px] font-semibold text-white/90 uppercase tracking-[0.08em]"
                     >
                       {h}
                     </th>
@@ -293,8 +281,8 @@ function Transactions() {
               </thead>
               <motion.tbody variants={staggerContainer} initial="initial" animate="animate">
                 {filteredTx.map((tx) => {
-                  const pgChip = PG_CHIP_COLORS[tx.pgName] || 'bg-gray-50 text-gray-700';
-                  const typeChip = TYPE_CHIP_COLORS[tx.type] || 'bg-gray-50 text-gray-700';
+                  const pgChip = PG_CHIP_COLORS[tx.pgName] || 'bg-[#EFE7DA] text-[#5C4632]';
+                  const typeChip = TYPE_CHIP_COLORS[tx.type] || 'bg-[#EFE7DA] text-[#5C4632]';
                   const statusLabel = tx.status.charAt(0).toUpperCase() + tx.status.slice(1);
                   const badgeVariant = BADGE_MAP[statusLabel] || 'neutral';
 
@@ -304,46 +292,49 @@ function Transactions() {
                       variants={fadeUp}
                       onMouseEnter={() => setHoveredRow(tx.id)}
                       onMouseLeave={() => setHoveredRow(null)}
-                      className={`border-b border-[#F3F4F6] transition-colors duration-150
-                                  ${hoveredRow === tx.id ? 'bg-[#F9FAFB]' : 'bg-white'}`}
+                      className={`border-b border-[#F3EEE5] transition-colors duration-150
+                                  ${hoveredRow === tx.id ? 'bg-[#FAF7F2]' : 'bg-white'}`}
                     >
                       {/* Tenant */}
-                      <td className="px-4 py-3">
-                        <span className="text-sm font-medium text-[#111827]">{tx.tenantName}</span>
+                      <td className="px-4 py-4">
+                        <span className="text-sm font-semibold text-[#2B1D14]">{tx.tenantName}</span>
                       </td>
 
                       {/* PG chip */}
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${pgChip}`}>
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${pgChip}`}>
                           {tx.pgName}
                         </span>
                       </td>
 
                       {/* Room */}
-                      <td className="px-4 py-3">
-                        <span className="font-mono text-sm text-[#374151]">{tx.room}</span>
+                      <td className="px-4 py-4">
+                        <span className="font-mono text-sm font-semibold text-[#2B1D14]">{tx.room}</span>
                       </td>
 
                       {/* Amount */}
-                      <td className="px-4 py-3">
-                        <span className="font-bold text-sm text-[#12B76A]">{formatCurrency(tx.amount)}</span>
+                      <td className="px-4 py-4">
+                        <span className="font-mono font-bold text-sm text-[#1C6C41]">{formatCurrency(tx.amount)}</span>
                       </td>
 
                       {/* Date */}
-                      <td className="px-4 py-3">
-                        <span className="text-sm text-[#374151]">{tx.date}</span>
+                      <td className="px-4 py-4">
+                        <span className="inline-flex items-center gap-1.5 text-sm text-[#5C4632]">
+                          <Calendar size={13} className="text-[#A89580]" />
+                          {tx.date}
+                        </span>
                       </td>
 
                       {/* Status Badge */}
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-4">
                         <Badge variant={badgeVariant} dot size="md">
                           {statusLabel}
                         </Badge>
                       </td>
 
                       {/* Type chip */}
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${typeChip}`}>
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${typeChip}`}>
                           {tx.type}
                         </span>
                       </td>

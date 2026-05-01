@@ -1,17 +1,18 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, ChevronRight, UserPlus, ChevronDown } from 'lucide-react';
+import { Search, ChevronRight, UserPlus, Calendar } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import AddTenantDrawer from '../components/AddTenantDrawer';
+import Select from '../components/ui/Select';
 
 const PG_COLORS = {
-  default: { bg: 'bg-teal-50', text: 'text-teal-700' },
-  0: { bg: 'bg-teal-50', text: 'text-teal-700' },
-  1: { bg: 'bg-indigo-50', text: 'text-indigo-700' },
-  2: { bg: 'bg-amber-50', text: 'text-amber-700' },
-  3: { bg: 'bg-rose-50', text: 'text-rose-700' },
+  default: { bg: 'bg-[#DCEEDF]', text: 'text-[#1C6C41]' },
+  0: { bg: 'bg-[#DCEEDF]', text: 'text-[#1C6C41]' },
+  1: { bg: 'bg-[#FCF1DC]', text: 'text-[#B45309]' },
+  2: { bg: 'bg-[#FBE5F0]', text: 'text-[#BE185D]' },
+  3: { bg: 'bg-[#E8E1F5]', text: 'text-[#6D28D9]' },
 };
 
 function getRelativeTime(dateStr) {
@@ -127,7 +128,7 @@ function Tenants() {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-[#111827]">Tenants</h1>
-          <span className="text-sm text-[#6B7280] bg-[#F3F4F6] px-2.5 py-0.5 rounded-full font-medium">
+          <span className="text-sm text-[#8B7355] bg-[#EFE7DA] px-2.5 py-0.5 rounded-full font-medium">
             {filteredTenants.length} total
           </span>
         </div>
@@ -135,33 +136,28 @@ function Tenants() {
         <div className="flex items-center gap-3">
           {/* Search */}
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A89580]" />
             <input
               type="text"
               placeholder="Search..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="h-10 pl-9 pr-3.5 border border-[#D1D5DB] rounded-lg text-sm bg-white
-                         focus:outline-none focus:border-[#1C6C41] focus:ring-2 focus:ring-[#1C6C41]/12
+              className="h-10 pl-9 pr-3.5 border border-[#E0D3BD] rounded-lg text-sm bg-white text-[#2B1D14] placeholder-[#A89580]
+                         focus:outline-none focus:border-[#1C6C41] focus:ring-2 focus:ring-[#1C6C41]/15
                          transition-all w-48"
             />
           </div>
 
           {/* PG Filter */}
-          <div className="relative">
-            <select
-              value={filterPg}
-              onChange={e => setFilterPg(e.target.value)}
-              className="h-10 pl-3.5 pr-8 border border-[#D1D5DB] rounded-lg text-sm bg-white cursor-pointer
-                         appearance-none focus:outline-none focus:border-[#1C6C41] focus:ring-2 focus:ring-[#1C6C41]/12
-                         transition-all"
-            >
-              <option value="all">All PG</option>
-              <option value="pg-001">Sunrise PG</option>
-              <option value="pg-002">Cozy Living PG</option>
-            </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
-          </div>
+          <Select
+            value={filterPg}
+            onChange={setFilterPg}
+            options={[
+              { value: 'all', label: 'All PG' },
+              { value: 'pg-001', label: 'Sunrise PG' },
+              { value: 'pg-002', label: 'Cozy Living PG' },
+            ]}
+          />
 
           {/* Add Tenant */}
           <button
@@ -176,26 +172,26 @@ function Tenants() {
       </div>
 
       {/* Table Container */}
-      <div className="flex-1 bg-white rounded-xl shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col">
+      <div className="flex-1 bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
         <div className="flex-1 overflow-auto">
           {filteredTenants.length === 0 ? (
-            <div className="py-16 text-center text-[#6B7280]">
+            <div className="py-16 text-center text-[#8B7355]">
               <p className="text-base font-medium">No tenants found</p>
               <p className="text-sm mt-1">Try adjusting your search or filter</p>
             </div>
           ) : (
             <table className="w-full border-collapse">
-              <thead className="sticky top-0 bg-[#F9FAFB] z-[1]">
+              <thead className="sticky top-0 bg-[#1C6C41] z-[1]">
                 <tr>
                   {['Name', 'Contact', 'PG', 'Room', 'Rent', 'Move In'].map(h => (
                     <th
                       key={h}
-                      className="text-left px-6 py-4 text-[12px] font-bold text-[#6B7280] uppercase tracking-wider border-b border-[#E5E7EB]"
+                      className="text-left px-6 py-4 text-[12px] font-semibold text-white/90 uppercase tracking-[0.08em]"
                     >
                       {h}
                     </th>
                   ))}
-                  <th className="w-10 border-b border-[#E5E7EB]" />
+                  <th className="w-10" />
                 </tr>
               </thead>
               <motion.tbody variants={staggerContainer} initial="initial" animate="animate">
@@ -208,54 +204,57 @@ function Tenants() {
                       onClick={() => navigate(`/tenants/${tenant.id}`)}
                       onMouseEnter={() => setHoveredRow(tenant.id)}
                       onMouseLeave={() => setHoveredRow(null)}
-                      className={`border-b border-[#F3F4F6] cursor-pointer transition-colors duration-150
-                                  ${hoveredRow === tenant.id ? 'bg-[#F9FAFB]' : 'bg-white'}`}
+                      className={`border-b border-[#F3EEE5] cursor-pointer transition-colors duration-150
+                                  ${hoveredRow === tenant.id ? 'bg-[#FAF7F2]' : 'bg-white'}`}
                     >
                       {/* Name + Email */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1C6C41] to-[#155331] flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-[#1C6C41] flex items-center justify-center text-white text-sm font-semibold shrink-0">
                             {tenant.name.charAt(0)}
                           </div>
                           <div className="min-w-0">
-                            <div className="text-sm font-medium text-[#111827] truncate">{tenant.name}</div>
-                            <div className="text-sm text-[#6B7280] truncate">{tenant.email}</div>
+                            <div className="text-sm font-semibold text-[#2B1D14] truncate">{tenant.name}</div>
+                            <div className="text-sm text-[#8B7355] truncate">{tenant.email}</div>
                           </div>
                         </div>
                       </td>
 
                       {/* Contact (phone only) */}
                       <td className="px-6 py-4">
-                        <span className="text-sm text-[#374151]">{tenant.phone}</span>
+                        <span className="text-sm text-[#5C4632] font-mono">{tenant.phone}</span>
                       </td>
 
                       {/* PG badge */}
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}>
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${colors.bg} ${colors.text}`}>
                           {tenant.pgName}
                         </span>
                       </td>
 
                       {/* Room */}
                       <td className="px-6 py-4">
-                        <span className="font-mono text-sm text-[#374151]">{tenant.room}</span>
+                        <span className="font-mono text-sm font-semibold text-[#2B1D14]">{tenant.room}</span>
                       </td>
 
                       {/* Rent */}
                       <td className="px-6 py-4">
-                        <span className="font-bold text-sm text-[#12B76A]">{formatCurrency(tenant.rent)}</span>
+                        <span className="font-mono font-bold text-sm text-[#1C6C41]">{formatCurrency(tenant.rent)}</span>
                       </td>
 
                       {/* Move In */}
                       <td className="px-6 py-4" title={getRelativeTime(tenant.moveInRaw)}>
-                        <span className="text-sm text-[#374151]">{tenant.moveIn}</span>
+                        <span className="inline-flex items-center gap-1.5 text-sm text-[#5C4632]">
+                          <Calendar size={13} className="text-[#A89580]" />
+                          {tenant.moveIn}
+                        </span>
                       </td>
 
                       {/* Chevron */}
                       <td className="px-4 py-4">
                         <ChevronRight
                           size={16}
-                          className={`text-[#D1D5DB] transition-all duration-150
+                          className={`text-[#1C6C41] transition-all duration-150
                                       ${hoveredRow === tenant.id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-1'}`}
                         />
                       </td>

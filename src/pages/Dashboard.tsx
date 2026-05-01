@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import {
-  Users, Home, MessageSquare, Wrench, ArrowRight, Activity, BedDouble,
-  TrendingUp, TrendingDown, IndianRupee, Clock, AlertTriangle, CheckCircle2,
-  CalendarDays, Bell,
+  Users, Home, Wrench, ArrowRight, Activity, BedDouble,
+  TrendingUp, TrendingDown, IndianRupee, AlertTriangle, CheckCircle2,
+  CalendarDays, UserPlus,
 } from "lucide-react"
 import { apiRequest, unwrapData } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -37,8 +37,6 @@ function getInitial(name?: string) {
 }
 
 const STATUS_BADGE = {
-  new: "info",
-  responded: "success",
   open: "destructive",
   in_progress: "warning",
   resolved: "success",
@@ -75,12 +73,24 @@ interface StatCardProps {
 function StatCard({ icon: Icon, label, value, delta, deltaUnit, footer }: StatCardProps) {
   const positive = (delta ?? 0) >= 0
   return (
-    <Card className="flex h-[140px] flex-col justify-between p-4">
-      {/* top row: icon + trend chip — fixed height */}
-      <div className="flex items-start justify-between">
-        <div className="flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary">
+    <Card className="flex h-[88px] items-center p-4">
+      {/* Left: icon + label + value */}
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
           <Icon size={18} />
         </div>
+        <div className="min-w-0">
+          <p className="text-[10.5px] font-semibold uppercase tracking-wider leading-tight text-muted-foreground">
+            {label}
+          </p>
+          <p className="mt-0.5 text-2xl font-bold leading-tight tabular-nums text-foreground">
+            {value}
+          </p>
+        </div>
+      </div>
+
+      {/* Right: trend chip + sub-info */}
+      <div className="ml-3 flex shrink-0 flex-col items-end gap-1 text-right">
         {delta != null ? (
           <span
             className={cn(
@@ -95,22 +105,16 @@ function StatCard({ icon: Icon, label, value, delta, deltaUnit, footer }: StatCa
             {deltaUnit ?? ""}
           </span>
         ) : (
-          <span className="h-[22px]" />
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+            <CheckCircle2 size={11} className="text-brand-400" />
+            stable
+          </span>
         )}
+        <p className="line-clamp-1 max-w-[140px] text-[11px] leading-tight text-muted-foreground">
+          {footer}
+        </p>
       </div>
 
-      {/* bottom block — pushed down with mt-auto for consistent baseline */}
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {label}
-        </span>
-        <span className="text-2xl font-bold leading-none tabular-nums text-foreground">
-          {value}
-        </span>
-        <span className="line-clamp-1 h-[16px] text-xs text-muted-foreground">
-          {footer ?? " "}
-        </span>
-      </div>
     </Card>
   )
 }
@@ -183,20 +187,19 @@ function SectionCard({
 /* ------------------------------------------------------------------ */
 
 const TIMELINE_DOT = {
-  inquiry: "bg-blue-500",
   ticket: "bg-red-500",
   tenant: "bg-brand-500",
   general: "bg-muted-foreground",
 } as const
 
-function buildTimeline(inquiries: any[], tickets: any[]) {
+function buildTimeline(tenants: any[], tickets: any[]) {
   const items: any[] = []
-  inquiries.forEach((n) =>
+  tenants.forEach((t) =>
     items.push({
-      id: `inq-${n.id}`,
-      type: "inquiry",
-      time: n.created_at,
-      description: `${n.created_by_name || "Someone"} sent: "${n.title || "Untitled"}"`,
+      id: `tn-${t.id}`,
+      type: "tenant",
+      time: t.move_in_date,
+      description: `${t.name || "New tenant"} moved into Room ${t.room_number || "?"}`,
     })
   )
   tickets.forEach((t) =>
@@ -207,7 +210,9 @@ function buildTimeline(inquiries: any[], tickets: any[]) {
       description: `Ticket: "${t.title || "Untitled"}"`,
     })
   )
-  items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+  items
+    .filter((i) => i.time)
+    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
   return items.slice(0, 8)
 }
 
@@ -253,7 +258,6 @@ function RoomStatusBar({
 function Dashboard() {
   const [tenants, setTenants] = useState<any[]>([])
   const [rooms, setRooms] = useState<any[]>([])
-  const [notices, setNotices] = useState<any[]>([])
   const [tickets, setTickets] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [priorityFilter, setPriorityFilter] = useState<"all" | "high" | "medium">("all")
@@ -262,17 +266,15 @@ function Dashboard() {
     let mounted = true
     ;(async () => {
       try {
-        const [, tenantsPayload, noticesPayload, ticketsPayload, roomsPayload] =
+        const [, tenantsPayload, ticketsPayload, roomsPayload] =
           await Promise.all([
             apiRequest("/api/v1/pg-facilities/"),
             apiRequest("/api/v1/tenants/"),
-            apiRequest("/api/v1/notices/"),
             apiRequest("/api/v1/tickets/my"),
             apiRequest("/api/v1/rooms/"),
           ])
         if (!mounted) return
         setTenants(unwrapData<any[]>(tenantsPayload, []) || [])
-        setNotices(unwrapData<any[]>(noticesPayload, []) || [])
         setRooms(unwrapData<any[]>(roomsPayload, []) || [])
         const tk = unwrapData<any[]>(ticketsPayload, []) || []
         setTickets(Array.isArray(tk) ? tk.filter((x) => !x.detail) : [])
@@ -293,9 +295,8 @@ function Dashboard() {
   const occupiedRooms = rooms.filter((r) => r.status === "occupied").length
   const maintRooms = rooms.filter((r) => r.status === "maintenance").length
   const reservedRooms = rooms.filter((r) => r.status === "reserved").length
-  const openNotices = notices.filter((n) => n.status === "new").length
-  const highPriorityNotices = notices.filter((n) => n.priority === "high").length
   const openTickets = tickets.filter((t) => t.status !== "resolved" && t.status !== "closed")
+  const highPriorityTickets = openTickets.filter((t) => t.priority === "high").length
   const todayCount = openTickets.filter(
     (t) => t.created_at && new Date(t.created_at).toDateString() === new Date().toDateString()
   ).length
@@ -304,12 +305,18 @@ function Dashboard() {
   // Mock revenue/payments (no API yet)
   const revenueMTD = totalTenants * 8500
   const dueThisWeek = Math.max(0, Math.round(totalTenants * 0.15))
+  const avgRent = totalTenants > 0
+    ? Math.round(tenants.reduce((s, t) => s + (t.rent || 0), 0) / totalTenants)
+    : 0
 
-  const recentInquiries = notices.slice(0, 5)
+  const recentTenants = [...tenants]
+    .filter((t) => t.move_in_date)
+    .sort((a, b) => new Date(b.move_in_date).getTime() - new Date(a.move_in_date).getTime())
+    .slice(0, 5)
   const filteredTickets = openTickets
     .filter((t) => priorityFilter === "all" || t.priority === priorityFilter)
     .slice(0, 5)
-  const timeline = buildTimeline(notices, tickets)
+  const timeline = buildTimeline(tenants, tickets)
 
   if (loading) {
     return (
@@ -340,13 +347,8 @@ function Dashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" asChild>
-            <Link to="/inquiries">
-              <Bell size={14} /> Inquiries
-              {openNotices > 0 ? (
-                <Badge variant="default" className="ml-1 h-4 px-1 text-[10px]">
-                  {openNotices}
-                </Badge>
-              ) : null}
+            <Link to="/transactions">
+              <IndianRupee size={14} /> Transactions
             </Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
@@ -385,15 +387,11 @@ function Dashboard() {
           footer={`${occupiedRooms} occupied · ${vacantRooms} vacant`}
         />
         <StatCard
-          icon={MessageSquare}
-          label="Open Inquiries"
-          value={openNotices}
+          icon={BedDouble}
+          label="Vacant Rooms"
+          value={vacantRooms}
           delta={null}
-          footer={
-            highPriorityNotices > 0
-              ? `${highPriorityNotices} high priority`
-              : "all caught up"
-          }
+          footer={vacantRooms > 0 ? `${vacantRooms} ready to book` : "fully booked"}
         />
         <StatCard
           icon={Wrench}
@@ -423,74 +421,71 @@ function Dashboard() {
           hint={<span>₹{((dueThisWeek * 8500) / 1000).toFixed(1)}K</span>}
         />
         <MiniMetric
-          icon={Clock}
-          label="Avg response"
-          value="2.4h"
+          icon={UserPlus}
+          label="Avg rent"
+          value={`₹${(avgRent / 1000).toFixed(1)}K`}
           hint={
             <span className="text-brand-400">
-              <TrendingDown size={11} className="inline" /> 18%
+              <TrendingUp size={11} className="inline" /> 4%
             </span>
           }
         />
         <MiniMetric
           icon={AlertTriangle}
           label="Action needed"
-          value={`${highPriorityNotices + openTickets.filter((t) => t.priority === "high").length} items`}
-          hint={<span className="text-red-400">High</span>}
+          value={`${highPriorityTickets} items`}
+          hint={
+            <span className={highPriorityTickets > 0 ? "text-red-400" : "text-muted-foreground"}>
+              {highPriorityTickets > 0 ? "High" : "None"}
+            </span>
+          }
         />
       </Card>
 
       {/* 2-col: Inquiries | Tickets */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <SectionCard
-          title="Recent Inquiries"
-          icon={MessageSquare}
+          title="Recent Tenants"
+          icon={Users}
           className="h-[340px]"
           action={
             <Link
-              to="/inquiries"
+              to="/tenants"
               className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
             >
               View all <ArrowRight size={12} />
             </Link>
           }
         >
-          {recentInquiries.length === 0 ? (
+          {recentTenants.length === 0 ? (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              No inquiries yet
+              No tenants yet
             </div>
           ) : (
             <ul className="divide-y divide-border">
-              {recentInquiries.map((inq, idx) => (
+              {recentTenants.map((t, idx) => (
                 <li
-                  key={inq.id || idx}
+                  key={t.id || idx}
                   className="flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/50"
                 >
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">
-                    {getInitial(inq.created_by_name || inq.author)}
+                    {getInitial(t.name)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      {inq.status === "new" && (
-                        <span className="size-1.5 shrink-0 rounded-full bg-primary" />
-                      )}
-                      <span className="truncate text-sm font-medium text-foreground">
-                        {inq.created_by_name || inq.author || "Tenant"}
-                      </span>
-                    </div>
+                    <span className="truncate text-sm font-medium text-foreground">
+                      {t.name || "Tenant"}
+                    </span>
                     <p className="truncate text-xs text-muted-foreground">
-                      {inq.message || inq.title || "No message"}
+                      Room {t.room_number || "—"}
+                      {t.rent ? ` · ₹${t.rent.toLocaleString("en-IN")}/mo` : ""}
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-0.5">
                     <span className="text-[10.5px] text-muted-foreground">
-                      {relativeTime(inq.created_at)}
+                      {relativeTime(t.move_in_date)}
                     </span>
-                    <Badge
-                      variant={(STATUS_BADGE as any)[inq.status] || "neutral"}
-                      className="h-4 px-1.5 text-[10px]"
-                    >
-                      {(inq.status || "new").replace("_", " ")}
+                    <Badge variant="success" className="h-4 px-1.5 text-[10px]">
+                      moved in
                     </Badge>
                   </div>
                 </li>

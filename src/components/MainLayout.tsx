@@ -34,7 +34,7 @@ function MainLayout({ children }) {
         className="flex-1 overflow-y-auto p-6 md:p-10"
         style={{ marginLeft: `${sidebarWidth}px`, transition: 'margin-left 0.3s ease' }}
       >
-        <div className="max-w-[1280px] mx-auto">
+        <div className="max-w-[1280px] mx-auto min-h-full h-full">
           {children}
         </div>
       </main>
