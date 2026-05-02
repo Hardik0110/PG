@@ -1,9 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* ------------------------------------------------------------------ */
-/*  Tailwind v4 theme — TrustCircle light design system               */
-/* ------------------------------------------------------------------ */
 @theme {
   --header-height: 60px;
 
@@ -17,7 +14,6 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Brand green scale */
   --color-brand-50: #EEFBF4;
   --color-brand-100: #D5F5E3;
   --color-brand-200: #A8E6C3;
@@ -29,7 +25,6 @@
   --color-brand-800: #0C2E1C;
   --color-brand-900: #071D12;
 
-  /* Mint scale (kept for compat, now maps to brand green) */
   --color-mint-50: #EEFBF4;
   --color-mint-100: #D5F5E3;
   --color-mint-200: #A8E6C3;
@@ -41,7 +36,6 @@
   --color-mint-800: #0C2E1C;
   --color-mint-900: #071D12;
 
-  /* Semantic tokens — light theme */
   --color-background: #F8F5F0;
   --color-foreground: #111827;
   --color-card: #FFFFFF;
@@ -74,11 +68,23 @@
   --color-chart-3: #F79009;
   --color-chart-4: #B692F6;
   --color-chart-5: #F472B6;
+
+  --text-fluid-xs:    clamp(0.625rem, calc(0.583rem + 0.208vw), 0.75rem);
+  --text-fluid-sm:    clamp(0.75rem,  calc(0.708rem + 0.208vw), 0.875rem);
+  --text-fluid-base:  clamp(0.875rem, calc(0.833rem + 0.208vw), 1rem);
+  --text-fluid-lg:    clamp(1rem,     calc(0.917rem + 0.417vw), 1.25rem);
+  --text-fluid-xl:    clamp(1.125rem, calc(1rem     + 0.625vw), 1.5rem);
+  --text-fluid-2xl:   clamp(1.25rem,  calc(1.083rem + 0.833vw), 1.75rem);
+  --text-fluid-3xl:   clamp(1.5rem,   calc(1.333rem + 0.833vw), 2rem);
+
+  --spacing-fluid-1:  clamp(0.5rem,   calc(0.417rem + 0.417vw), 0.75rem);
+  --spacing-fluid-2:  clamp(0.75rem,  calc(0.667rem + 0.417vw), 1rem);
+  --spacing-fluid-3:  clamp(1rem,     calc(0.833rem + 0.833vw), 1.5rem);
+  --spacing-fluid-4:  clamp(1.25rem,  calc(1rem     + 1.25vw),  2rem);
+  --spacing-fluid-5:  clamp(1.5rem,   calc(1.167rem + 1.667vw), 2.5rem);
+  --spacing-fluid-6:  clamp(2rem,     calc(1.5rem   + 2.5vw),   3.5rem);
 }
 
-/* ------------------------------------------------------------------ */
-/*  Base                                                               */
-/* ------------------------------------------------------------------ */
 @layer base {
   *, *::before, *::after { border-color: var(--color-border); }
 
@@ -95,18 +101,17 @@
 
   input, textarea, select, button { font-family: inherit; }
 
-  /* Custom Scrollbar */
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: var(--color-background); }
-  ::-webkit-scrollbar-thumb { 
-    background: var(--color-primary); 
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
     border-radius: 9999px;
     border: 2px solid var(--color-background);
   }
   ::-webkit-scrollbar-thumb:hover { background: var(--color-brand-600); }
-  * { 
-    scrollbar-width: thin; 
-    scrollbar-color: var(--color-primary) var(--color-background); 
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) var(--color-background);
   }
 
   :focus-visible {

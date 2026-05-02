@@ -38,7 +38,6 @@ function EditPG() {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Form fields
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
@@ -97,7 +96,6 @@ function EditPG() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required
     const newErrors = {};
     if (!name.trim()) newErrors.name = 'PG Name is required';
     if (!address.trim()) newErrors.address = 'Address is required';
@@ -151,7 +149,7 @@ function EditPG() {
       exit="exit"
       className="max-w-3xl mx-auto h-full overflow-y-auto pr-1"
     >
-      {/* Success Toast */}
+
       {showSuccess && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -165,7 +163,6 @@ function EditPG() {
         </motion.div>
       )}
 
-      {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={() => navigate('/dashboard')}
@@ -181,15 +178,15 @@ function EditPG() {
           >
             Back to Dashboard
           </button>
-          <h1 className="text-2xl font-bold text-[#111827] leading-tight">
-            Edit PG {name ? <span className="text-[#6B7280] font-normal text-lg ml-1">/ {name}</span> : ''}
+          <h1 className="text-xl sm:text-2xl font-bold text-[#111827] leading-tight">
+            Edit PG {name ? <span className="text-[#6B7280] font-normal text-base sm:text-lg ml-1">/ {name}</span> : ''}
           </h1>
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
         <motion.div variants={staggerContainer} initial="initial" animate="animate" className="flex flex-col gap-6">
-          {/* Section 1: Basic Information */}
+
           <motion.div variants={fadeUp} className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-6">
             <h2 className="text-base font-semibold text-[#111827] mb-5">Basic Information</h2>
             <div className="flex flex-col gap-4">
@@ -244,7 +241,6 @@ function EditPG() {
             </div>
           </motion.div>
 
-          {/* Section 2: Contact & Details */}
           <motion.div variants={fadeUp} className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-6">
             <h2 className="text-base font-semibold text-[#111827] mb-5">Contact & Details</h2>
             <div className="flex flex-col gap-4">
@@ -299,10 +295,9 @@ function EditPG() {
             </div>
           </motion.div>
 
-          {/* Section 3: Amenities */}
           <motion.div variants={fadeUp} className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-6">
             <h2 className="text-base font-semibold text-[#111827] mb-5">Amenities</h2>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {AMENITY_OPTIONS.map(({ key, label, icon: Icon }) => {
                 const checked = !!amenities[key];
                 return (
@@ -332,7 +327,6 @@ function EditPG() {
             </div>
           </motion.div>
 
-          {/* Actions */}
           <motion.div variants={fadeUp} className="flex items-center justify-between pt-2">
             <button
               type="button"

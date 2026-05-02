@@ -7,7 +7,6 @@ const DEFAULT_API_BASE_URL = "https://pg-maintenance.onrender.com";
 const TOKEN_KEY = "pg_manager_token";
 const USE_MOCK = true;
 
-// API configuration
 const baseUrl = import.meta.env.DEV
   ? ""
   : ((import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/$/, ""));

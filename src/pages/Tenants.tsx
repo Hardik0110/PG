@@ -7,6 +7,8 @@ import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import AddTenantDrawer from '../components/AddTenantDrawer';
 import Select from '../components/ui/Select';
 import Loader from '../components/ui/Loader';
+import Pagination from '../components/ui/Pagination';
+import { useTablePageSize } from '../hooks/use-table-page-size';
 
 const PG_COLORS = {
   default: { bg: 'bg-[#DCEEDF]', text: 'text-[#1C6C41]' },
@@ -40,6 +42,9 @@ function Tenants() {
   const [loading, setLoading] = useState(true);
   const [hoveredRow, setHoveredRow] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const [tableRef, pageSize] = useTablePageSize({ mobile: 60, tablet: 64, desktop: 68 });
 
   useEffect(() => {
     let mounted = true;
@@ -102,6 +107,13 @@ function Tenants() {
     });
   }, [tenants, filterPg, search]);
 
+  useEffect(() => { setPage(1); }, [filterPg, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTenants.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pageStart = (safePage - 1) * pageSize;
+  const pagedTenants = filteredTenants.slice(pageStart, pageStart + pageSize);
+
   const formatCurrency = (amt) => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amt).replace('₹', '₹');
   };
@@ -125,31 +137,30 @@ function Tenants() {
       exit="exit"
       className="h-full flex flex-col"
     >
-      {/* Top Toolbar */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-[#111827]">Tenants</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#111827]">Tenants</h1>
           <span className="text-sm text-[#8B7355] bg-[#EFE7DA] px-2.5 py-0.5 rounded-full font-medium">
             {filteredTenants.length} total
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Search */}
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+
+          <div className="relative flex-1 min-w-[140px] sm:flex-none">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A89580]" />
             <input
               type="text"
               placeholder="Search..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="h-10 pl-9 pr-3.5 border border-[#E0D3BD] rounded-lg text-sm bg-white text-[#2B1D14] placeholder-[#A89580]
+              className="h-10 w-full sm:w-48 pl-9 pr-3.5 border border-[#E0D3BD] rounded-lg text-base sm:text-sm bg-white text-[#2B1D14] placeholder-[#A89580]
                          focus:outline-none focus:border-[#1C6C41] focus:ring-2 focus:ring-[#1C6C41]/15
-                         transition-all w-48"
+                         transition-all"
             />
           </div>
 
-          {/* PG Filter */}
           <Select
             value={filterPg}
             onChange={setFilterPg}
@@ -160,21 +171,20 @@ function Tenants() {
             ]}
           />
 
-          {/* Add Tenant */}
           <button
             onClick={() => setIsDrawerOpen(true)}
-            className="h-10 px-4 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
-                       inline-flex items-center gap-2 transition-colors cursor-pointer"
+            aria-label="Add Tenant"
+            className="h-10 px-3 sm:px-4 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
+                       inline-flex items-center gap-2 whitespace-nowrap transition-colors cursor-pointer"
           >
             <UserPlus size={16} />
-            Add Tenant
+            <span className="hidden sm:inline">Add Tenant</span>
           </button>
         </div>
       </div>
 
-      {/* Table Container */}
-      <div className="flex-1 min-h-0 bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-auto">
+      <div ref={tableRef} className="bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
+        <div className="overflow-x-auto">
           {filteredTenants.length === 0 ? (
             <div className="py-16 text-center text-[#8B7355]">
               <p className="text-base font-medium">No tenants found</p>
@@ -182,12 +192,12 @@ function Tenants() {
             </div>
           ) : (
             <table className="w-full border-collapse">
-              <thead className="sticky top-0 bg-[#1C6C41] z-[1]">
+              <thead className="bg-[#1C6C41]">
                 <tr>
                   {['Name', 'Contact', 'PG', 'Room', 'Rent', 'Move In'].map(h => (
                     <th
                       key={h}
-                      className="text-left px-6 py-4 text-[12px] font-semibold text-white/90 uppercase tracking-[0.08em]"
+                      className="text-left px-fluid-3 py-fluid-2 text-[12px] font-semibold text-white/90 uppercase tracking-[0.08em] whitespace-nowrap"
                     >
                       {h}
                     </th>
@@ -196,7 +206,7 @@ function Tenants() {
                 </tr>
               </thead>
               <motion.tbody variants={staggerContainer} initial="initial" animate="animate">
-                {filteredTenants.map((tenant) => {
+                {pagedTenants.map((tenant) => {
                   const colors = pgColorMap[tenant.pgName] || PG_COLORS.default;
                   return (
                     <motion.tr
@@ -208,51 +218,45 @@ function Tenants() {
                       className={`border-b border-[#F3EEE5] cursor-pointer transition-colors duration-150
                                   ${hoveredRow === tenant.id ? 'bg-[#FAF7F2]' : 'bg-white'}`}
                     >
-                      {/* Name + Email */}
-                      <td className="px-6 py-4">
+
+                      <td className="px-fluid-3 py-fluid-2">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#1C6C41] flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-[#1C6C41] flex items-center justify-center text-white text-fluid-sm font-semibold shrink-0">
                             {tenant.name.charAt(0)}
                           </div>
                           <div className="min-w-0">
-                            <div className="text-sm font-semibold text-[#2B1D14] truncate">{tenant.name}</div>
-                            <div className="text-sm text-[#8B7355] truncate">{tenant.email}</div>
+                            <div className="text-fluid-sm font-semibold text-[#2B1D14] truncate">{tenant.name}</div>
+                            <div className="text-fluid-xs text-[#8B7355] truncate">{tenant.email}</div>
                           </div>
                         </div>
                       </td>
 
-                      {/* Contact (phone only) */}
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-[#5C4632] font-mono">{tenant.phone}</span>
+                      <td className="px-fluid-3 py-fluid-2">
+                        <span className="text-fluid-sm text-[#5C4632] font-mono whitespace-nowrap">{tenant.phone}</span>
                       </td>
 
-                      {/* PG badge */}
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${colors.bg} ${colors.text}`}>
+                      <td className="px-fluid-3 py-fluid-2">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-fluid-xs font-semibold whitespace-nowrap ${colors.bg} ${colors.text}`}>
                           {tenant.pgName}
                         </span>
                       </td>
 
-                      {/* Room */}
-                      <td className="px-6 py-4">
-                        <span className="font-mono text-sm font-semibold text-[#2B1D14]">{tenant.room}</span>
+                      <td className="px-fluid-3 py-fluid-2">
+                        <span className="font-mono text-fluid-sm font-semibold text-[#2B1D14]">{tenant.room}</span>
                       </td>
 
-                      {/* Rent */}
-                      <td className="px-6 py-4">
-                        <span className="font-mono font-bold text-sm text-[#1C6C41]">{formatCurrency(tenant.rent)}</span>
+                      <td className="px-fluid-3 py-fluid-2">
+                        <span className="font-mono font-bold text-fluid-sm text-[#1C6C41] whitespace-nowrap">{formatCurrency(tenant.rent)}</span>
                       </td>
 
-                      {/* Move In */}
                       <td className="px-6 py-4" title={getRelativeTime(tenant.moveInRaw)}>
-                        <span className="inline-flex items-center gap-1.5 text-sm text-[#5C4632]">
+                        <span className="inline-flex items-center gap-1.5 text-fluid-sm text-[#5C4632] whitespace-nowrap">
                           <Calendar size={13} className="text-[#A89580]" />
                           {tenant.moveIn}
                         </span>
                       </td>
 
-                      {/* Chevron */}
-                      <td className="px-4 py-4">
+                      <td className="px-fluid-2 py-fluid-2">
                         <ChevronRight
                           size={16}
                           className={`text-[#1C6C41] transition-all duration-150
@@ -266,9 +270,16 @@ function Tenants() {
             </table>
           )}
         </div>
+        <Pagination
+          page={safePage}
+          totalPages={totalPages}
+          total={filteredTenants.length}
+          pageSize={pageSize}
+          onPageChange={setPage}
+        />
       </div>
 
-      <AddTenantDrawer 
+      <AddTenantDrawer
         open={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onSubmit={(data) => {

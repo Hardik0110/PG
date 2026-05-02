@@ -68,30 +68,30 @@ function AuthPage() {
   };
 
   const inputClass = (fieldName) =>
-    `w-full h-[42px] pl-11 pr-4 rounded-[10px] bg-white border text-[14px] outline-none transition-colors font-sans ${
+    `w-full h-12 md:h-[42px] pl-11 pr-4 rounded-[10px] bg-white border text-base md:text-[14px] outline-none transition-colors font-sans ${
       errors[fieldName] ? 'border-red-400 focus:border-red-500' : 'border-[#D1D5DB] focus:border-[#1C6C41]'
     }`;
 
   return (
-    <div className="h-screen flex items-center justify-center p-4 md:p-6" style={{ background: 'linear-gradient(135deg, #1C6C41 0%, #F8F5F0 60%)' }}>
-      <div className="w-full max-w-[920px] bg-white shadow-md p-4 rounded-[40px] border border-gray-200">
-        <div className="w-full flex flex-col-reverse md:flex-row">
+    <div className="min-h-screen min-h-svh flex items-center justify-center bg-white md:p-6 md:bg-[linear-gradient(135deg,#1C6C41_0%,#F8F5F0_60%)]">
+      <div className="w-full max-w-[920px] bg-white md:shadow-md md:p-4 md:rounded-[40px] md:border md:border-gray-200">
+        <div className="w-full flex flex-col md:flex-row">
 
-          {/* Left Column — Decorative image panel */}
-          <div className="w-full flex items-center justify-center md:max-w-[420px] mt-6 md:mt-0">
+          <div className="hidden md:flex md:items-center md:justify-center md:max-w-[420px]">
             <div className="relative w-full h-full rounded-[30px] overflow-hidden">
               <img
                 src="/login-hero.png"
                 alt="PG Management illustration"
+                width="420"
+                height="600"
                 className="w-full h-full object-cover"
               />
             </div>
           </div>
 
-          {/* Right Column — Form */}
-          <div className="flex-1 p-6 md:p-10 flex flex-col justify-start items-start">
-            {/* Logo */}
-            <img src="/logo.png" alt="TrustCircle Logo" className="h-[26px] w-[134px]" />
+          <div className="flex-1 px-5 py-6 md:p-10 flex flex-col justify-start items-start">
+
+            <img src="/logo.png" alt="TrustCircle Logo" width="134" height="26" className="h-[26px] w-[134px]" />
 
             <h1 className="text-[26px] md:text-[30px] mt-4 font-bold text-gray-900">
               {activeTab === 'login' ? 'Welcome Back!' : 'Join TrustCircle!'}
@@ -102,12 +102,11 @@ function AuthPage() {
                 : 'Create an account to start managing your properties.'}
             </p>
 
-            {/* Toggle Tabs */}
             <div className="relative flex w-full bg-[#F3F4F6] rounded-full p-1 mb-5">
               <button
                 type="button"
                 onClick={() => { setActiveTab('login'); setErrors({}); }}
-                className={`relative z-10 flex-1 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 ${
+                className={`relative z-10 flex-1 min-h-[44px] md:min-h-0 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 ${
                   activeTab === 'login'
                     ? 'text-white'
                     : 'text-gray-500 hover:text-gray-700'
@@ -118,7 +117,7 @@ function AuthPage() {
               <button
                 type="button"
                 onClick={() => { setActiveTab('signup'); setErrors({}); }}
-                className={`relative z-10 flex-1 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 ${
+                className={`relative z-10 flex-1 min-h-[44px] md:min-h-0 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 ${
                   activeTab === 'signup'
                     ? 'text-white'
                     : 'text-gray-500 hover:text-gray-700'
@@ -126,17 +125,17 @@ function AuthPage() {
               >
                 Sign Up
               </button>
-              
+
               <motion.div
                 className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#1C6C41] rounded-full shadow-sm z-0"
                 initial={false}
-                animate={{ 
-                  x: activeTab === 'login' ? 0 : '100%' 
+                animate={{
+                  x: activeTab === 'login' ? 0 : '100%'
                 }}
-                transition={{ 
-                  type: 'tween', 
-                  duration: 0.4, 
-                  ease: 'easeInOut' 
+                transition={{
+                  type: 'tween',
+                  duration: 0.4,
+                  ease: 'easeInOut'
                 }}
               />
             </div>
@@ -178,7 +177,8 @@ function AuthPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      className="absolute inset-y-0 right-0 flex items-center justify-center px-3 text-gray-400 hover:text-gray-600"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -187,7 +187,7 @@ function AuthPage() {
                 </div>
 
                 <div className="flex justify-end w-full">
-                  <button type="button" className="text-[12px] text-gray-500 hover:text-[#1C6C41] transition-colors">
+                  <button type="button" className="-mr-2 px-2 py-2 text-[12px] text-gray-500 hover:text-[#1C6C41] transition-colors">
                     Forgot password?
                   </button>
                 </div>
@@ -196,7 +196,7 @@ function AuthPage() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="bg-[#1C6C41] rounded-full w-full h-[42px] text-white hover:bg-[#155331] transition-colors flex justify-center items-center font-semibold text-[14px] disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="bg-[#1C6C41] rounded-full w-full h-12 md:h-[42px] text-white hover:bg-[#155331] transition-colors flex justify-center items-center font-semibold text-[14px] disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {submitting ? <Loader size={20} color="white" /> : 'Log In'}
                   </button>
@@ -257,7 +257,8 @@ function AuthPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      className="absolute inset-y-0 right-0 flex items-center justify-center px-3 text-gray-400 hover:text-gray-600"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -282,7 +283,8 @@ function AuthPage() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                      className="absolute inset-y-0 right-0 flex items-center justify-center px-3 text-gray-400 hover:text-gray-600"
                     >
                       {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -294,7 +296,7 @@ function AuthPage() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="bg-[#1C6C41] rounded-full w-full h-[42px] text-white hover:bg-[#155331] transition-colors flex justify-center items-center font-semibold text-[14px] disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="bg-[#1C6C41] rounded-full w-full h-12 md:h-[42px] text-white hover:bg-[#155331] transition-colors flex justify-center items-center font-semibold text-[14px] disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {submitting ? <Loader size={20} color="white" /> : 'Sign Up'}
                   </button>

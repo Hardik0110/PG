@@ -35,7 +35,7 @@ function PGCard({ pg, onManage }) {
       className="relative overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_-12px_rgba(60,30,15,0.25)] border border-[#E8DFD2] flex flex-col"
     >
       <motion.div variants={cardHover} className="flex flex-col flex-1">
-        {/* Banner */}
+
         <div className={`relative h-20 ${theme.banner} px-5 py-3`}>
           <div className={`relative opacity-75 ${theme.accent}`}>
             <span className="text-[10px] font-semibold tracking-[0.2em] uppercase">
@@ -48,7 +48,6 @@ function PGCard({ pg, onManage }) {
             {pg.name}
           </h2>
 
-          {/* Tenant count badge */}
           <div
             className={`absolute top-1/2 -translate-y-1/2 right-5 h-14 w-14 rounded-full bg-white ring-4 ${theme.ring} shadow-md flex flex-col items-center justify-center`}
           >
@@ -59,7 +58,6 @@ function PGCard({ pg, onManage }) {
           </div>
         </div>
 
-        {/* Body */}
         <div className="px-5 py-5 flex flex-col flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-1.5 text-sm text-[#6B5847] min-w-0">
@@ -74,7 +72,6 @@ function PGCard({ pg, onManage }) {
             </button>
           </div>
 
-          {/* Stats */}
           <div className="flex gap-3 mt-4">
             <div className="flex-1 rounded-xl bg-[#FAF7F2] border border-[#E8DFD2] px-3 py-2.5">
               <p className="text-[10px] uppercase tracking-[0.15em] text-[#8B7355] font-medium">
@@ -98,7 +95,6 @@ function PGCard({ pg, onManage }) {
 
           <div className="flex-1" />
 
-          {/* CTA */}
           <button
             onClick={() => onManage(pg)}
             className="mt-4 w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all bg-[#1C6C41] hover:bg-[#155232] text-[#F8F5F0] cursor-pointer"
@@ -130,7 +126,7 @@ function MyPGs() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Building size={24} className="text-[#1C6C41]" />
-          <h1 className="text-2xl font-bold text-[#1F2937]">My PGs</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#1F2937]">My PGs</h1>
         </div>
         <button
           onClick={() => navigate('/pg/add')}

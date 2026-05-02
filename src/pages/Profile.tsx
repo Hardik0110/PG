@@ -39,7 +39,7 @@ function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Swagger docs currently expose read-only current profile endpoint.
+
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
     } catch {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import {
   Users, Home, Wrench, ArrowRight, Activity, BedDouble,
-  TrendingUp, TrendingDown, IndianRupee, AlertTriangle, CheckCircle2,
+  TrendingUp, IndianRupee, AlertTriangle, CheckCircle2,
   CalendarDays, UserPlus,
 } from "lucide-react"
 import { apiRequest, unwrapData } from "@/lib/api"
@@ -12,8 +12,7 @@ import { Badge } from "@/components/ui/Badge"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Separator } from "@/components/ui/separator"
-
-
+import StatCards, { type StatCard as StatCardData } from "@/components/StatCards"
 
 function relativeTime(dateString?: string) {
   if (!dateString) return ""
@@ -56,70 +55,6 @@ const CATEGORY_TONE = {
   other: "bg-muted text-muted-foreground",
 } as const
 
-
-
-interface StatCardProps {
-  icon: React.ComponentType<{ size?: number; className?: string }>
-  label: string
-  value: React.ReactNode
-  delta?: number | null
-  deltaUnit?: string
-  footer?: React.ReactNode
-}
-
-function StatCard({ icon: Icon, label, value, delta, deltaUnit, footer }: StatCardProps) {
-  const positive = (delta ?? 0) >= 0
-  return (
-    <Card className="flex h-[88px] items-center p-4">
-      {/* Left: icon + label + value */}
-      <div className="flex min-w-0 flex-1 items-center gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
-          <Icon size={18} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-[10.5px] font-semibold uppercase tracking-wider leading-tight text-muted-foreground">
-            {label}
-          </p>
-          <p className="mt-0.5 text-2xl font-bold leading-tight tabular-nums text-foreground">
-            {value}
-          </p>
-        </div>
-      </div>
-
-      {/* Right: trend chip + sub-info */}
-      <div className="ml-3 flex shrink-0 flex-col items-end gap-1 text-right">
-        {delta != null ? (
-          <span
-            className={cn(
-              "inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] font-semibold tabular-nums",
-              positive
-                ? "border-brand-500/30 bg-brand-500/10 text-brand-400"
-                : "border-red-500/30 bg-red-500/10 text-red-400"
-            )}
-          >
-            {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-            {positive ? `+${delta}` : delta}
-            {deltaUnit ?? ""}
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
-            <CheckCircle2 size={11} className="text-brand-400" />
-            stable
-          </span>
-        )}
-        <p className="line-clamp-1 max-w-[140px] text-[11px] leading-tight text-muted-foreground">
-          {footer}
-        </p>
-      </div>
-
-    </Card>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/*  Inline mini-metric (used in second strip)                          */
-/* ------------------------------------------------------------------ */
-
 interface MiniMetricProps {
   label: string
   value: React.ReactNode
@@ -129,28 +64,24 @@ interface MiniMetricProps {
 
 function MiniMetric({ label, value, hint, icon: Icon }: MiniMetricProps) {
   return (
-    <div className="flex flex-1 items-center gap-3 px-4 py-3">
+    <div className="flex flex-1 items-center gap-fluid-2 p-fluid-2">
       {Icon ? (
         <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
           <Icon size={14} />
         </div>
       ) : null}
       <div className="min-w-0 flex-1">
-        <p className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="text-fluid-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {label}
         </p>
-        <p className="text-sm font-semibold tabular-nums text-foreground">{value}</p>
+        <p className="text-fluid-base font-semibold tabular-nums text-foreground">{value}</p>
       </div>
       {hint != null ? (
-        <span className="shrink-0 text-[11px] text-muted-foreground">{hint}</span>
+        <span className="shrink-0 text-fluid-xs text-muted-foreground">{hint}</span>
       ) : null}
     </div>
   )
 }
-
-/* ------------------------------------------------------------------ */
-/*  Section card with header                                           */
-/* ------------------------------------------------------------------ */
 
 function SectionCard({
   title,
@@ -167,10 +98,10 @@ function SectionCard({
 }) {
   return (
     <Card className={cn("flex flex-col overflow-hidden", className)}>
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-fluid-3">
         <div className="flex items-center gap-2">
           {Icon ? <Icon size={15} className="text-muted-foreground" /> : null}
-          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+          <h3 className="text-fluid-sm font-semibold text-foreground">{title}</h3>
         </div>
         {action}
       </div>
@@ -178,10 +109,6 @@ function SectionCard({
     </Card>
   )
 }
-
-/* ------------------------------------------------------------------ */
-/*  Activity timeline grouping                                         */
-/* ------------------------------------------------------------------ */
 
 const TIMELINE_DOT = {
   ticket: "bg-red-500",
@@ -212,10 +139,6 @@ function buildTimeline(tenants: any[], tickets: any[]) {
     .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
   return items.slice(0, 8)
 }
-
-/* ------------------------------------------------------------------ */
-/*  Room status mini-card                                              */
-/* ------------------------------------------------------------------ */
 
 function RoomStatusBar({
   label,
@@ -248,10 +171,6 @@ function RoomStatusBar({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/*  Main Dashboard                                                     */
-/* ------------------------------------------------------------------ */
-
 function Dashboard() {
   const [tenants, setTenants] = useState<any[]>([])
   const [rooms, setRooms] = useState<any[]>([])
@@ -271,13 +190,11 @@ function Dashboard() {
             apiRequest("/api/v1/rooms/"),
           ])
         if (!mounted) return
-        setTenants(unwrapData<any[]>(tenantsPayload, []) || [])
-        setRooms(unwrapData<any[]>(roomsPayload, []) || [])
-        const tk = unwrapData<any[]>(ticketsPayload, []) || []
+        setTenants(unwrapData(tenantsPayload, []) || [])
+        setRooms(unwrapData(roomsPayload, []) || [])
+        const tk = unwrapData(ticketsPayload, []) || []
         setTickets(Array.isArray(tk) ? tk.filter((x) => !x.detail) : [])
-      } catch {
-        /* noop */
-      } finally {
+      } catch {} finally {
         if (mounted) setLoading(false)
       }
     })()
@@ -299,7 +216,6 @@ function Dashboard() {
   ).length
   const occupancy = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0
 
-  // Mock revenue/payments (no API yet)
   const revenueMTD = totalTenants * 8500
   const dueThisWeek = Math.max(0, Math.round(totalTenants * 0.15))
   const avgRent = totalTenants > 0
@@ -327,8 +243,8 @@ function Dashboard() {
   }
 
   return (
-    <div className="h-full overflow-y-auto pr-1 flex flex-col gap-4">
-      {/* Header strip — greeting + date + actions */}
+    <div className="flex flex-col gap-fluid-3">
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
@@ -343,14 +259,14 @@ function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild aria-label="Transactions">
             <Link to="/transactions">
-              <IndianRupee size={14} /> Transactions
+              <IndianRupee size={14} /> <span className="hidden sm:inline">Transactions</span>
             </Link>
           </Button>
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild aria-label="Tickets">
             <Link to="/maintenance">
-              <Wrench size={14} /> Tickets
+              <Wrench size={14} /> <span className="hidden sm:inline">Tickets</span>
               {openTickets.length > 0 ? (
                 <Badge variant="destructive" className="ml-1 h-4 px-1 text-[10px]">
                   {openTickets.length}
@@ -358,49 +274,56 @@ function Dashboard() {
               ) : null}
             </Link>
           </Button>
-          <Button size="sm" asChild>
+          <Button size="sm" asChild aria-label="Add tenant">
             <Link to="/tenants">
-              <Users size={14} /> Add tenant
+              <Users size={14} /> <span className="hidden sm:inline">Add tenant</span>
             </Link>
           </Button>
         </div>
       </div>
 
-      {/* Stat cards — 4 columns, all uniform h-[140px], identical inner rhythm */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard
-          icon={Users}
-          label="Tenants"
-          value={totalTenants}
-          delta={2}
-          footer={`${totalTenants}/${totalRooms} capacity used`}
-        />
-        <StatCard
-          icon={Home}
-          label="Occupancy"
-          value={`${occupancy}%`}
-          delta={5}
-          deltaUnit="%"
-          footer={`${occupiedRooms} occupied · ${vacantRooms} vacant`}
-        />
-        <StatCard
-          icon={BedDouble}
-          label="Vacant Rooms"
-          value={vacantRooms}
-          delta={null}
-          footer={vacantRooms > 0 ? `${vacantRooms} ready to book` : "fully booked"}
-        />
-        <StatCard
-          icon={Wrench}
-          label="Open Tickets"
-          value={openTickets.length}
-          delta={openTickets.length === 0 ? null : -1}
-          footer={todayCount > 0 ? `${todayCount} new today` : "no new today"}
-        />
-      </div>
+      <StatCards
+        cards={[
+          {
+            label: "Tenants",
+            value: totalTenants,
+            subtext: `${totalTenants} of ${totalRooms} capacity used`,
+            trend: { delta: "+2", direction: "up", sentiment: totalTenants > totalRooms ? "negative" : "positive" },
+            progress: totalRooms > 0 ? Math.min(100, (totalTenants / totalRooms) * 100) : 0,
+            status: totalTenants > totalRooms ? "Over capacity" : "Within capacity",
+            semantic: totalTenants > totalRooms ? "danger" : "success",
+          },
+          {
+            label: "Occupancy",
+            value: `${occupancy}%`,
+            subtext: `${occupiedRooms} occupied · ${vacantRooms} vacant`,
+            trend: { delta: "+5%", direction: "up", sentiment: "positive" },
+            progress: occupancy,
+            status: "On track",
+            semantic: "success",
+          },
+          {
+            label: "Vacant Rooms",
+            value: vacantRooms,
+            subtext: vacantRooms > 0 ? `${vacantRooms} ready to book` : "fully booked",
+            trend: { delta: "Stable", direction: "flat", sentiment: "neutral" },
+            progress: totalRooms > 0 ? Math.round((vacantRooms / totalRooms) * 100) : 0,
+            status: "Revenue opportunity",
+            semantic: "warning",
+          },
+          {
+            label: "Open Tickets",
+            value: openTickets.length,
+            subtext: todayCount > 0 ? `${todayCount} new today` : "No new tickets today",
+            trend: { delta: "−1", direction: "down", sentiment: "positive" },
+            progress: null,
+            status: "Trending down",
+            semantic: "info",
+          },
+        ] satisfies StatCardData[]}
+      />
 
-      {/* Inline mini-metrics strip — extra info, very compact */}
-      <Card className="grid grid-cols-2 divide-x divide-y divide-border md:grid-cols-4 md:divide-y-0">
+      <Card className="grid grid-cols-1 divide-y divide-border sm:grid-cols-2 sm:divide-x xl:grid-cols-4 xl:divide-y-0">
         <MiniMetric
           icon={IndianRupee}
           label="Revenue MTD"
@@ -439,8 +362,7 @@ function Dashboard() {
         />
       </Card>
 
-      {/* 2-col: Recent Tenants | Tickets */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-fluid-3 lg:grid-cols-2">
         <SectionCard
           title="Recent Tenants"
           icon={Users}
@@ -563,8 +485,7 @@ function Dashboard() {
         </SectionCard>
       </div>
 
-      {/* Bottom: Activity Timeline (2/3) | Room status (1/3) */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-fluid-3 lg:grid-cols-3">
         <SectionCard
           title="Recent Activity"
           icon={Activity}

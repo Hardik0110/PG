@@ -73,7 +73,6 @@ export default function CommandPalette() {
   const listRef = useRef(null);
   const navigate = useNavigate();
 
-  // Filter results based on query
   const results = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
@@ -84,7 +83,6 @@ export default function CommandPalette() {
     );
   }, [query]);
 
-  // Group results by category
   const grouped = useMemo(() => {
     const groups = {};
     results.forEach(item => {
@@ -94,7 +92,6 @@ export default function CommandPalette() {
     return groups;
   }, [results]);
 
-  // Flat list for keyboard navigation
   const flatResults = useMemo(() => {
     const flat = [];
     Object.keys(CATEGORY_CONFIG).forEach(cat => {
@@ -105,12 +102,10 @@ export default function CommandPalette() {
     return flat;
   }, [grouped]);
 
-  // Reset selection when results change
   useEffect(() => {
     setSelectedIndex(0);
   }, [flatResults.length]);
 
-  // Open on Cmd+K / Ctrl+K
   useEffect(() => {
     function handleKeyDown(e) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -122,7 +117,6 @@ export default function CommandPalette() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Open on custom event
   useEffect(() => {
     function handleCustomOpen() {
       setOpen(true);
@@ -131,7 +125,6 @@ export default function CommandPalette() {
     return () => window.removeEventListener('open-command-palette', handleCustomOpen);
   }, []);
 
-  // Focus input when opened, reset state when closed
   useEffect(() => {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 50);
@@ -141,7 +134,6 @@ export default function CommandPalette() {
     }
   }, [open]);
 
-  // Scroll selected item into view
   useEffect(() => {
     if (!listRef.current) return;
     const items = listRef.current.querySelectorAll('[data-result-item]');
@@ -187,13 +179,12 @@ export default function CommandPalette() {
           animate="animate"
           exit="exit"
         >
-          {/* Backdrop */}
+
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
 
-          {/* Palette */}
           <motion.div
             className="relative w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
             variants={commandPaletteVariants}
@@ -202,7 +193,7 @@ export default function CommandPalette() {
             exit="exit"
             onKeyDown={handleKeyDown}
           >
-            {/* Search input */}
+
             <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
               <Search className="w-5 h-5 text-gray-400 shrink-0" />
               <input
@@ -221,9 +212,8 @@ export default function CommandPalette() {
               </button>
             </div>
 
-            {/* Results area */}
             <div ref={listRef} className="max-h-[400px] overflow-y-auto">
-              {/* Empty query */}
+
               {!query.trim() && (
                 <div className="px-4 py-12 text-center">
                   <Search className="w-8 h-8 text-gray-300 mx-auto mb-3" />
@@ -233,7 +223,6 @@ export default function CommandPalette() {
                 </div>
               )}
 
-              {/* No results */}
               {query.trim() && flatResults.length === 0 && (
                 <div className="px-4 py-12 text-center">
                   <p className="text-sm text-gray-500">
@@ -242,7 +231,6 @@ export default function CommandPalette() {
                 </div>
               )}
 
-              {/* Grouped results */}
               {Object.keys(CATEGORY_CONFIG).map(cat => {
                 const items = grouped[cat];
                 if (!items || items.length === 0) return null;
@@ -301,7 +289,6 @@ export default function CommandPalette() {
               })}
             </div>
 
-            {/* Footer hint */}
             {query.trim() && flatResults.length > 0 && (
               <div className="flex items-center justify-between px-4 py-2 border-t border-gray-100 bg-gray-50/80">
                 <div className="flex items-center gap-3 text-[11px] text-gray-400">

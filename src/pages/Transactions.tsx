@@ -10,6 +10,8 @@ import RecordPaymentModal from '../components/RecordPaymentModal';
 import AddExpenseModal from '../components/AddExpenseModal';
 import Select from '../components/ui/Select';
 import Loader from '../components/ui/Loader';
+import Pagination from '../components/ui/Pagination';
+import { useTablePageSize } from '../hooks/use-table-page-size';
 
 const MOCK_TRANSACTIONS = [
   { id: "tx-001", tenantName: "Rahul Sharma", room: "101", pgName: "Sunrise PG", amount: 8000, type: "rent", date: "2026-04-25T10:00:00Z", status: "paid", method: "UPI" },
@@ -58,6 +60,9 @@ function Transactions() {
   const [hoveredRow, setHoveredRow] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExpenseOpen, setIsExpenseOpen] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const [tableRef, pageSize] = useTablePageSize({ mobile: 40, tablet: 44, desktop: 48 });
 
   const monthOptions = useMemo(() => getMonthOptions(), []);
 
@@ -95,6 +100,13 @@ function Transactions() {
       return true;
     });
   }, [transactions, filterPg, filterType, filterMonth]);
+
+  useEffect(() => { setPage(1); }, [filterPg, filterType, filterMonth]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTx.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pageStart = (safePage - 1) * pageSize;
+  const pagedTx = filteredTx.slice(pageStart, pageStart + pageSize);
 
   const totalCollected = useMemo(
     () => filteredTx.filter(t => t.status === 'paid').reduce((sum, t) => sum + t.amount, 0),
@@ -150,30 +162,30 @@ function Transactions() {
       exit="exit"
       className="h-full flex flex-col"
     >
-      {/* Top Toolbar */}
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-[#111827]">Transactions</h1>
-        <div className="flex items-center gap-3">
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold text-[#111827]">Transactions</h1>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <button
             onClick={handleExportCSV}
-            className="h-10 px-4 border border-[#E0D3BD] rounded-lg text-sm font-medium text-[#5C4632]
-                       bg-white hover:bg-[#FAF7F2] inline-flex items-center gap-2 transition-colors cursor-pointer"
+            className="h-10 px-3 sm:px-4 border border-[#E0D3BD] rounded-lg text-sm font-medium text-[#5C4632]
+                       bg-white hover:bg-[#FAF7F2] inline-flex items-center gap-2 whitespace-nowrap transition-colors cursor-pointer"
           >
             <Download size={16} />
             Export CSV
           </button>
           <button
             onClick={() => setIsExpenseOpen(true)}
-            className="h-10 px-4 border border-[#E6CB9A] rounded-lg text-sm font-semibold text-[#B45309]
-                       bg-white hover:bg-[#FCF1DC] inline-flex items-center gap-2 transition-colors cursor-pointer"
+            className="h-10 px-3 sm:px-4 border border-[#E6CB9A] rounded-lg text-sm font-semibold text-[#B45309]
+                       bg-white hover:bg-[#FCF1DC] inline-flex items-center gap-2 whitespace-nowrap transition-colors cursor-pointer"
           >
             <TrendingDown size={16} />
             Add Expense
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="h-10 px-4 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
-                       inline-flex items-center gap-2 transition-colors cursor-pointer"
+            className="h-10 px-3 sm:px-4 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
+                       inline-flex items-center gap-2 whitespace-nowrap transition-colors cursor-pointer"
           >
             <Plus size={16} />
             Record Payment
@@ -181,7 +193,6 @@ function Transactions() {
         </div>
       </div>
 
-      {/* Filter Row */}
       <div className="flex items-center gap-3 mb-5 flex-wrap">
         <span className="text-sm font-medium text-[#8B7355]">Filter:</span>
 
@@ -218,61 +229,57 @@ function Transactions() {
         />
       </div>
 
-      {/* Summary Cards */}
       <motion.div
         variants={staggerContainer}
         initial="initial"
         animate="animate"
-        className="grid grid-cols-3 gap-4 mb-6"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6"
       >
-        {/* Total Collected */}
+
         <motion.div
           variants={fadeUp}
-          className="bg-white rounded-2xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] p-5 flex items-center gap-4"
+          className="bg-white rounded-2xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] p-fluid-3 flex items-center gap-fluid-3"
         >
           <div className="w-12 h-12 rounded-xl bg-[#DCEEDF] flex items-center justify-center shrink-0">
             <TrendingUp size={22} className="text-[#1C6C41]" />
           </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.15em] text-[#8B7355] font-medium mb-0.5">Total Collected</p>
-            <p className="text-xl font-bold text-[#1C6C41] font-mono leading-tight">{formatCurrency(totalCollected)}</p>
+          <div className="min-w-0">
+            <p className="text-fluid-xs uppercase tracking-[0.15em] text-[#8B7355] font-medium mb-0.5">Total Collected</p>
+            <p className="text-fluid-xl font-bold text-[#1C6C41] font-mono leading-tight tabular-nums">{formatCurrency(totalCollected)}</p>
           </div>
         </motion.div>
 
-        {/* Pending Dues */}
         <motion.div
           variants={fadeUp}
-          className="bg-white rounded-2xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] p-5 flex items-center gap-4"
+          className="bg-white rounded-2xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] p-fluid-3 flex items-center gap-fluid-3"
         >
           <div className="w-12 h-12 rounded-xl bg-[#FCF1DC] flex items-center justify-center shrink-0">
             <Clock size={22} className="text-[#B45309]" />
           </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.15em] text-[#8B7355] font-medium mb-0.5">
+          <div className="min-w-0">
+            <p className="text-fluid-xs uppercase tracking-[0.15em] text-[#8B7355] font-medium mb-0.5">
               Pending Dues <span className="text-[#A89580] normal-case tracking-normal">({pendingTx.length})</span>
             </p>
-            <p className="text-xl font-bold text-[#B45309] font-mono leading-tight">{formatCurrency(totalPending)}</p>
+            <p className="text-fluid-xl font-bold text-[#B45309] font-mono leading-tight tabular-nums">{formatCurrency(totalPending)}</p>
           </div>
         </motion.div>
 
-        {/* This Month */}
         <motion.div
           variants={fadeUp}
-          className="bg-white rounded-2xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] p-5 flex items-center gap-4"
+          className="bg-white rounded-2xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] p-fluid-3 flex items-center gap-fluid-3"
         >
           <div className="w-12 h-12 rounded-xl bg-[#EFE7DA] flex items-center justify-center shrink-0">
             <CalendarDays size={22} className="text-[#5C4632]" />
           </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.15em] text-[#8B7355] font-medium mb-0.5">This Month</p>
-            <p className="text-xl font-bold text-[#2B1D14] font-mono leading-tight">{formatCurrency(thisMonthTotal)}</p>
+          <div className="min-w-0">
+            <p className="text-fluid-xs uppercase tracking-[0.15em] text-[#8B7355] font-medium mb-0.5">This Month</p>
+            <p className="text-fluid-xl font-bold text-[#2B1D14] font-mono leading-tight tabular-nums">{formatCurrency(thisMonthTotal)}</p>
           </div>
         </motion.div>
       </motion.div>
 
-      {/* Table */}
-      <div className="flex-1 min-h-0 bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-auto">
+      <div ref={tableRef} className="bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
+        <div className="overflow-x-auto">
           {filteredTx.length === 0 ? (
             <div className="py-16 text-center text-[#8B7355]">
               <p className="text-base font-medium">No transactions found</p>
@@ -280,12 +287,12 @@ function Transactions() {
             </div>
           ) : (
             <table className="w-full border-collapse">
-              <thead className="sticky top-0 bg-[#1C6C41] z-[1]">
+              <thead className="bg-[#1C6C41]">
                 <tr>
                   {['Tenant', 'PG', 'Room', 'Amount', 'Date', 'Status', 'Type'].map(h => (
                     <th
                       key={h}
-                      className="text-left px-4 py-4 text-[12px] font-semibold text-white/90 uppercase tracking-[0.08em]"
+                      className="text-left px-fluid-2 py-fluid-2 text-[12px] font-semibold text-white/90 uppercase tracking-[0.08em] whitespace-nowrap"
                     >
                       {h}
                     </th>
@@ -293,7 +300,7 @@ function Transactions() {
                 </tr>
               </thead>
               <motion.tbody variants={staggerContainer} initial="initial" animate="animate">
-                {filteredTx.map((tx) => {
+                {pagedTx.map((tx) => {
                   const pgChip = PG_CHIP_COLORS[tx.pgName] || 'bg-[#EFE7DA] text-[#5C4632]';
                   const typeChip = TYPE_CHIP_COLORS[tx.type] || 'bg-[#EFE7DA] text-[#5C4632]';
                   const statusLabel = tx.status.charAt(0).toUpperCase() + tx.status.slice(1);
@@ -308,46 +315,40 @@ function Transactions() {
                       className={`border-b border-[#F3EEE5] transition-colors duration-150
                                   ${hoveredRow === tx.id ? 'bg-[#FAF7F2]' : 'bg-white'}`}
                     >
-                      {/* Tenant */}
-                      <td className="px-4 py-4">
-                        <span className="text-sm font-semibold text-[#2B1D14]">{tx.tenantName}</span>
+
+                      <td className="px-fluid-2 py-fluid-2">
+                        <span className="text-fluid-sm font-semibold text-[#2B1D14] whitespace-nowrap">{tx.tenantName}</span>
                       </td>
 
-                      {/* PG chip */}
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${pgChip}`}>
+                      <td className="px-fluid-2 py-fluid-2">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-fluid-xs font-semibold whitespace-nowrap ${pgChip}`}>
                           {tx.pgName}
                         </span>
                       </td>
 
-                      {/* Room */}
-                      <td className="px-4 py-4">
-                        <span className="font-mono text-sm font-semibold text-[#2B1D14]">{tx.room}</span>
+                      <td className="px-fluid-2 py-fluid-2">
+                        <span className="font-mono text-fluid-sm font-semibold text-[#2B1D14]">{tx.room}</span>
                       </td>
 
-                      {/* Amount */}
-                      <td className="px-4 py-4">
-                        <span className="font-mono font-bold text-sm text-[#1C6C41]">{formatCurrency(tx.amount)}</span>
+                      <td className="px-fluid-2 py-fluid-2">
+                        <span className="font-mono font-bold text-fluid-sm text-[#1C6C41] whitespace-nowrap">{formatCurrency(tx.amount)}</span>
                       </td>
 
-                      {/* Date */}
-                      <td className="px-4 py-4">
-                        <span className="inline-flex items-center gap-1.5 text-sm text-[#5C4632]">
+                      <td className="px-fluid-2 py-fluid-2">
+                        <span className="inline-flex items-center gap-1.5 text-fluid-sm text-[#5C4632] whitespace-nowrap">
                           <Calendar size={13} className="text-[#A89580]" />
                           {tx.date}
                         </span>
                       </td>
 
-                      {/* Status Badge */}
-                      <td className="px-4 py-4">
+                      <td className="px-fluid-2 py-fluid-2">
                         <Badge variant={badgeVariant} dot size="md">
                           {statusLabel}
                         </Badge>
                       </td>
 
-                      {/* Type chip */}
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${typeChip}`}>
+                      <td className="px-fluid-2 py-fluid-2">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-fluid-xs font-semibold capitalize whitespace-nowrap ${typeChip}`}>
                           {tx.type}
                         </span>
                       </td>
@@ -358,9 +359,16 @@ function Transactions() {
             </table>
           )}
         </div>
+        <Pagination
+          page={safePage}
+          totalPages={totalPages}
+          total={filteredTx.length}
+          pageSize={pageSize}
+          onPageChange={setPage}
+        />
       </div>
 
-      <RecordPaymentModal 
+      <RecordPaymentModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => {

@@ -24,9 +24,6 @@ import { sidebarVariants, backdropVariants } from '../lib/animations';
 
 const LS_KEY = 'pg_sidebar_collapsed';
 
-/* ------------------------------------------------------------------ */
-/*  Nav structure grouped by section                                   */
-/* ------------------------------------------------------------------ */
 const NAV_SECTIONS = [
   {
     label: 'OVERVIEW',
@@ -41,7 +38,7 @@ const NAV_SECTIONS = [
       { path: '/pgs', icon: Building, label: 'My PGs' },
       { path: '/tenants', icon: Users, label: 'Tenants' },
       { path: '/rooms', icon: Home, label: 'Rooms' },
-      // { path: '/inquiries', icon: MessageSquare, label: 'Inquiries', badgeKey: 'inquiries' },
+
       { path: '/maintenance', icon: Wrench, label: 'Maintenance', badgeKey: 'maintenance' },
       { path: '/transactions', icon: CreditCard, label: 'Transactions' },
     ],
@@ -55,9 +52,6 @@ const NAV_SECTIONS = [
   },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  Tooltip (shown in collapsed state)                                 */
-/* ------------------------------------------------------------------ */
 function Tooltip({ children, label, show }) {
   if (!show) return children;
   return (
@@ -72,9 +66,6 @@ function Tooltip({ children, label, show }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Badge pill                                                         */
-/* ------------------------------------------------------------------ */
 function Badge({ count }) {
   if (!count || count <= 0) return null;
   return (
@@ -84,9 +75,6 @@ function Badge({ count }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Main Sidebar Component                                             */
-/* ------------------------------------------------------------------ */
 function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, onToggleCollapse }) {
   const navigate = useNavigate();
 
@@ -100,27 +88,24 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
 
   const collapsed = controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
 
-  // Badge counts (stubbed)
   const [badges] = useState({
     notifications: 3,
     inquiries: 5,
     maintenance: 2,
   });
 
-  /* --- Toggle collapsed --- */
   const toggleCollapsed = useCallback(() => {
     if (onToggleCollapse) {
       onToggleCollapse();
     } else {
       setInternalCollapsed((prev) => {
         const next = !prev;
-        try { localStorage.setItem(LS_KEY, String(next)); } catch { /* noop */ }
+        try { localStorage.setItem(LS_KEY, String(next)); } catch {}
         return next;
       });
     }
   }, [onToggleCollapse]);
 
-  /* --- Logout --- */
   const handleLogout = useCallback(() => {
     if (!window.confirm('Log out of your account?')) return;
     clearToken();
@@ -128,9 +113,6 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
     navigate('/auth');
   }, [navigate]);
 
-  /* ---------------------------------------------------------------- */
-  /*  Render helpers                                                   */
-  /* ---------------------------------------------------------------- */
   const renderNavItem = (item) => {
     const Icon = item.icon;
     const badgeCount = item.badgeKey ? badges[item.badgeKey] : 0;
@@ -154,7 +136,7 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
         >
           {({ isActive }) => (
             <>
-              {/* Active left bar */}
+
               {isActive && !collapsed && (
                 <motion.div
                   layoutId="sidebar-active-indicator"
@@ -169,7 +151,7 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
                   <Badge count={badgeCount} />
                 </>
               )}
-              {/* Badge dot in collapsed mode */}
+
               {collapsed && badgeCount > 0 && (
                 <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#1C6C41] ring-2 ring-white" />
               )}
@@ -199,12 +181,9 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
     </div>
   );
 
-  /* ---------------------------------------------------------------- */
-  /*  Sidebar content (shared between desktop and mobile)              */
-  /* ---------------------------------------------------------------- */
   const sidebarContent = (
     <>
-      {/* Logo + Collapse toggle */}
+
       <div className={`shrink-0 flex items-center ${collapsed ? 'px-2 py-4 justify-center' : 'px-4 py-4 justify-between'}`}>
         {collapsed ? (
           <button
@@ -228,20 +207,16 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
         )}
       </div>
 
-      {/* Divider */}
       <div className="mx-3 border-t border-gray-200" />
 
-      {/* Nav sections */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4">
         {NAV_SECTIONS.map(renderSection)}
       </nav>
 
-      {/* Divider */}
       <div className="mx-3 border-t border-gray-200" />
 
-      {/* Bottom section */}
       <div className={`shrink-0 ${collapsed ? 'px-2 py-3' : 'px-3 py-3'}`}>
-        {/* User row */}
+
         <div
           className={`flex items-center rounded-xl ${
             collapsed ? 'flex-col gap-2 px-1 py-2' : 'gap-3 px-3 py-2 transition-colors hover:bg-gray-50'
@@ -274,9 +249,6 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
     </>
   );
 
-  /* ---------------------------------------------------------------- */
-  /*  Desktop sidebar                                                  */
-  /* ---------------------------------------------------------------- */
   const desktopSidebar = (
     <motion.nav
       className="fixed left-0 top-0 bottom-0 z-[100] hidden flex-col bg-white border-r border-gray-200 md:flex"
@@ -287,18 +259,14 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
     >
       {sidebarContent}
 
-
     </motion.nav>
   );
 
-  /* ---------------------------------------------------------------- */
-  /*  Mobile drawer                                                    */
-  /* ---------------------------------------------------------------- */
   const mobileDrawer = (
     <AnimatePresence>
       {mobileOpen && (
         <>
-          {/* Backdrop */}
+
           <motion.div
             key="sidebar-backdrop"
             variants={backdropVariants}
@@ -306,18 +274,17 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
             animate="animate"
             exit="exit"
             onClick={onMobileClose}
-            className="fixed inset-0 z-[99] bg-black/30 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-[115] bg-black/30 backdrop-blur-sm md:hidden"
           />
 
-          {/* Drawer panel */}
           <motion.nav
             key="sidebar-mobile"
             initial={{ x: '-100%' }}
             animate={{ x: 0, transition: { type: 'spring', damping: 30, stiffness: 300 } }}
             exit={{ x: '-100%', transition: { duration: 0.2 } }}
-            className="fixed left-0 top-0 bottom-0 z-[100] flex w-[280px] flex-col bg-white md:hidden"
+            className="fixed left-0 top-0 bottom-0 z-[120] flex w-[280px] max-w-[85vw] flex-col bg-white md:hidden"
           >
-            {/* Mobile close button */}
+
             <div className="flex items-center justify-between px-4 pt-4 pb-2">
               <img src="/logo.png" alt="TrustCircle" className="h-[22px]" />
               <button
@@ -331,7 +298,6 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
 
             <div className="mx-3 border-t border-gray-200" />
 
-            {/* Nav */}
             <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
               {NAV_SECTIONS.map((section, idx) => (
                 <div key={section.label} className={idx > 0 ? 'mt-5' : ''}>
@@ -376,7 +342,6 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
 
             <div className="mx-3 border-t border-gray-200" />
 
-            {/* Bottom */}
             <div className="shrink-0 px-3 py-3">
               <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-gray-50">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#1C6C41] to-[#3DBF7E] text-xs font-bold text-white">

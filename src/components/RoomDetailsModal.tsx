@@ -45,10 +45,10 @@ export default function RoomDetailsModal({ open, onClose, room, tenants = [] }) 
             exit={{ scale: 0.95, opacity: 0 }}
             className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
           >
-            {/* Header */}
+
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB] bg-[#F9FAFB]">
               <div>
-                <h2 className="text-lg font-bold text-[#111827] flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-[#111827] flex items-center gap-2">
                   <Users size={20} className="text-[#1C6C41]" />
                   Room {room.roomNumber}
                 </h2>
@@ -62,9 +62,8 @@ export default function RoomDetailsModal({ open, onClose, room, tenants = [] }) 
               </button>
             </div>
 
-            {/* Body */}
             <div className="flex-1 overflow-y-auto">
-              {/* Quick info */}
+
               <div className="grid grid-cols-3 gap-3 px-6 py-4 border-b border-[#E5E7EB] bg-white">
                 <div>
                   <p className="text-[11px] uppercase tracking-wide text-[#9CA3AF] font-medium">Type</p>
@@ -82,7 +81,6 @@ export default function RoomDetailsModal({ open, onClose, room, tenants = [] }) 
                 </div>
               </div>
 
-              {/* Tenants list */}
               <div className="px-6 py-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-[#374151]">
@@ -105,12 +103,11 @@ export default function RoomDetailsModal({ open, onClose, room, tenants = [] }) 
                         key={t.id}
                         className="flex items-start gap-3 p-3 rounded-lg border border-[#E8E9ED] hover:border-[#1C6C41]/30 hover:bg-[#F9FAFB] transition-colors"
                       >
-                        {/* Avatar */}
+
                         <div className="w-10 h-10 rounded-full bg-[#1C6C41]/10 text-[#1C6C41] font-semibold text-sm flex items-center justify-center shrink-0">
                           {getInitials(t.name)}
                         </div>
 
-                        {/* Details */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <p className="font-semibold text-sm text-[#1F2937] truncate">{t.name}</p>
@@ -154,7 +151,6 @@ export default function RoomDetailsModal({ open, onClose, room, tenants = [] }) 
               </div>
             </div>
 
-            {/* Footer */}
             <div className="flex justify-end px-6 py-4 border-t border-[#E5E7EB] bg-[#F9FAFB]">
               <button
                 type="button"

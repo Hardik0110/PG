@@ -10,7 +10,6 @@ function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)
   )
 }
 
-/* Legacy helpers kept so older pages keep rendering */
 export function SkeletonText({ width = "100%", height = 16, lines = 1 }: { width?: string | number; height?: string | number; lines?: number }) {
   return (
     <div className="space-y-2">

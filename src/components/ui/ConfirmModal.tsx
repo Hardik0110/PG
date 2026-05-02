@@ -50,7 +50,7 @@ export default function ConfirmModal({
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center">
-          {/* Backdrop */}
+
           <motion.div
             className="fixed inset-0 bg-black/40 backdrop-blur-[2px]"
             variants={backdropVariants}
@@ -60,7 +60,6 @@ export default function ConfirmModal({
             onClick={onClose}
           />
 
-          {/* Modal */}
           <motion.div
             className="relative z-10 bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6"
             variants={modalVariants}
@@ -68,18 +67,15 @@ export default function ConfirmModal({
             animate="animate"
             exit="exit"
           >
-            {/* Icon */}
+
             <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-4 ${iconStyles[variant] || iconStyles.danger}`}>
               <AlertTriangle size={20} />
             </div>
 
-            {/* Title */}
             <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
 
-            {/* Message */}
             <p className="text-sm text-gray-600 mb-6">{message}</p>
 
-            {/* Actions */}
             <div className="flex items-center justify-end gap-3">
               <button
                 ref={cancelRef}

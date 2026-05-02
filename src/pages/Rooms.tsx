@@ -31,7 +31,7 @@ function RoomCard({ room, formatCurrency, onBook, onView, tenantCount }) {
       className="relative overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_-12px_rgba(60,30,15,0.25)] border border-[#E8DFD2] flex flex-col"
     >
       <motion.div variants={cardHover} className="flex flex-col flex-1">
-        {/* Banner */}
+
         <div className={`relative h-20 ${bannerColor} px-5 py-3`}>
           <div className={`relative opacity-75 ${accentText}`}>
             <span className="text-[10px] font-semibold tracking-[0.2em] uppercase">
@@ -42,7 +42,6 @@ function RoomCard({ room, formatCurrency, onBook, onView, tenantCount }) {
             {isVacant ? 'VACANT' : 'ROOM FULL'}
           </h2>
 
-          {/* Occupancy badge — vertically centered inside banner */}
           <div
             className={`absolute top-1/2 -translate-y-1/2 right-5 h-14 w-14 rounded-full bg-white ring-4 ${badgeRing} shadow-md flex flex-col items-center justify-center`}
           >
@@ -53,7 +52,6 @@ function RoomCard({ room, formatCurrency, onBook, onView, tenantCount }) {
           </div>
         </div>
 
-        {/* Body */}
         <div className="px-5 py-5 flex flex-col flex-1">
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
@@ -74,7 +72,6 @@ function RoomCard({ room, formatCurrency, onBook, onView, tenantCount }) {
             </div>
           </div>
 
-          {/* Amenities */}
           {room.amenities.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-1.5">
               {room.amenities.slice(0, maxAmenities).map((a) => (
@@ -95,7 +92,6 @@ function RoomCard({ room, formatCurrency, onBook, onView, tenantCount }) {
 
           <div className="flex-1" />
 
-          {/* CTA */}
           {isVacant ? (
             <button
               onClick={() => onBook(room)}
@@ -204,7 +200,6 @@ function Rooms() {
     [rooms, filterPg, filterStatus],
   );
 
-  /** Group rooms by PG when no PG filter is active */
   const groupedRooms = useMemo(() => {
     if (filterPg !== 'all') return null;
 
@@ -251,16 +246,15 @@ function Rooms() {
     >
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        {/* Left: title + count */}
+
         <div className="flex items-center gap-2">
           <Home size={22} className="text-[#1C6C41] shrink-0" />
-          <h1 className="text-2xl font-bold text-[#1F2937]">Rooms</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#1F2937]">Rooms</h1>
           <span className="text-sm text-[#9CA3AF] ml-1">
             ({filteredRooms.length} total)
           </span>
         </div>
 
-        {/* Right: filters + add button */}
         <div className="flex items-center gap-2 flex-wrap">
           <Select
             value={filterPg}
@@ -289,13 +283,12 @@ function Rooms() {
         </div>
       </div>
 
-
       {filteredRooms.length === 0 ? (
         <div className="flex-1 flex items-center justify-center text-[#9CA3AF] text-sm">
           No rooms found matching the selected filters.
         </div>
       ) : groupedRooms ? (
-        /* Grouped by PG */
+
         <div className="flex flex-col gap-8">
           {groupedRooms.map((group) => (
             <section key={group.pgName}>
@@ -328,7 +321,7 @@ function Rooms() {
           ))}
         </div>
       ) : (
-        /* Flat grid (PG filter active) */
+
         <motion.div
           variants={staggerContainer}
           initial="initial"

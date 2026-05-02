@@ -1,18 +1,12 @@
 import React from 'react';
 
-/**
- * Custom Spinner component with a "bar" style design as requested.
- * @param {number} size - Width and height in pixels.
- * @param {string} color - Hex or CSS color for the bars.
- * @param {string} className - Optional Tailwind or CSS classes.
- */
 const Loader = ({ size = 32, color = '#1C6C41', className = '' }) => {
   return (
     <div className={`inline-flex items-center justify-center ${className}`}>
-      <svg 
-        width={size} 
-        height={size} 
-        viewBox="0 0 24 24" 
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
       >
         <style>{`

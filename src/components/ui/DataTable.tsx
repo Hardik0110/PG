@@ -16,7 +16,6 @@ export default function DataTable({
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
 
-  // Filter data by search term across all string/number fields
   const filtered = useMemo(() => {
     if (!search.trim()) return data;
     const q = search.toLowerCase();
@@ -28,7 +27,6 @@ export default function DataTable({
     );
   }, [data, search, columns]);
 
-  // Sort filtered data
   const sorted = useMemo(() => {
     if (!sortKey) return filtered;
     const col = columns.find((c) => c.key === sortKey);
@@ -44,7 +42,6 @@ export default function DataTable({
     });
   }, [filtered, sortKey, sortDir, columns]);
 
-  // Pagination
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
   const safePage = Math.min(page, totalPages);
   const startIdx = (safePage - 1) * pageSize;
@@ -52,7 +49,6 @@ export default function DataTable({
   const showingFrom = sorted.length === 0 ? 0 : startIdx + 1;
   const showingTo = Math.min(startIdx + pageSize, sorted.length);
 
-  // Reset page when search changes
   React.useEffect(() => {
     setPage(1);
   }, [search, pageSize]);
@@ -68,7 +64,6 @@ export default function DataTable({
     }
   }
 
-  // -- Loading skeleton --
   if (loading) {
     return (
       <div className="w-full overflow-hidden rounded-lg border border-[#E5E7EB]">
@@ -105,7 +100,6 @@ export default function DataTable({
     );
   }
 
-  // -- Empty state --
   if (!data.length || !sorted.length) {
     return (
       <div className="w-full overflow-hidden rounded-lg border border-[#E5E7EB]">
@@ -149,7 +143,6 @@ export default function DataTable({
     );
   }
 
-  // -- Main table --
   return (
     <div className="w-full overflow-hidden rounded-lg border border-[#E5E7EB]">
       {searchable && (
@@ -216,7 +209,6 @@ export default function DataTable({
         </table>
       </div>
 
-      {/* Pagination bar */}
       <div className="flex items-center justify-between px-4 py-3 border-t border-[#E5E7EB] bg-white text-sm">
         <div className="flex items-center gap-2 text-[#6B7280]">
           <span>Rows per page:</span>

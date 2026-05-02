@@ -50,7 +50,7 @@ export default function AddExpenseModal({ open, onClose, onSubmit }) {
             className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl z-[60]"
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB] bg-[#FCF1DC] rounded-t-xl">
-              <h2 className="text-lg font-bold text-[#7A3D33] flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-[#7A3D33] flex items-center gap-2">
                 <TrendingDown size={20} className="text-[#B45309]" />
                 Add Expense
               </h2>

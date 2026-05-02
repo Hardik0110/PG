@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
+import Header from './Header';
 
 function MainLayout({ children }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -17,11 +18,9 @@ function MainLayout({ children }) {
     } catch {}
   }, [sidebarCollapsed]);
 
-  const sidebarWidth = sidebarCollapsed ? 64 : 240;
-
   return (
-    <div className="h-screen flex overflow-hidden bg-[#F8F5F0]">
-      {/* Sidebar — full height */}
+    <div className="h-screen h-svh flex overflow-hidden bg-[#F8F5F0]">
+
       <Sidebar
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
@@ -29,15 +28,22 @@ function MainLayout({ children }) {
         onToggleCollapse={() => setSidebarCollapsed(c => !c)}
       />
 
-      {/* Content — offset from sidebar */}
-      <main
-        className="flex-1 flex flex-col overflow-hidden px-6 pt-6 pb-3 md:px-10 md:pt-10 md:pb-3"
-        style={{ marginLeft: `${sidebarWidth}px`, transition: 'margin-left 0.3s ease' }}
+      <div
+        className={`flex-1 flex flex-col overflow-hidden ml-0 ${
+          sidebarCollapsed ? 'md:ml-[64px]' : 'md:ml-[240px]'
+        } transition-[margin-left] duration-300`}
       >
-        <div className="max-w-[1280px] mx-auto w-full h-full min-h-0">
-          {children}
+
+        <div className="md:hidden">
+          <Header onMenuClick={() => setMobileSidebarOpen(true)} />
         </div>
-      </main>
+
+        <main className="flex-1 overflow-y-auto">
+          <div className="px-4 pt-4 pb-3 md:px-10 md:pt-10 md:pb-3 max-w-[1280px] mx-auto w-full">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

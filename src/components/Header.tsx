@@ -75,10 +75,9 @@ function Header({ onMenuClick }) {
   }
 
   return (
-    <header className="h-[72px] min-h-[72px] shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-6 md:px-10 relative z-[110]">
+    <header className="h-[60px] md:h-[72px] min-h-[60px] md:min-h-[72px] shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-3 md:px-10 relative z-[110]">
 
-      {/* Left: Hamburger + Breadcrumbs */}
-      <div className="flex items-center gap-6 min-w-0">
+      <div className="flex items-center gap-2 md:gap-6 min-w-0">
         <button
           onClick={onMenuClick}
           className="md:hidden flex items-center justify-center p-2 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"
@@ -88,7 +87,6 @@ function Header({ onMenuClick }) {
 
         <span className="md:hidden text-[15px] font-semibold text-gray-800 select-none">TrustCircle</span>
 
-        {/* Desktop breadcrumbs */}
         <div className="hidden md:flex items-center gap-6">
           <nav className="flex items-center gap-2 text-[15px]" aria-label="Breadcrumb">
             {breadcrumbs.map((crumb, idx) => {
@@ -106,9 +104,8 @@ function Header({ onMenuClick }) {
         </div>
       </div>
 
-      {/* Right: Search + Bell + Avatar */}
       <div className="flex items-center gap-3">
-        {/* Search bar */}
+
         <button
           onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
           className="hidden md:flex items-center gap-2.5 rounded-[10px] border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm text-gray-400 hover:border-gray-300 hover:bg-gray-100 transition-colors cursor-pointer min-w-[240px]"
@@ -120,7 +117,6 @@ function Header({ onMenuClick }) {
           </kbd>
         </button>
 
-        {/* Search icon mobile */}
         <button
           onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
           className="md:hidden flex items-center justify-center p-2 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"
@@ -128,7 +124,6 @@ function Header({ onMenuClick }) {
           <Search size={20} />
         </button>
 
-        {/* Notification bell */}
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => { setShowNotifications(p => !p); setShowUserMenu(false); }}
@@ -147,7 +142,7 @@ function Header({ onMenuClick }) {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="absolute top-full right-0 mt-2 w-[320px] bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden z-50"
+                className="absolute top-full right-0 mt-2 w-[320px] max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden z-50"
               >
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                   <span className="text-sm font-semibold text-gray-800">Notifications</span>
@@ -176,7 +171,6 @@ function Header({ onMenuClick }) {
           </AnimatePresence>
         </div>
 
-        {/* User avatar */}
         <div className="relative" ref={userRef}>
           <button
             onClick={() => { setShowUserMenu(p => !p); setShowNotifications(false); }}

@@ -14,7 +14,7 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        // Legacy aliases — map old variant names to new
+
         primary: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
         danger: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
       },
@@ -37,7 +37,7 @@ interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
-  /** Legacy: icon component to render before children */
+
   icon?: React.ComponentType<{ size?: number }>
 }
 

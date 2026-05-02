@@ -24,7 +24,7 @@ function SettingsPage() {
         if (!mounted) return;
         setSettings((prev) => ({
           ...prev,
-          // Keep app settings local when backend does not expose settings endpoints.
+
           themeColor: data.themeColor || prev.themeColor
         }));
       } catch {
@@ -86,7 +86,7 @@ function SettingsPage() {
       )}
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* Notifications */}
+
         <div style={{
           background: 'var(--color-card)',
           borderRadius: 'var(--radius-lg)',
@@ -163,7 +163,6 @@ function SettingsPage() {
           </div>
         </div>
 
-        {/* Security */}
         <div style={{
           background: 'var(--color-card)',
           borderRadius: 'var(--radius-lg)',

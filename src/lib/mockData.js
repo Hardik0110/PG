@@ -25,7 +25,7 @@ export const MOCK_TENANTS = [
   { id: "t-006", name: "Neha Gupta", email: "neha@test.com", phone_number: "+91 9876543006", pg_id: "pg-002", room_number: "203", rent: 8000, move_in_date: "2026-03-10" },
   { id: "t-007", name: "Arjun Mehta", email: "arjun@test.com", phone_number: "+91 9876543007", pg_id: "pg-001", room_number: "104", rent: 8000, move_in_date: "2026-04-01" },
   { id: "t-008", name: "Kavya Reddy", email: "kavya@test.com", phone_number: "+91 9876543008", pg_id: "pg-001", room_number: "105", rent: 8500, move_in_date: "2026-04-05" },
-  // Roommates in shared/double rooms
+
   { id: "t-009", name: "Rohan Das", email: "rohan@test.com", phone_number: "+91 9876543009", pg_id: "pg-001", room_number: "103", rent: 7500, move_in_date: "2026-03-15" },
   { id: "t-010", name: "Karan Joshi", email: "karan@test.com", phone_number: "+91 9876543010", pg_id: "pg-001", room_number: "103", rent: 7500, move_in_date: "2026-04-10" },
   { id: "t-011", name: "Aditya Verma", email: "aditya@test.com", phone_number: "+91 9876543011", pg_id: "pg-001", room_number: "105", rent: 8500, move_in_date: "2026-04-12" },

@@ -68,7 +68,7 @@ function AddPG() {
         navigate('/dashboard');
       }, 1500);
     } catch {
-      // Keep visual flow intact while still allowing offline/demo usage.
+
       setShowSuccess(true);
       setTimeout(() => {
         navigate('/dashboard');
@@ -104,7 +104,6 @@ function AddPG() {
         </div>
       )}
 
-      {/* Header */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -136,7 +135,6 @@ function AddPG() {
         </h1>
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} style={{
         background: 'var(--color-card)',
         borderRadius: 'var(--radius-xl)',
@@ -144,7 +142,7 @@ function AddPG() {
         boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
         border: '1px solid var(--color-border)'
       }}>
-        {/* Basic Info Section */}
+
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{
             fontSize: '16px',
@@ -224,7 +222,6 @@ function AddPG() {
           </div>
         </div>
 
-        {/* Location Section */}
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{
             fontSize: '16px',
@@ -359,7 +356,6 @@ function AddPG() {
           </div>
         </div>
 
-        {/* Description */}
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{
             fontSize: '16px',
@@ -392,7 +388,6 @@ function AddPG() {
           />
         </div>
 
-        {/* Amenities */}
         <div style={{ marginBottom: '32px' }}>
           <h2 style={{
             fontSize: '16px',
@@ -440,7 +435,6 @@ function AddPG() {
           </div>
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={submitting}

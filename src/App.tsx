@@ -5,7 +5,7 @@ import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import AddPG from './pages/AddPG';
 import EditPG from './pages/EditPG';
-// import Inquiries from './pages/Inquiries';
+
 import Maintenance from './pages/Maintenance';
 import Tenants from './pages/Tenants';
 import Rooms from './pages/Rooms';
@@ -76,16 +76,7 @@ function AppRoutes() {
             </MainLayout>
           }
         />
-        {/* <Route
-          path="/inquiries"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <Inquiries />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        /> */}
+
         <Route
           path="/maintenance"
           element={

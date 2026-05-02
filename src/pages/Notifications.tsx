@@ -50,13 +50,12 @@ function Notifications() {
       exit="exit"
       className="max-w-[700px] mx-auto h-full flex flex-col overflow-y-auto pr-1"
     >
-      {/* Header */}
+
       <div className="flex items-center gap-2 mb-8">
         <Bell size={24} className="text-[#1C6C41]" />
-        <h1 className="text-2xl font-bold text-[#1F2937]">Notifications</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-[#1F2937]">Notifications</h1>
       </div>
 
-      {/* Notifications List */}
       <div className="flex flex-col gap-4">
         {notifications.map((notif) => (
           <div

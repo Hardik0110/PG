@@ -7,6 +7,8 @@ import Badge from '../components/ui/Badge';
 import Drawer from '../components/ui/Drawer';
 import NewTicketModal from '../components/NewTicketModal';
 import Loader from '../components/ui/Loader';
+import Pagination from '../components/ui/Pagination';
+import { useTablePageSize } from '../hooks/use-table-page-size';
 
 const CATEGORIES = ['plumbing', 'electrical', 'furniture', 'cleaning', 'other'];
 const PRIORITIES = ['high', 'medium', 'low'];
@@ -47,6 +49,9 @@ function Maintenance() {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const menuRef = useRef(null);
+  const [page, setPage] = useState(1);
+
+  const [tableRef, pageSize] = useTablePageSize(56);
 
   useEffect(() => {
     let mounted = true;
@@ -76,7 +81,6 @@ function Maintenance() {
     return () => { mounted = false; };
   }, []);
 
-  // Close overflow menu on outside click
   useEffect(() => {
     if (!openMenuId) return;
     const handler = (e) => {
@@ -102,6 +106,13 @@ function Maintenance() {
     if (filterStatus !== 'all' && ticket.status !== filterStatus) return false;
     return true;
   });
+
+  useEffect(() => { setPage(1); }, [filterCategory, filterPriority, filterStatus]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTickets.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pageStart = (safePage - 1) * pageSize;
+  const pagedTickets = filteredTickets.slice(pageStart, pageStart + pageSize);
 
   const menuOptions = (ticket) => {
     const options = [];
@@ -131,10 +142,10 @@ function Maintenance() {
       animate="animate"
       exit="exit"
     >
-      {/* Top Toolbar - Title + New Ticket */}
+
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-[#111827]">Maintenance Tickets</h1>
-        <button 
+        <h1 className="text-xl sm:text-2xl font-bold text-[#111827]">Maintenance Tickets</h1>
+        <button
           onClick={() => setIsModalOpen(true)}
           className="inline-flex items-center gap-2 px-4 py-2 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
         >
@@ -143,9 +154,8 @@ function Maintenance() {
         </button>
       </div>
 
-      {/* Filters Row */}
       <div className="flex items-center gap-3 mb-5 flex-wrap">
-        {/* Category filter */}
+
         <div className="relative">
           <select
             value={filterCategory}
@@ -160,7 +170,6 @@ function Maintenance() {
           <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
         </div>
 
-        {/* Priority filter */}
         <div className="relative">
           <select
             value={filterPriority}
@@ -175,7 +184,6 @@ function Maintenance() {
           <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
         </div>
 
-        {/* Status filter */}
         <div className="relative">
           <select
             value={filterStatus}
@@ -190,25 +198,23 @@ function Maintenance() {
           <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
         </div>
 
-        {/* Ticket count */}
         <span className="ml-auto text-sm text-[#6B7280]">
           {filteredTickets.length} ticket{filteredTickets.length !== 1 ? 's' : ''}
         </span>
       </div>
 
-      {/* Table Card */}
-      <div className="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-auto">
+      <div ref={tableRef} className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col">
+        <div className="overflow-x-auto">
           {filteredTickets.length === 0 ? (
             <div className="py-16 text-center text-[#6B7280]">No tickets found</div>
           ) : (
             <table className="w-full border-collapse">
-              <thead className="sticky top-0 bg-[#1C6C41] z-10">
+              <thead className="bg-[#1C6C41]">
                 <tr>
                   {['Title', 'Category', 'Priority', 'Status', 'Created', 'Action'].map((header) => (
                     <th
                       key={header}
-                      className={`text-left px-6 py-4 text-[12px] font-semibold text-white/90 uppercase tracking-[0.08em] ${header === 'Action' ? 'w-16 text-center' : ''}`}
+                      className={`text-left px-fluid-3 py-fluid-2 text-[12px] font-semibold text-white/90 uppercase tracking-[0.08em] whitespace-nowrap ${header === 'Action' ? 'w-16 text-center' : ''}`}
                     >
                       {header}
                     </th>
@@ -216,7 +222,7 @@ function Maintenance() {
                 </tr>
               </thead>
               <motion.tbody variants={staggerContainer} initial="initial" animate="animate">
-                {filteredTickets.map((ticket) => {
+                {pagedTickets.map((ticket) => {
                   const catColor = CATEGORY_COLORS[ticket.category] || CATEGORY_COLORS.other;
                   const priorityDot = PRIORITY_DOTS[ticket.priority] || PRIORITY_DOTS.medium;
                   const statusBadge = STATUS_BADGE[ticket.status] || STATUS_BADGE.open;
@@ -228,24 +234,22 @@ function Maintenance() {
                       className="h-14 border-b border-[#F3F4F6] hover:bg-[#F9FAFB] cursor-pointer transition-colors"
                       onClick={() => setSelectedTicket(ticket)}
                     >
-                      {/* Title (no description) */}
-                      <td className="px-6 py-4">
-                        <span className="text-sm font-medium text-[#111827]">{ticket.title}</span>
+
+                      <td className="px-fluid-3 py-fluid-2">
+                        <span className="text-fluid-sm font-medium text-[#111827]">{ticket.title}</span>
                       </td>
 
-                      {/* Category chip */}
-                      <td className="px-6 py-4">
+                      <td className="px-fluid-3 py-fluid-2">
                         <span
-                          className="inline-block px-2 py-0.5 rounded text-[11px] font-medium"
+                          className="inline-block px-2 py-0.5 rounded text-fluid-xs font-medium whitespace-nowrap"
                           style={{ backgroundColor: catColor.bg, color: catColor.text }}
                         >
                           {capitalize(ticket.category)}
                         </span>
                       </td>
 
-                      {/* Priority dot + text */}
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center gap-1.5 text-sm text-[#374151]">
+                      <td className="px-fluid-3 py-fluid-2">
+                        <span className="inline-flex items-center gap-1.5 text-fluid-sm text-[#374151] whitespace-nowrap">
                           <span
                             className="w-2 h-2 rounded-full shrink-0"
                             style={{ backgroundColor: priorityDot }}
@@ -254,16 +258,13 @@ function Maintenance() {
                         </span>
                       </td>
 
-                      {/* Status badge */}
-                      <td className="px-6 py-4">
+                      <td className="px-fluid-3 py-fluid-2">
                         <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
                       </td>
 
-                      {/* Created */}
-                      <td className="px-6 py-4 text-sm text-[#6B7280]">{ticket.createdAt}</td>
+                      <td className="px-fluid-3 py-fluid-2 text-fluid-sm text-[#6B7280] whitespace-nowrap">{ticket.createdAt}</td>
 
-                      {/* Overflow menu */}
-                      <td className="px-6 py-4 text-center relative">
+                      <td className="px-fluid-3 py-fluid-2 text-center relative">
                         <button
                           className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] transition-colors cursor-pointer"
                           onClick={(e) => {
@@ -306,9 +307,15 @@ function Maintenance() {
             </table>
           )}
         </div>
+        <Pagination
+          page={safePage}
+          totalPages={totalPages}
+          total={filteredTickets.length}
+          pageSize={pageSize}
+          onPageChange={setPage}
+        />
       </div>
 
-      {/* Maintenance Detail Drawer */}
       <Drawer
         open={!!selectedTicket}
         onClose={() => setSelectedTicket(null)}
@@ -321,7 +328,7 @@ function Maintenance() {
 
           return (
             <div className="flex flex-col gap-6">
-              {/* Description */}
+
               <div>
                 <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-2">Description</h3>
                 <div className="bg-[#F9FAFB] rounded-lg p-4 text-sm text-[#374151] leading-relaxed">
@@ -329,9 +336,8 @@ function Maintenance() {
                 </div>
               </div>
 
-              {/* Meta info grid */}
               <div className="grid grid-cols-2 gap-4">
-                {/* Category */}
+
                 <div>
                   <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1.5">Category</h3>
                   <span
@@ -342,7 +348,6 @@ function Maintenance() {
                   </span>
                 </div>
 
-                {/* Priority */}
                 <div>
                   <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1.5">Priority</h3>
                   <span className="inline-flex items-center gap-1.5 text-sm text-[#374151]">
@@ -354,13 +359,11 @@ function Maintenance() {
                   </span>
                 </div>
 
-                {/* Status */}
                 <div>
                   <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1.5">Status</h3>
                   <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
                 </div>
 
-                {/* Created */}
                 <div>
                   <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1.5">Created</h3>
                   <span className="inline-flex items-center gap-1.5 text-sm text-[#374151]">
@@ -370,7 +373,6 @@ function Maintenance() {
                 </div>
               </div>
 
-              {/* Status change buttons */}
               <div className="pt-4 border-t border-[#E5E7EB]">
                 <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-3">Update Status</h3>
                 <div className="flex flex-wrap gap-2">
@@ -408,8 +410,8 @@ function Maintenance() {
         })()}
       </Drawer>
 
-      <NewTicketModal 
-        open={isModalOpen} 
+      <NewTicketModal
+        open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => {
 

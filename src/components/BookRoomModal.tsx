@@ -29,7 +29,7 @@ export default function BookRoomModal({ open, onClose, roomLabel, onSubmit }) {
             onClick={onClose}
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
           />
-          
+
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -37,7 +37,7 @@ export default function BookRoomModal({ open, onClose, roomLabel, onSubmit }) {
             className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden z-10"
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB] bg-[#F9FAFB]">
-              <h2 className="text-lg font-bold text-[#111827] flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-[#111827] flex items-center gap-2">
                 <Key size={20} className="text-[#1C6C41]" />
                 Book Room {roomLabel}
               </h2>

@@ -31,7 +31,7 @@ export default function AddTenantDrawer({ open, onClose, onSubmit }) {
     }
     onSubmit(formData);
     onClose();
-    setTimeout(() => setStep(1), 300); // Reset after close
+    setTimeout(() => setStep(1), 300);
   };
 
   const renderStep = () => {
@@ -134,7 +134,7 @@ export default function AddTenantDrawer({ open, onClose, onSubmit }) {
               <label className="block text-sm font-medium text-[#374151] mb-1">College / Company Name</label>
               <input required type="text" placeholder="e.g., Christ University or TCS" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.workplace} onChange={(e) => setFormData({ ...formData, workplace: e.target.value })} />
             </div>
-            
+
             <div className="p-4 bg-[#ECFDF3] border border-[#A8E6C3] rounded-lg mt-4">
               <h4 className="text-sm font-semibold text-[#1C6C41] mb-2">Ready to submit!</h4>
               <p className="text-xs text-[#064E3B]">The tenant profile will be created. You can book a room for them from the Rooms page next.</p>
@@ -154,7 +154,7 @@ export default function AddTenantDrawer({ open, onClose, onSubmit }) {
           onClick={onClose}
           className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         />
-        
+
         <motion.div
           initial={{ x: '100%' }}
           animate={{ x: 0 }}
@@ -163,7 +163,7 @@ export default function AddTenantDrawer({ open, onClose, onSubmit }) {
           className="relative w-full max-w-md h-full bg-white shadow-2xl flex flex-col z-10"
         >
           <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB] bg-white shrink-0">
-            <h2 className="text-lg font-bold text-[#111827] flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-bold text-[#111827] flex items-center gap-2">
               <UserPlus size={20} className="text-[#1C6C41]" />
               Add Tenant Profile
             </h2>
@@ -172,7 +172,6 @@ export default function AddTenantDrawer({ open, onClose, onSubmit }) {
             </button>
           </div>
 
-          {/* Stepper */}
           <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#F9FAFB] shrink-0">
             <div className="flex items-center justify-between">
               {[1, 2, 3, 4].map((i) => (
@@ -188,7 +187,7 @@ export default function AddTenantDrawer({ open, onClose, onSubmit }) {
                   </span>
                 </div>
               ))}
-              {/* Lines */}
+
               <div className="absolute left-10 right-10 top-8 h-[2px] bg-[#E5E7EB] -z-10" />
             </div>
           </div>

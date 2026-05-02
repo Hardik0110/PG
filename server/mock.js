@@ -1,12 +1,10 @@
-// Mock backend server for PG Manager
-// Run with: node server/mock.js
+
 
 import http from 'http';
 
 const PORT = 3001;
 const ADMIN_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Nzc5NzY5MDEsInN1YiI6IjFmNWQ0NDFjLWZlMzAtNGNhZi1hZmVlLWIzODI5NWM2MTYwNyJ9.1VJ_5FXUIWIWhaQfJ6gvURHtTGXZv2bo9z5IfsYqcpw';
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
 const MOCK_USER = {
   id: "1f5d441c-fe30-4caf-afee-b38295c61607",
   email: "pgowner@test.com",
@@ -79,7 +77,6 @@ const MOCK_AMENITIES = [
   { id: "am-010", name: "Balcony", category: "comfort" },
 ];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -126,11 +123,10 @@ function sendOptions(res) {
 function requireAuth(req) {
   const auth = req.headers['authorization'] || '';
   if (!auth.startsWith('Bearer ')) return false;
-  // Accept our mock token
+
   return auth.slice(7) === ADMIN_TOKEN;
 }
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
 const ROUTES = {
   'POST /api/v1/auth/login': async (req, res) => {
     await delay(80);
@@ -236,17 +232,15 @@ const ROUTES = {
 };
 
 function matchRoute(method, path) {
-  // Exact match
+
   const key = `${method} ${path}`;
   if (ROUTES[key]) return ROUTES[key];
 
-  // 404
   return null;
 }
 
-// ─── Server ───────────────────────────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
-  // CORS preflight
+
   if (req.method === 'OPTIONS') {
     sendOptions(res);
     return;
@@ -254,7 +248,6 @@ const server = http.createServer(async (req, res) => {
 
   const url = req.url.split('?')[0];
 
-  // Strip /api prefix since Vite proxy sends /api/v1/xxx
   const path = url.startsWith('/api') ? url : url;
 
   const handler = matchRoute(req.method, path);

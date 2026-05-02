@@ -121,11 +121,10 @@ function Inquiries() {
       animate="animate"
       exit="exit"
     >
-      {/* Top Toolbar */}
+
       <div className="flex items-center gap-4 mb-5 flex-wrap">
         <h1 className="text-2xl font-bold text-[#111827] mr-auto">Inquiries</h1>
 
-        {/* Search */}
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
           <input
@@ -137,7 +136,6 @@ function Inquiries() {
           />
         </div>
 
-        {/* Status filter */}
         <div className="relative">
           <select
             value={statusFilter}
@@ -152,7 +150,6 @@ function Inquiries() {
           <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
         </div>
 
-        {/* Date filter */}
         <div className="relative">
           <select
             value={dateFilter}
@@ -167,7 +164,6 @@ function Inquiries() {
         </div>
       </div>
 
-      {/* Table Card */}
       <div className="flex-1 bg-white rounded-xl shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col">
         <div className="flex-1 overflow-auto">
           {filtered.length === 0 ? (
@@ -198,7 +194,7 @@ function Inquiries() {
                       className="h-14 border-b border-[#F3F4F6] hover:bg-[#F9FAFB] cursor-pointer transition-colors"
                       onClick={() => setSelectedInquiry(inquiry)}
                     >
-                      {/* Name */}
+
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div
@@ -214,7 +210,6 @@ function Inquiries() {
                         </div>
                       </td>
 
-                      {/* Contact */}
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-0.5">
                           <span className="flex items-center gap-1.5 text-xs text-[#6B7280]">
@@ -228,7 +223,6 @@ function Inquiries() {
                         </div>
                       </td>
 
-                      {/* PG */}
                       <td className="px-6 py-4">
                         <span
                           className="inline-block px-2 py-0.5 rounded text-[11px] font-medium"
@@ -238,18 +232,15 @@ function Inquiries() {
                         </span>
                       </td>
 
-                      {/* Date */}
                       <td className="px-6 py-4">
                         <div className="text-sm text-[#111827]">{inquiry.date || <span className="text-[#9CA3AF]">&mdash;</span>}</div>
                         {inquiry.time && <div className="text-xs text-[#9CA3AF]">{inquiry.time}</div>}
                       </td>
 
-                      {/* Message */}
                       <td className="px-6 py-4 max-w-[280px]">
                         <span className="text-sm text-[#6B7280] line-clamp-1">{inquiry.message}</span>
                       </td>
 
-                      {/* Status */}
                       <td className="px-6 py-4">
                         <Badge variant={badge.variant}>{badge.label}</Badge>
                       </td>
@@ -262,7 +253,6 @@ function Inquiries() {
         </div>
       </div>
 
-      {/* Inquiry Detail Drawer */}
       <Drawer
         open={!!selectedInquiry}
         onClose={() => { setSelectedInquiry(null); setReplyText(''); }}
@@ -270,7 +260,7 @@ function Inquiries() {
       >
         {selectedInquiry && (
           <div className="flex flex-col gap-6">
-            {/* Back + Respond header */}
+
             <div className="flex items-center justify-between">
               <button
                 onClick={() => { setSelectedInquiry(null); setReplyText(''); }}
@@ -284,7 +274,6 @@ function Inquiries() {
               </Badge>
             </div>
 
-            {/* PG + Date */}
             <div className="flex items-center gap-3">
               {(() => {
                 const pgChip = getPgChipColor(selectedInquiry.pgName);
@@ -302,7 +291,6 @@ function Inquiries() {
               </span>
             </div>
 
-            {/* Message */}
             <div>
               <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-2">Message</h3>
               <div className="bg-[#F9FAFB] rounded-lg p-4 text-sm text-[#374151] leading-relaxed">
@@ -310,7 +298,6 @@ function Inquiries() {
               </div>
             </div>
 
-            {/* Contact */}
             <div>
               <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-2">Contact</h3>
               <div className="flex flex-col gap-2">
@@ -325,7 +312,6 @@ function Inquiries() {
               </div>
             </div>
 
-            {/* Reply */}
             <div className="mt-auto pt-4 border-t border-[#E5E7EB]">
               <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-2">Reply</h3>
               <textarea
