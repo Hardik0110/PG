@@ -5,11 +5,11 @@ import {
 
 const DEFAULT_API_BASE_URL = "https://pg-maintenance.onrender.com";
 const TOKEN_KEY = "pg_manager_token";
-const USE_MOCK = true; // Set to false when real backend works
+const USE_MOCK = true;
 
-// Use relative /api path in dev (Vite proxy), full URL in prod
+// API configuration
 const baseUrl = import.meta.env.DEV
-  ? "" // Vite proxy handles /api prefix, paths should NOT include /api
+  ? ""
   : ((import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/$/, ""));
 
 function getToken() {

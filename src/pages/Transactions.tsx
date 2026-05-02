@@ -9,6 +9,7 @@ import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import RecordPaymentModal from '../components/RecordPaymentModal';
 import AddExpenseModal from '../components/AddExpenseModal';
 import Select from '../components/ui/Select';
+import Loader from '../components/ui/Loader';
 
 const MOCK_TRANSACTIONS = [
   { id: "tx-001", tenantName: "Rahul Sharma", room: "101", pgName: "Sunrise PG", amount: 8000, type: "rent", date: "2026-04-25T10:00:00Z", status: "paid", method: "UPI" },
@@ -134,7 +135,7 @@ function Transactions() {
     return (
       <div className="flex items-center justify-center h-[60vh] text-[#6B7280]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#1C6C41] border-t-transparent rounded-full animate-spin" />
+          <Loader size={32} />
           <span className="text-sm">Loading transactions...</span>
         </div>
       </div>
@@ -270,7 +271,7 @@ function Transactions() {
       </motion.div>
 
       {/* Table */}
-      <div className="flex-1 bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-0 bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
         <div className="flex-1 overflow-auto">
           {filteredTx.length === 0 ? (
             <div className="py-16 text-center text-[#8B7355]">
@@ -363,7 +364,7 @@ function Transactions() {
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => {
-          // Dummy demo logic
+
           setTransactions([{
             id: 'tx-' + Math.random().toString(36).substr(2, 9),
             tenantName: data.tenant.split(' (')[0],
@@ -383,7 +384,7 @@ function Transactions() {
         open={isExpenseOpen}
         onClose={() => setIsExpenseOpen(false)}
         onSubmit={(data) => {
-          // Demo: log expense as an outgoing transaction in the same list
+
           setTransactions([{
             id: 'ex-' + Math.random().toString(36).substr(2, 9),
             tenantName: data.vendor || `Expense (${data.category})`,

@@ -125,7 +125,7 @@ function MyPGs() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="h-full flex flex-col"
+      className="h-full flex flex-col overflow-y-auto pr-1"
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">

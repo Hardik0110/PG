@@ -31,10 +31,10 @@ function MainLayout({ children }) {
 
       {/* Content — offset from sidebar */}
       <main
-        className="flex-1 overflow-y-auto p-6 md:p-10"
+        className="flex-1 flex flex-col overflow-hidden px-6 pt-6 pb-3 md:px-10 md:pt-10 md:pb-3"
         style={{ marginLeft: `${sidebarWidth}px`, transition: 'margin-left 0.3s ease' }}
       >
-        <div className="max-w-[1280px] mx-auto min-h-full h-full">
+        <div className="max-w-[1280px] mx-auto w-full h-full min-h-0">
           {children}
         </div>
       </main>

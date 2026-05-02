@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, Loader2 } from 'lucide-react';
+import Loader from '../components/ui/Loader';
 import { motion } from 'framer-motion';
 import { setToken } from '../lib/api';
 
@@ -11,9 +12,9 @@ function AuthPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
-    email: '',
+    email: 'admin@trustcircle.com',
     phone: '',
-    password: '',
+    password: 'password123',
     confirmPassword: ''
   });
   const [errors, setErrors] = useState({});
@@ -126,7 +127,6 @@ function AuthPage() {
                 Sign Up
               </button>
               
-              {/* Animated sliding pill */}
               <motion.div
                 className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#1C6C41] rounded-full shadow-sm z-0"
                 initial={false}
@@ -141,7 +141,6 @@ function AuthPage() {
               />
             </div>
 
-            {/* Forms */}
             {activeTab === 'login' ? (
               <form onSubmit={handleLogin} className="w-full flex flex-col gap-3 flex-1">
                 <div className="flex flex-col gap-1.5">
@@ -152,7 +151,7 @@ function AuthPage() {
                       id="login-email"
                       type="email"
                       name="email"
-                      placeholder="johns@gmail.com"
+                      placeholder="admin@trustcircle.com"
                       value={formData.email}
                       onChange={handleInputChange}
                       className={inputClass('email')}
@@ -170,7 +169,7 @@ function AuthPage() {
                       id="login-password"
                       type={showPassword ? 'text' : 'password'}
                       name="password"
-                      placeholder="••••••••"
+                      placeholder="password123"
                       value={formData.password}
                       onChange={handleInputChange}
                       className={`${inputClass('password')} pr-10`}
@@ -199,7 +198,7 @@ function AuthPage() {
                     disabled={submitting}
                     className="bg-[#1C6C41] rounded-full w-full h-[42px] text-white hover:bg-[#155331] transition-colors flex justify-center items-center font-semibold text-[14px] disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Log In'}
+                    {submitting ? <Loader size={20} color="white" /> : 'Log In'}
                   </button>
                 </div>
               </form>
@@ -297,7 +296,7 @@ function AuthPage() {
                     disabled={submitting}
                     className="bg-[#1C6C41] rounded-full w-full h-[42px] text-white hover:bg-[#155331] transition-colors flex justify-center items-center font-semibold text-[14px] disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign Up'}
+                    {submitting ? <Loader size={20} color="white" /> : 'Sign Up'}
                   </button>
                 </div>
               </form>

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
+import Loader from '../components/ui/Loader';
 
 const AMENITY_OPTIONS = [
   { key: 'wifi', label: 'WiFi', icon: Wifi },
@@ -135,7 +136,7 @@ function EditPG() {
     return (
       <div className="flex items-center justify-center h-[60vh] text-[#6B7280]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#1C6C41] border-t-transparent rounded-full animate-spin" />
+          <Loader size={32} />
           <span className="text-sm">Loading PG details...</span>
         </div>
       </div>
@@ -148,7 +149,7 @@ function EditPG() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="max-w-3xl mx-auto pb-10"
+      className="max-w-3xl mx-auto h-full overflow-y-auto pr-1"
     >
       {/* Success Toast */}
       {showSuccess && (

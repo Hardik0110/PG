@@ -6,6 +6,7 @@ import { apiRequest, unwrapData } from '../lib/api';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import AddTenantDrawer from '../components/AddTenantDrawer';
 import Select from '../components/ui/Select';
+import Loader from '../components/ui/Loader';
 
 const PG_COLORS = {
   default: { bg: 'bg-[#DCEEDF]', text: 'text-[#1C6C41]' },
@@ -109,7 +110,7 @@ function Tenants() {
     return (
       <div className="flex items-center justify-center h-[60vh] text-[#6B7280]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#1C6C41] border-t-transparent rounded-full animate-spin" />
+          <Loader size={32} />
           <span className="text-sm">Loading tenants...</span>
         </div>
       </div>
@@ -172,7 +173,7 @@ function Tenants() {
       </div>
 
       {/* Table Container */}
-      <div className="flex-1 bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-0 bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
         <div className="flex-1 overflow-auto">
           {filteredTenants.length === 0 ? (
             <div className="py-16 text-center text-[#8B7355]">
@@ -271,7 +272,7 @@ function Tenants() {
         open={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onSubmit={(data) => {
-          // Dummy demo logic
+
           setTenants([{
             id: 'tnt-' + Math.random().toString(36).substr(2, 9),
             name: `${data.firstName} ${data.lastName}`,

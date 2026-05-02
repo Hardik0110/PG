@@ -1,4 +1,4 @@
-// Mock data for PG Manager - used as fallback when backend is unavailable
+
 export const MOCK_USER = {
   id: "1f5d441c-fe30-4caf-afee-b38295c61607",
   email: "pgowner@test.com",

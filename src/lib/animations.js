@@ -1,4 +1,4 @@
-// Framer Motion variants — reuse everywhere per design spec
+
 
 export const pageVariants = {
   initial: { opacity: 0, y: 12 },

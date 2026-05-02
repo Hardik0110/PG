@@ -57,7 +57,8 @@ function SettingsPage() {
   };
 
   return (
-    <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+    <div className="h-full overflow-y-auto pr-1">
+      <div style={{ maxWidth: '700px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-foreground)', marginBottom: '32px' }}>
         Settings
       </h1>
@@ -225,6 +226,7 @@ function SettingsPage() {
           Save Settings
         </button>
       </form>
+    </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import Badge from '../components/ui/Badge';
 import Drawer from '../components/ui/Drawer';
 import NewTicketModal from '../components/NewTicketModal';
+import Loader from '../components/ui/Loader';
 
 const CATEGORIES = ['plumbing', 'electrical', 'furniture', 'cleaning', 'other'];
 const PRIORITIES = ['high', 'medium', 'low'];
@@ -114,7 +115,10 @@ function Maintenance() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh] text-[#6B7280]">
-        Loading tickets...
+        <div className="flex flex-col items-center gap-3">
+          <Loader size={32} />
+          <span className="text-sm">Loading tickets...</span>
+        </div>
       </div>
     );
   }
@@ -193,7 +197,7 @@ function Maintenance() {
       </div>
 
       {/* Table Card */}
-      <div className="flex-1 bg-white rounded-xl shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col">
         <div className="flex-1 overflow-auto">
           {filteredTickets.length === 0 ? (
             <div className="py-16 text-center text-[#6B7280]">No tickets found</div>
@@ -408,7 +412,7 @@ function Maintenance() {
         open={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => {
-          // Dummy update logic for demo
+
           setTickets([{
             id: 'tkt-' + Math.random().toString(36).substr(2, 9),
             title: data.subject,

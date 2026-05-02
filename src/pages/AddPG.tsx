@@ -79,7 +79,8 @@ function AddPG() {
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div className="h-full overflow-y-auto pr-1">
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       {showSuccess && (
         <div style={{
           position: 'fixed',
@@ -462,6 +463,7 @@ function AddPG() {
           {submitting ? 'Publishing...' : 'Publish PG'}
         </button>
       </form>
+    </div>
     </div>
   );
 }

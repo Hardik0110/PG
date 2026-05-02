@@ -48,7 +48,7 @@ function Notifications() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="max-w-[700px] mx-auto h-full flex flex-col"
+      className="max-w-[700px] mx-auto h-full flex flex-col overflow-y-auto pr-1"
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-8">

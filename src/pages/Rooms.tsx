@@ -247,9 +247,9 @@ function Rooms() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="h-full flex flex-col"
+      className="h-full flex flex-col overflow-y-auto pr-1"
     >
-      {/* ── Top toolbar ─────────────────────────────────── */}
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         {/* Left: title + count */}
         <div className="flex items-center gap-2">
@@ -289,7 +289,7 @@ function Rooms() {
         </div>
       </div>
 
-      {/* ── Content ──────────────────────────────────────── */}
+
       {filteredRooms.length === 0 ? (
         <div className="flex-1 flex items-center justify-center text-[#9CA3AF] text-sm">
           No rooms found matching the selected filters.
@@ -354,7 +354,7 @@ function Rooms() {
         roomLabel={selectedRoomToBook ? `${selectedRoomToBook.roomNumber} (${selectedRoomToBook.pgName})` : ''}
         onSubmit={(data) => {
           if (!selectedRoomToBook) return;
-          // Dummy demo logic
+
           setRooms((prev) =>
             prev.map(r => r.id === selectedRoomToBook.id ? { ...r, status: 'occupied' } : r)
           );

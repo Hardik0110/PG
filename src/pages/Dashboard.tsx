@@ -7,14 +7,13 @@ import {
 } from "lucide-react"
 import { apiRequest, unwrapData } from "@/lib/api"
 import { cn } from "@/lib/utils"
+import Loader from "@/components/ui/Loader"
 import { Badge } from "@/components/ui/Badge"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Separator } from "@/components/ui/separator"
 
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
-/* ------------------------------------------------------------------ */
+
 
 function relativeTime(dateString?: string) {
   if (!dateString) return ""
@@ -57,9 +56,7 @@ const CATEGORY_TONE = {
   other: "bg-muted text-muted-foreground",
 } as const
 
-/* ------------------------------------------------------------------ */
-/*  Stat Card — uniform, fixed size                                    */
-/* ------------------------------------------------------------------ */
+
 
 interface StatCardProps {
   icon: React.ComponentType<{ size?: number; className?: string }>
@@ -322,7 +319,7 @@ function Dashboard() {
     return (
       <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
         <div className="flex flex-col items-center gap-3">
-          <div className="size-7 animate-spin rounded-full border-2 border-muted border-t-primary" />
+          <Loader size={28} />
           <span className="text-sm">Loading dashboard…</span>
         </div>
       </div>
@@ -330,7 +327,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="h-full overflow-y-auto pr-1 flex flex-col gap-4">
       {/* Header strip — greeting + date + actions */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
