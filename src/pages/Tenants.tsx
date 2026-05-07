@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, ChevronRight, UserPlus, Calendar } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
@@ -35,7 +34,6 @@ function getRelativeTime(dateStr) {
 }
 
 function Tenants() {
-  const navigate = useNavigate();
   const [tenants, setTenants] = useState([]);
   const [filterPg, setFilterPg] = useState('all');
   const [search, setSearch] = useState('');
@@ -227,10 +225,9 @@ function Tenants() {
                     <motion.tr
                       key={tenant.id}
                       variants={fadeUp}
-                      onClick={() => navigate(`/tenants/${tenant.id}`)}
                       onMouseEnter={() => setHoveredRow(tenant.id)}
                       onMouseLeave={() => setHoveredRow(null)}
-                      className={`border-b border-[#F3EEE5] cursor-pointer transition-colors duration-150
+                      className={`border-b border-[#F3EEE5] transition-colors duration-150
                                   ${hoveredRow === tenant.id ? 'bg-[#FAF7F2]' : 'bg-white'}`}
                     >
 
