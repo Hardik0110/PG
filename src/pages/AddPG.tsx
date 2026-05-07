@@ -50,7 +50,7 @@ function AddPG() {
     try {
       setSubmitting(true);
       // 1) Create the PG
-      const created = await apiRequest('/api/v1/pg-facilities/', {
+      const created = await apiRequest('/api/v1/pg/', {
         method: 'POST',
         body: {
           name: formData.name,

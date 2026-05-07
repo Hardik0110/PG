@@ -121,7 +121,7 @@ function MyPGs() {
     (async () => {
       try {
         const [pgList, tenantList, roomList] = await Promise.all([
-          apiRequest('/api/v1/pg-facilities/'),
+          apiRequest('/api/v1/pg/'),
           apiRequest('/api/v1/tenants/'),
           apiRequest('/api/v1/rooms/'),
         ]);

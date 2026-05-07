@@ -184,7 +184,7 @@ function Dashboard() {
       try {
         const [, tenantsPayload, ticketsPayload, roomsPayload] =
           await Promise.all([
-            apiRequest("/api/v1/pg-facilities/"),
+            apiRequest("/api/v1/pg/"),
             apiRequest("/api/v1/tenants/"),
             apiRequest("/api/v1/tickets/my"),
             apiRequest("/api/v1/rooms/"),

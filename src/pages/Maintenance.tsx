@@ -60,7 +60,7 @@ function Maintenance() {
     (async () => {
       try {
         const [pgList, roomList] = await Promise.all([
-          apiRequest('/api/v1/pg-facilities/'),
+          apiRequest('/api/v1/pg/'),
           apiRequest('/api/v1/rooms/'),
         ]);
         const pgArr = Array.isArray(pgList) ? pgList : [];

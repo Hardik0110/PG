@@ -54,7 +54,7 @@ function Expenses() {
     let mounted = true;
     (async () => {
       try {
-        const pgList = (await apiRequest('/api/v1/pg-facilities/')) || [];
+        const pgList = (await apiRequest('/api/v1/pg/')) || [];
         if (!mounted) return;
         setPgs(Array.isArray(pgList) ? pgList : []);
 

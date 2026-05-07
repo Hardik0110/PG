@@ -130,7 +130,7 @@ function Rooms() {
     const loadData = async () => {
       try {
         const [pgPayload, roomsPayload, tenantsPayload] = await Promise.all([
-          apiRequest('/api/v1/pg-facilities/'),
+          apiRequest('/api/v1/pg/'),
           apiRequest('/api/v1/rooms/'),
           apiRequest('/api/v1/tenants/'),
         ]);

@@ -52,7 +52,7 @@ function EditPG() {
     let mounted = true;
     const loadPg = async () => {
       try {
-        const payload = await apiRequest(`/api/v1/pg-facilities/${id}`);
+        const payload = await apiRequest(`/api/v1/pg/${id}`);
         const data = unwrapData(payload, {});
         if (!mounted) return;
         setName(data.name || '');
@@ -106,7 +106,7 @@ function EditPG() {
 
     setSaving(true);
     try {
-      await apiRequest(`/api/v1/pg-facilities/${id}`, {
+      await apiRequest(`/api/v1/pg/${id}`, {
         method: 'PATCH',
         body: {
           name,
