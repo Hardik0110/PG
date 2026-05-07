@@ -122,9 +122,8 @@ function Notifications() {
             <div
               key={notif.id}
               onClick={() => !notif.is_read && markRead(notif.id)}
-              className={`group flex items-start gap-4 p-4 rounded-xl border transition-colors cursor-pointer ${
-                notif.is_read ? 'bg-white border-[#E8E9ED]' : 'bg-[#EEFBF4] border-[#A8E6C3]'
-              }`}
+              className={`group flex items-start gap-4 p-4 rounded-xl border transition-colors cursor-pointer ${notif.is_read ? 'bg-white border-[#E8E9ED]' : 'bg-[#EEFBF4] border-[#A8E6C3]'
+                }`}
             >
               <div className="mt-1 flex-shrink-0">
                 {getIcon(notif.kind)}

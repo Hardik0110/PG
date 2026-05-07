@@ -15,24 +15,24 @@ const PRIORITIES = ['high', 'medium', 'low'];
 const STATUSES = ['open', 'in_progress', 'resolved', 'closed'];
 
 const CATEGORY_COLORS = {
-  plumbing:   { bg: '#EFF8FF', text: '#2E90FA' },
+  plumbing: { bg: '#EFF8FF', text: '#2E90FA' },
   electrical: { bg: '#FFFAEB', text: '#F79009' },
-  furniture:  { bg: '#F5F3FF', text: '#7C3AED' },
-  cleaning:   { bg: '#ECFDF3', text: '#12B76A' },
-  other:      { bg: '#F3F4F6', text: '#6B7280' },
+  furniture: { bg: '#F5F3FF', text: '#7C3AED' },
+  cleaning: { bg: '#ECFDF3', text: '#12B76A' },
+  other: { bg: '#F3F4F6', text: '#6B7280' },
 };
 
 const PRIORITY_DOTS = {
-  high:   '#F04438',
+  high: '#F04438',
   medium: '#F79009',
-  low:    '#2E90FA',
+  low: '#2E90FA',
 };
 
 const STATUS_BADGE = {
-  open:        { variant: 'danger',  label: 'Open' },
+  open: { variant: 'danger', label: 'Open' },
   in_progress: { variant: 'warning', label: 'In Progress' },
-  resolved:    { variant: 'success', label: 'Resolved' },
-  closed:      { variant: 'neutral', label: 'Closed' },
+  resolved: { variant: 'success', label: 'Resolved' },
+  closed: { variant: 'neutral', label: 'Closed' },
 };
 
 function capitalize(str) {

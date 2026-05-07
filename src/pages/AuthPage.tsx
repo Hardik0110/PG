@@ -17,7 +17,7 @@ function AuthPage() {
     password: 'password123',
     confirmPassword: ''
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
@@ -26,7 +26,7 @@ function AuthPage() {
   };
 
   const validateLogin = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
     if (!formData.email) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Please enter a valid email';
     if (!formData.password) newErrors.password = 'Password is required';
@@ -36,7 +36,7 @@ function AuthPage() {
   };
 
   const validateSignup = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
     if (!formData.fullName) newErrors.fullName = 'Name is required';
     if (!formData.email) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Please enter a valid email';
@@ -52,7 +52,6 @@ function AuthPage() {
     if (!validateLogin()) return;
     setSubmitting(true);
     try {
-      // OAuth2PasswordRequestForm expects form-urlencoded with `username` (not email)
       const body = new URLSearchParams({
         username: formData.email,
         password: formData.password,
@@ -99,8 +98,7 @@ function AuthPage() {
   };
 
   const inputClass = (fieldName) =>
-    `w-full h-12 md:h-[42px] pl-11 pr-4 rounded-[10px] bg-white border text-base md:text-[14px] outline-none transition-colors font-sans ${
-      errors[fieldName] ? 'border-red-400 focus:border-red-500' : 'border-[#D1D5DB] focus:border-[#1C6C41]'
+    `w-full h-12 md:h-[42px] pl-11 pr-4 rounded-[10px] bg-white border text-base md:text-[14px] outline-none transition-colors font-sans ${errors[fieldName] ? 'border-red-400 focus:border-red-500' : 'border-[#D1D5DB] focus:border-[#1C6C41]'
     }`;
 
   return (
@@ -137,22 +135,20 @@ function AuthPage() {
               <button
                 type="button"
                 onClick={() => { setActiveTab('login'); setErrors({}); }}
-                className={`relative z-10 flex-1 min-h-[44px] md:min-h-0 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 ${
-                  activeTab === 'login'
+                className={`relative z-10 flex-1 min-h-[44px] md:min-h-0 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 ${activeTab === 'login'
                     ? 'text-white'
                     : 'text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 Login
               </button>
               <button
                 type="button"
                 onClick={() => { setActiveTab('signup'); setErrors({}); }}
-                className={`relative z-10 flex-1 min-h-[44px] md:min-h-0 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 ${
-                  activeTab === 'signup'
+                className={`relative z-10 flex-1 min-h-[44px] md:min-h-0 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 ${activeTab === 'signup'
                     ? 'text-white'
                     : 'text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 Sign Up
               </button>

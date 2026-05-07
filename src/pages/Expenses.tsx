@@ -113,13 +113,13 @@ function Expenses() {
         return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
       })
       .reduce((sum, e) => sum + (e.amount || 0), 0);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredExp]);
 
-  const topCategoryEntry = useMemo(() => {
-    const sums = {};
+  const topCategoryEntry = useMemo<[string, number]>(() => {
+    const sums: Record<string, number> = {};
     for (const e of filteredExp) {
-      sums[e.category] = (sums[e.category] || 0) + e.amount;
+      sums[e.category] = (sums[e.category] || 0) + (e.amount || 0);
     }
     const entries = Object.entries(sums).sort((a, b) => b[1] - a[1]);
     return entries[0] || ['—', 0];

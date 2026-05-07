@@ -180,24 +180,24 @@ function Dashboard() {
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      try {
-        const [, tenantsPayload, ticketsPayload, roomsPayload] =
-          await Promise.all([
-            apiRequest("/api/v1/pg/"),
-            apiRequest("/api/v1/tenants/"),
-            apiRequest("/api/v1/tickets/my"),
-            apiRequest("/api/v1/rooms/"),
-          ])
-        if (!mounted) return
-        setTenants(unwrapData(tenantsPayload, []) || [])
-        setRooms(unwrapData(roomsPayload, []) || [])
-        const tk = unwrapData(ticketsPayload, []) || []
-        setTickets(Array.isArray(tk) ? tk.filter((x) => !x.detail) : [])
-      } catch {} finally {
-        if (mounted) setLoading(false)
-      }
-    })()
+      ; (async () => {
+        try {
+          const [, tenantsPayload, ticketsPayload, roomsPayload] =
+            await Promise.all([
+              apiRequest("/api/v1/pg/"),
+              apiRequest("/api/v1/tenants/"),
+              apiRequest("/api/v1/tickets/my"),
+              apiRequest("/api/v1/rooms/"),
+            ])
+          if (!mounted) return
+          setTenants(unwrapData(tenantsPayload, []) || [])
+          setRooms(unwrapData(roomsPayload, []) || [])
+          const tk = unwrapData(ticketsPayload, []) || []
+          setTickets(Array.isArray(tk) ? tk.filter((x) => !x.detail) : [])
+        } catch { } finally {
+          if (mounted) setLoading(false)
+        }
+      })()
     return () => {
       mounted = false
     }

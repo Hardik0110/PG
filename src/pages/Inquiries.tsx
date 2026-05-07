@@ -23,7 +23,9 @@ function getInitials(name) {
   return name.slice(0, 2).toUpperCase();
 }
 
-function statusToBadge(status) {
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' | 'info' | 'neutral';
+
+function statusToBadge(status: string | undefined): { variant: BadgeVariant; label: string } {
   const s = status?.toLowerCase();
   if (s === 'new') return { variant: 'info', label: 'New' };
   if (s === 'responded') return { variant: 'success', label: 'Responded' };

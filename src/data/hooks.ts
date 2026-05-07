@@ -163,14 +163,14 @@ export function useRepo(resource: Resource): Repo {
   const queryClient = useQueryClient();
   return useMemo<Repo>(
     () => ({
-      list: (params) => port.list(resource, params),
-      create: async (body) => {
-        const created = await port.create(resource, body);
+      list: <T>(params) => port.list<T>(resource, params),
+      create: async <T>(body) => {
+        const created = await port.create<T>(resource, body);
         queryClient.invalidateQueries({ queryKey: queryKeys.resource(resource) });
         return created;
       },
-      update: async (id, patch) => {
-        const updated = await port.update(resource, id, patch);
+      update: async <T>(id, patch) => {
+        const updated = await port.update<T>(resource, id, patch);
         queryClient.invalidateQueries({ queryKey: queryKeys.resource(resource) });
         return updated;
       },

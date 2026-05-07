@@ -34,17 +34,17 @@ function normalizeArray<T>(raw: unknown): T[] {
 }
 
 export const httpAdapter: DataPort = {
-  async list(resource, params) {
+  async list<T>(resource: Resource, params?: ListParams): Promise<T[]> {
     const raw = await apiRequest(listUrl(resource, params));
-    return normalizeArray(raw);
+    return normalizeArray<T>(raw);
   },
-  async get(resource, id) {
+  async get<T>(resource: Resource, id: string): Promise<T> {
     return await apiRequest(itemUrl(resource, id));
   },
-  async create(resource, body) {
+  async create<T>(resource: Resource, body: unknown): Promise<T> {
     return await apiRequest(RESOURCE_BASE[resource], { method: 'POST', body });
   },
-  async update(resource, id, patch) {
+  async update<T>(resource: Resource, id: string, patch: unknown): Promise<T> {
     return await apiRequest(itemUrl(resource, id), { method: 'PATCH', body: patch });
   },
   async remove(resource, id) {

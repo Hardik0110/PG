@@ -33,29 +33,26 @@ function StepIndicator({ current }) {
           <div key={s.num} className="flex items-center">
             <div className="flex flex-col items-center gap-1.5">
               <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                  done
+                className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${done
                     ? 'bg-[#1C6C41] text-white'
                     : active
-                    ? 'bg-[#1C6C41] text-white ring-4 ring-[#1C6C41]/15'
-                    : 'bg-white border border-[#D1D5DB] text-[#9CA3AF]'
-                }`}
+                      ? 'bg-[#1C6C41] text-white ring-4 ring-[#1C6C41]/15'
+                      : 'bg-white border border-[#D1D5DB] text-[#9CA3AF]'
+                  }`}
               >
                 {done ? <Check size={16} /> : s.num}
               </div>
               <span
-                className={`text-[11px] font-semibold tracking-wide uppercase ${
-                  active ? 'text-[#1C6C41]' : 'text-[#9CA3AF]'
-                }`}
+                className={`text-[11px] font-semibold tracking-wide uppercase ${active ? 'text-[#1C6C41]' : 'text-[#9CA3AF]'
+                  }`}
               >
                 {s.title}
               </span>
             </div>
             {idx < STEPS.length - 1 && (
               <div
-                className={`w-12 sm:w-20 h-[2px] mx-2 mb-5 transition-colors ${
-                  current > s.num ? 'bg-[#1C6C41]' : 'bg-[#E5E7EB]'
-                }`}
+                className={`w-12 sm:w-20 h-[2px] mx-2 mb-5 transition-colors ${current > s.num ? 'bg-[#1C6C41]' : 'bg-[#E5E7EB]'
+                  }`}
               />
             )}
           </div>
@@ -175,16 +172,14 @@ function StepBuildingAmenities({ amenities, selectedIds, onToggle, onNext, onBac
                 key={a.id}
                 type="button"
                 onClick={() => onToggle(a.id)}
-                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-lg border text-sm font-medium transition-colors cursor-pointer ${
-                  checked
+                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-lg border text-sm font-medium transition-colors cursor-pointer ${checked
                     ? 'bg-[#1C6C41]/8 border-[#1C6C41] text-[#1C6C41]'
                     : 'bg-white border-[#E5E7EB] text-[#374151] hover:border-[#D1D5DB] hover:bg-[#F9FAFB]'
-                }`}
+                  }`}
               >
                 <div
-                  className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                    checked ? 'bg-[#1C6C41] border-[#1C6C41]' : 'border-[#D1D5DB] bg-white'
-                  }`}
+                  className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${checked ? 'bg-[#1C6C41] border-[#1C6C41]' : 'border-[#D1D5DB] bg-white'
+                    }`}
                 >
                   {checked && <Check size={10} className="text-white" />}
                 </div>
@@ -342,7 +337,7 @@ function AddPG() {
   });
 
   const [allAmenities, setAllAmenities] = useState([]);
-  const [selectedBuildingIds, setSelectedBuildingIds] = useState(new Set());
+  const [selectedBuildingIds, setSelectedBuildingIds] = useState<Set<string>>(new Set());
 
   const [rooms, setRooms] = useState([]);
   const [roomModalOpen, setRoomModalOpen] = useState(false);

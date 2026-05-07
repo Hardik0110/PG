@@ -208,7 +208,8 @@ function Rooms() {
   const groupedRooms = useMemo(() => {
     if (filterPg !== 'all') return null;
 
-    const groups = {};
+    type RoomRow = (typeof filteredRooms)[number];
+    const groups: Record<string, { pgName: string; rooms: RoomRow[] }> = {};
     filteredRooms.forEach((r) => {
       if (!groups[r.pgId]) {
         groups[r.pgId] = { pgName: r.pgName, rooms: [] };

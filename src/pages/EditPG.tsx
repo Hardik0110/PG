@@ -39,7 +39,7 @@ function EditPG() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
@@ -99,7 +99,7 @@ function EditPG() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
     if (!name.trim()) newErrors.name = 'PG Name is required';
     if (!address.trim()) newErrors.address = 'Address is required';
     if (Object.keys(newErrors).length > 0) {
@@ -317,8 +317,8 @@ function EditPG() {
                     className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border cursor-pointer
                                 transition-all duration-150 select-none
                                 ${checked
-                                  ? 'border-[#1C6C41] bg-[#1C6C41]/5 text-[#111827]'
-                                  : 'border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#D1D5DB] hover:bg-[#F9FAFB]'}`}
+                        ? 'border-[#1C6C41] bg-[#1C6C41]/5 text-[#111827]'
+                        : 'border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#D1D5DB] hover:bg-[#F9FAFB]'}`}
                   >
                     <input
                       type="checkbox"

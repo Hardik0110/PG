@@ -21,7 +21,7 @@ function getRelativeTime(dateStr) {
   if (!dateStr) return '';
   const date = new Date(dateStr);
   const now = new Date();
-  const diffMs = now - date;
+  const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   if (diffDays < 1) return 'Today';
   if (diffDays === 1) return '1 day ago';
