@@ -1,22 +1,9 @@
-import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { useUIStore } from '../store';
 
 function MainLayout({ children }) {
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem('pg_sidebar_collapsed') === 'true';
-    } catch {
-      return false;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('pg_sidebar_collapsed', String(sidebarCollapsed));
-    } catch {}
-  }, [sidebarCollapsed]);
+  const { sidebarCollapsed, toggleSidebar, mobileSidebarOpen, setMobileSidebarOpen } = useUIStore();
 
   return (
     <div className="h-screen h-svh flex overflow-hidden bg-[#F8F5F0]">
@@ -25,7 +12,7 @@ function MainLayout({ children }) {
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
         collapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed(c => !c)}
+        onToggleCollapse={toggleSidebar}
       />
 
       <div

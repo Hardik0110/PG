@@ -12,16 +12,8 @@ import Loader from '../components/ui/Loader';
 import Pagination from '../components/ui/Pagination';
 import { useTablePageSize } from '../hooks/use-table-page-size';
 import { formatCurrency, formatCompact, formatDate } from '../lib/format';
-
-const TYPE_CHIP_COLORS = {
-  rent: 'bg-[#DCEEDF] text-[#1C6C41]',
-  deposit: 'bg-[#E8E1F5] text-[#6D28D9]',
-  utility: 'bg-[#FCF1DC] text-[#B45309]',
-  fine: 'bg-[#FBE5E0] text-[#A04D3A]',
-  food: 'bg-[#FBE5F0] text-[#BE185D]',
-  refund: 'bg-[#EFE7DA] text-[#5C4632]',
-  other: 'bg-[#EFE7DA] text-[#5C4632]',
-};
+import { TRANSACTION_TYPE_CHIP } from '../constants';
+import type { TransactionType } from '../types';
 
 function getMonthOptions() {
   const months = [];
@@ -123,7 +115,7 @@ function Transactions() {
         return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
       })
       .reduce((sum, t) => sum + (t.amount || 0), 0);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredTx]);
 
   const tenantName = (id) => tenantById[id]?.user?.full_name || '—';
@@ -318,7 +310,7 @@ function Transactions() {
               </thead>
               <motion.tbody variants={staggerContainer} initial="initial" animate="animate">
                 {pagedTx.map((tx) => {
-                  const typeChip = TYPE_CHIP_COLORS[tx.type] || TYPE_CHIP_COLORS.other;
+                  const typeChip = TRANSACTION_TYPE_CHIP[tx.type as TransactionType] || TRANSACTION_TYPE_CHIP.other;
                   const statusLabel = (tx.status || '').charAt(0).toUpperCase() + (tx.status || '').slice(1);
                   const badgeVariant = BADGE_MAP[statusLabel] || 'neutral';
 

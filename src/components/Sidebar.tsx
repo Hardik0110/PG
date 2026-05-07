@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useUIStore } from '../store';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -79,33 +80,20 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
   const navigate = useNavigate();
   const { displayName, email, initial } = useCurrentUser();
 
-  const [internalCollapsed, setInternalCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem(LS_KEY) === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const storeCollapsed = useUIStore((s) => s.sidebarCollapsed);
+  const storeToggle = useUIStore((s) => s.toggleSidebar);
 
-  const collapsed = controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
+  const collapsed = controlledCollapsed !== undefined ? controlledCollapsed : storeCollapsed;
 
-  const [badges] = useState({
-    notifications: 3,
-    inquiries: 5,
-    maintenance: 2,
-  });
+  const badges = { notifications: 0, maintenance: 0 };
 
   const toggleCollapsed = useCallback(() => {
     if (onToggleCollapse) {
       onToggleCollapse();
     } else {
-      setInternalCollapsed((prev) => {
-        const next = !prev;
-        try { localStorage.setItem(LS_KEY, String(next)); } catch { /* localStorage unavailable */ }
-        return next;
-      });
+      storeToggle();
     }
-  }, [onToggleCollapse]);
+  }, [onToggleCollapse, storeToggle]);
 
   const handleLogout = useCallback(() => {
     if (!window.confirm('Log out of your account?')) return;

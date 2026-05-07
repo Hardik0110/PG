@@ -2,9 +2,9 @@ import {
   MOCK_USER, MOCK_PGS, MOCK_TENANTS, MOCK_NOTICES,
   MOCK_TICKETS, MOCK_ROOMS, MOCK_AMENITIES,
 } from './mockData';
+import { getAuthToken, setAuthToken, clearAuthToken } from '../store/auth-store';
 
 const DEFAULT_API_BASE_URL = "https://pg-maintenance.onrender.com";
-const TOKEN_KEY = "pg_manager_token";
 
 const baseUrl = import.meta.env.DEV
   ? ""
@@ -13,19 +13,15 @@ const baseUrl = import.meta.env.DEV
 const USE_MOCK = String(import.meta.env.VITE_USE_MOCK ?? "false").toLowerCase() === "true";
 
 function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  return getAuthToken();
 }
 
 export function setToken(token) {
-  if (!token) {
-    localStorage.removeItem(TOKEN_KEY);
-    return;
-  }
-  localStorage.setItem(TOKEN_KEY, token);
+  setAuthToken(token || null);
 }
 
 export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY);
+  clearAuthToken();
 }
 
 function buildHeaders(customHeaders = {}) {
