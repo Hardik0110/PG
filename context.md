@@ -1,274 +1,364 @@
 # PG Manager — Project Context
 
-> Living reference for what this project is, how it's structured, and the design system it uses.
-> Last refreshed: 2026-05-02
+> Living single-source-of-truth for this codebase. Optimized to be read by an LLM landing
+> in the repo with zero prior knowledge: where things live, how they connect, and which
+> file does what. Last refreshed: 2026-05-07.
 
-## 1. What this project is
+---
 
-**PG Manager** (also branded **TrustCircle** in UI/logo) is a single-page React web app that lets a **PG (Paying Guest accommodation) owner** manage their lodging business from one dashboard.
+## 1. What the project is
 
-The product is targeted at the Indian PG market — currency is ₹ (INR), tenants are Indian names, addresses are Indian cities (Bangalore is the demo data anchor), phone numbers are +91, and rents are in the ₹7K–₹11K/month range.
+**PG Manager** (UI/logo brand: **TrustCircle**) is a single-page React web app that lets
+the **owner** of an Indian Paying-Guest accommodation business manage their properties,
+rooms, tenants, payments, expenses and maintenance tickets from one dashboard.
 
-A "PG owner" can:
-- Manage one or more **PG facilities** (each with name, type — gents/ladies/coed, address, amenities)
-- Manage **rooms** in each PG (number, floor, type — single/double/shared, rent, status — vacant/occupied/reserved/maintenance, amenities)
-- Manage **tenants** (book a room, drawer-based add flow)
-- Track **maintenance tickets** (categories: plumbing, electrical, furniture, cleaning, other; priorities: high/medium/low; statuses: open/in_progress/resolved/closed)
-- Track **transactions** — rent payments + expenses (UPI / Bank Transfer / Cash)
-- View **notifications**
-- Edit **profile** and **settings**
+- **Currency**: ₹ (INR), formatted en-IN.
+- **Auth**: JWT bearer tokens; backend issues at `/api/v1/auth/login`.
+- **Two repos**:
+  - **Frontend** (this repo): `github.com/Hardik0110/PG`.
+  - **Backend**: `github.com/PandyaYog/pg-maintenance` → FastAPI on Render at
+    `https://pg-maintenance.onrender.com` (free tier, sleeps on idle).
 
-Auth is currently **mocked** — login uses `setToken('mock-token')` and any credentials with `password.length >= 6` succeed. There is also a real-backend code path (`https://pg-maintenance.onrender.com`) but `USE_MOCK = true` in `src/lib/api.js` causes any 401/network failure to fall back to mock data, so the UI works offline against `src/lib/mockData.js`.
-
-A separate `server/mock.js` (Node http server, port 3001, no Express) implements the same mock endpoints for local dev — Vite proxies `/api/*` to it.
+---
 
 ## 2. Tech stack
 
-| Layer | Choice |
+| Concern | Choice |
 |---|---|
-| Build tool | **Vite 8** (`@vitejs/plugin-react`) |
-| Framework | **React 19** |
-| Language | Mixed — `.tsx` files but most are essentially JS-with-types-off (e.g. `App.tsx` uses no types). `tsconfig.json` exists. |
-| Routing | `react-router-dom` v7 (`BrowserRouter`, `Routes`, `Route`) |
-| Styling | **Tailwind CSS v4** via `@tailwindcss/vite` plugin (no `tailwind.config.js` — theme is defined in CSS via `@theme {}`) |
-| UI primitives | **shadcn/ui** ("new-york" style, neutral base, CSS variables) on top of Radix UI |
-| Animation | **framer-motion** v12 |
-| Icons | **lucide-react** (project standard — no other icon set) |
-| Forms | Native `<input>` + manual state (no react-hook-form) |
-| Toasts | `sonner` + a custom `Toast.tsx` wrapper |
-| Class merging | `clsx` + `tailwind-merge` exposed as `cn()` in `@/lib/utils` |
-| Variants | `class-variance-authority` (cva) |
-| Tests | `vitest` + `@testing-library/react` + `happy-dom` (setup at `src/test/setup.js`) |
-| E2E | `@playwright/test` (configured but not heavily used) |
+| Framework | React 19 + Vite 8, TypeScript (strict: false, allowJs: true) |
+| Routing | react-router-dom 7 |
+| Server state | **TanStack Query 5** (cache, dedupe, polling, invalidation) |
+| Client state | **Zustand 5** (auth token, sidebar collapsed) |
+| Styling | Tailwind v4 with `@theme` tokens (no `tailwind.config.js`); shadcn/ui new-york style under `components/ui/` |
+| Animations | framer-motion 12 |
+| Icons | lucide-react |
+| Tests | Vitest 4 + @testing-library/react + happy-dom |
+| Lint | ESLint flat config + typescript-eslint + react-hooks rules |
+| Hooks | Husky pre-commit → lint-staged + `npm test` |
+| Duplicate detection | jscpd (`npm run dup`) |
+| HTTP | native `fetch` wrapped in `lib/api.js` |
 
-### Path aliases
-- `@/` → `./src/`
-- `@/components`, `@/components/ui`, `@/lib`, `@/lib/utils`, `@/hooks` (per `components.json`)
+---
 
-### Dev workflow
-- `npm run dev` — Vite dev server. Proxies `/api` → `http://localhost:3001`.
-- `node server/mock.js` — runs the mock backend (login: `pgowner@test.com` / `pgowner123`).
-- `npm run build` / `npm run preview` / `npm run lint` / `npm test`
-
-## 3. Repository layout
+## 3. Architecture diagram
 
 ```
-d:/PG/
-├── public/                 favicon, login-hero.png, logo.png, icons.svg
-├── server/mock.js          standalone Node http mock backend (port 3001)
-├── src/
-│   ├── main.tsx            React root; imports index.css; <StrictMode>
-│   ├── App.tsx             BrowserRouter + ToastProvider + CommandPalette + AnimatePresence routes
-│   ├── index.css           Tailwind v4 entry + @theme tokens + base styles
-│   ├── assets/             static imports
-│   ├── styles/             (legacy/extra)
-│   ├── context/            (empty)
-│   ├── hooks/
-│   │   └── use-mobile.ts
-│   ├── lib/
-│   │   ├── api.js          fetch wrapper with mock-data fallback (USE_MOCK = true)
-│   │   ├── animations.js   framer-motion variants (page, stagger, drawer, modal, toast, sidebar...)
-│   │   ├── mockData.js     MOCK_USER, MOCK_PGS, MOCK_TENANTS, MOCK_NOTICES, MOCK_TICKETS, MOCK_ROOMS, MOCK_AMENITIES
-│   │   └── utils.ts        cn() helper (clsx + tailwind-merge)
-│   ├── components/
-│   │   ├── MainLayout.tsx       sidebar + header shell, persists collapse state
-│   │   ├── Sidebar.tsx          collapsible nav with sections (OVERVIEW / MANAGE / SETTINGS)
-│   │   ├── Header.tsx           breadcrumbs, search-as-button (opens command palette), notif bell, user menu
-│   │   ├── AddTenantDrawer.tsx
-│   │   ├── BookRoomModal.tsx
-│   │   ├── RoomDetailsModal.tsx
-│   │   ├── NewTicketModal.tsx
-│   │   ├── RecordPaymentModal.tsx
-│   │   ├── AddExpenseModal.tsx
-│   │   └── ui/                  reusable primitives (see §6)
-│   └── pages/
-│       ├── AuthPage.tsx        split panel login/signup with hero image
-│       ├── Dashboard.tsx       stat cards + mini-metrics + recent tenants + tickets + activity + room status
-│       ├── MyPGs.tsx           list of owned PGs
-│       ├── AddPG.tsx / EditPG.tsx
-│       ├── Tenants.tsx
-│       ├── Rooms.tsx
-│       ├── Maintenance.tsx     tickets
-│       ├── Transactions.tsx
-│       ├── Notifications.tsx
-│       ├── Profile.tsx
-│       ├── Settings.tsx
-│       └── Inquiries.tsx       (legacy, route is commented out — kept for reference)
+                      ┌────────────────────────────────────────────────┐
+                      │                  main.tsx                      │
+                      │                     │                          │
+                      │                     ▼                          │
+                      │             <BrowserRouter>                    │
+                      │                     │                          │
+                      │                     ▼                          │
+                      │            ┌──────────────┐                    │
+                      │            │  <App />     │                    │
+                      │            └──────┬───────┘                    │
+                      │                   ▼                            │
+                      │  ┌──────────────────────────────────────┐      │
+                      │  │  <DataProvider port={httpAdapter}>   │ ◄──── TanStack QueryClient
+                      │  │   <FeedbackProvider>                 │      │   (data/DataProvider)
+                      │  │     <ToastProvider>                  │      │
+                      │  │      <ConfirmModal stack/>           │      │
+                      │  │      <CommandPalette/>               │      │
+                      │  │      <AppRoutes/> ────────┐          │      │
+                      │  │   </FeedbackProvider>     │          │      │
+                      │  │  </DataProvider>          │          │      │
+                      │  └───────────────────────────┼──────────┘      │
+                      │                              ▼                 │
+                      │                        ┌───────────┐           │
+                      │                        │ <Routes/> │           │
+                      │                        └─────┬─────┘           │
+                      │                              ▼                 │
+                      │             ┌────────────────────────────┐     │
+                      │             │  <MainLayout> on every     │     │
+                      │             │   protected route          │     │
+                      │             │                            │     │
+                      │             │  ┌──────────┬───────────┐  │     │
+                      │             │  │ Sidebar  │  Header   │  │     │
+                      │             │  └──────────┴───────────┘  │     │
+                      │             │  ┌──────────────────────┐  │     │
+                      │             │  │  <PageComponent/>    │  │     │
+                      │             │  │   (src/pages/*.tsx)  │  │     │
+                      │             │  └──────────────────────┘  │     │
+                      │             └────────────────────────────┘     │
+                      └────────────────────────────────────────────────┘
+
+   Pages call hooks ┐
+                    ▼
+   ┌────────────────────────────────────────────────────────────────────┐
+   │                       Cross-cutting hooks                          │
+   │                                                                    │
+   │  data/hooks.ts ──► useResource('rooms', { pgId })  ◄── TanStack    │
+   │                    useAggregate(['rooms','tenants','tickets'])     │
+   │                    useRepo('rooms').create/update/remove           │
+   │                    useMutation(fn)                                 │
+   │                                                                    │
+   │  hooks/use-current-user      → /api/v1/auth/me (TanStack-cached)   │
+   │  hooks/use-lookups            → wraps useResource for shared lookups│
+   │  hooks/use-paginated-filtered-list  → table state                  │
+   │  hooks/use-resource-modal     → add/edit modal state               │
+   │  hooks/use-table-page-size    → viewport-adaptive page size        │
+   │  hooks/use-responsive         → mobile/tablet/desktop tiers        │
+   │                                                                    │
+   │  components/FeedbackProvider  → useFeedback(): toast/confirm/error │
+   │                                                                    │
+   │  store/auth-store             → token (Zustand persist)            │
+   │  store/ui-store               → sidebarCollapsed (Zustand persist) │
+   └────────────────────────────────────────────────────────────────────┘
+                    │
+                    ▼ (data layer)
+   ┌────────────────────────────────────────────────────────────────────┐
+   │                           DataPort                                 │
+   │  (src/data/port.ts — interface: list/get/create/update/remove)     │
+   │                                                                    │
+   │   ┌─────────────────────────┐  ┌────────────────────────────────┐  │
+   │   │  httpAdapter            │  │  memoryAdapter                 │  │
+   │   │  (production)           │  │  (tests + Storybook seed)      │  │
+   │   │                         │  │                                │  │
+   │   │  → lib/api.js apiRequest│  │  → in-memory Map per resource  │  │
+   │   │  → /api/v1/* endpoints  │  │  → no network                  │  │
+   │   └────────────┬────────────┘  └────────────────────────────────┘  │
+   └────────────────┼───────────────────────────────────────────────────┘
+                    ▼
+            FastAPI backend
+        (pg-maintenance.onrender.com)
 ```
 
-## 4. Routing map (`src/App.tsx`)
+---
 
-Public:
-- `/auth` and `/` → `AuthPage` (no MainLayout)
+## 4. Directory tree (annotated)
 
-App (wrapped in `<MainLayout>` → sidebar + content area):
-- `/dashboard`, `/pgs`, `/pg/add`, `/pg/edit/:id`
-- `/tenants`, `/rooms`, `/maintenance`, `/transactions`
-- `/profile`, `/settings`, `/notifications`
+Only `src/` is shown. Top-level configs (`vite.config.js`, `tsconfig.json`, `eslint.config.js`,
+`package.json`, `.husky/pre-commit`, `.jscpd.json`, `.gitignore`) do what their names say.
 
-Inquiries route is intentionally commented out — feature was removed but file kept.
+```
+src/
+├── main.tsx                  # Vite entry. Mounts <App/> into #root.
+├── App.tsx                   # Routes + provider stack (Data, Feedback, CommandPalette).
+│
+├── pages/                    # Route components — one per visible URL.
+│   ├── AuthPage.tsx          #  /auth        — login + register form.
+│   ├── Dashboard.tsx         #  /dashboard   — KPI cards + recent activity.
+│   ├── MyPGs.tsx             #  /pgs         — list of owner's PGs (delete here).
+│   ├── AddPG.tsx             #  /pg/add      — 3-step wizard: basics → amenities → rooms.
+│   ├── EditPG.tsx            #  /pg/edit/:id — edit PG basics; "Manage Rooms" jumps to PGRooms.
+│   ├── PGRooms.tsx           #  /pg/:id/rooms — room CRUD scoped to ONE PG.
+│   ├── Rooms.tsx             #  /rooms       — global rooms table across all PGs.
+│   ├── Tenants.tsx           #  /tenants     — tenants table + AddTenantDrawer.
+│   ├── Maintenance.tsx       #  /maintenance — tickets across PGs + NewTicketModal.
+│   ├── Transactions.tsx      #  /transactions — payment ledger + RecordPaymentModal.
+│   ├── Expenses.tsx          #  /expenses    — expense ledger + AddExpenseModal.
+│   ├── Notifications.tsx     #  /notifications.
+│   ├── Profile.tsx           #  /profile     — PATCH /api/v1/users/me.
+│   ├── Settings.tsx          #  /settings    — local UI prefs.
+│   └── Inquiries.tsx         # legacy, route currently unmounted.
+│
+├── components/               # App-level composite components.
+│   ├── MainLayout.tsx        # Sidebar + Header chrome wrapping every protected route.
+│   ├── Sidebar.tsx           # Desktop nav + collapsed state from useUIStore.
+│   ├── Header.tsx            # Mobile-only chrome (notification bell + Cmd+K trigger).
+│   ├── FeedbackProvider.tsx  # Provides useFeedback(): toast/confirm/error. Wraps ToastProvider.
+│   ├── StatCards.tsx         # Semantic stat-card grid used by Dashboard.
+│   │
+│   ├── AddTenantDrawer.tsx   # 4-step tenant onboard drawer, posts /tenants/onboard.
+│   ├── RoomFormModal.tsx     # Room add/edit modal with amenity picker.
+│   ├── RecordPaymentModal.tsx# Payment entry → POST /transactions/.
+│   ├── AddExpenseModal.tsx   # Expense entry → POST /expenses/.
+│   ├── NewTicketModal.tsx    # Maintenance ticket → POST /tickets/.
+│   ├── BookRoomModal.tsx     # (legacy) book a room from /rooms grid.
+│   ├── RoomDetailsModal.tsx  # Read-only room detail from /rooms grid.
+│   │
+│   └── ui/                   # shadcn/ui primitives (don't edit unless adding new one).
+│       ├── Toast.tsx         # ToastProvider (used inside FeedbackProvider).
+│       ├── ConfirmModal.tsx  # Used inside FeedbackProvider for confirm().
+│       ├── Pagination.tsx    # Page navigation widget.
+│       ├── DataTable.tsx     # Generic table primitive.
+│       ├── Select.tsx        # Custom Select used in filter bars.
+│       ├── CommandPalette.tsx# Cmd+K palette mounted at App root.
+│       ├── Badge.tsx         # Semantic Badge with BADGE_MAP variants.
+│       ├── Loader.tsx, EmptyState.tsx, Skeleton.tsx, Drawer.tsx, ...
+│       └── (radix-ui-wrapping primitives: avatar, dialog, dropdown-menu, ...)
+│
+├── data/                     # Server-state data layer (Ports & Adapters over TanStack).
+│   ├── port.ts               # DataPort interface + Resource string union.
+│   ├── httpAdapter.ts        # Production adapter — wraps lib/api.js.
+│   ├── memoryAdapter.ts      # In-memory adapter for tests/Storybook.
+│   ├── DataProvider.tsx      # React context + QueryClient. Wraps the app.
+│   ├── hooks.ts              # useResource / useAggregate / useRepo / useMutation.
+│   ├── index.ts              # Barrel: import from '../data'.
+│   └── __tests__/useResource.test.tsx   # Boundary tests via memoryAdapter.
+│
+├── store/                    # Client state (Zustand).
+│   ├── auth-store.ts         # token (persisted, key 'pg_manager_auth') + non-React getters.
+│   ├── ui-store.ts           # sidebarCollapsed + mobileSidebarOpen.
+│   └── index.ts              # Barrel.
+│
+├── hooks/                    # Reusable custom hooks (in-process).
+│   ├── use-current-user.ts   # Wraps useQuery on /api/v1/auth/me. Provides {displayName,email,initial}.
+│   ├── use-lookups.ts        # Wraps useResource for shared modal lookup data.
+│   ├── use-paginated-filtered-list.ts  # data + filter + search + page → render-ready slice.
+│   ├── use-resource-modal.ts # Manages add/edit modal open + initial item.
+│   ├── use-table-page-size.ts# Computes page size from viewport.
+│   ├── use-responsive.ts     # isMobile/isTablet/isDesktop via window.matchMedia.
+│   └── use-mobile.ts         # Single mobile breakpoint hook.
+│
+├── lib/                      # Pure utilities (no React).
+│   ├── api.js                # fetch wrapper. setToken/clearToken delegate to auth-store.
+│   ├── animations.ts         # All framer-motion Variants (typed).
+│   ├── coerce.ts             # toNumber, toIsoDate, toStringSafe.
+│   ├── format.ts             # formatCurrency (cached Intl.NumberFormat), formatCompact, formatDate, formatRelative.
+│   ├── status.ts             # deriveRoomStatus / derivePaymentStatus / deriveTicketStatus + theme maps.
+│   │                         #   Aliases legacy values: 'vacant'→'available', 'success'→'paid', 'done'→'resolved'.
+│   ├── amenities.ts          # BUILDING_AMENITY_NAMES / ROOM_AMENITY_NAMES + syncAmenities helper.
+│   ├── utils.ts              # cn() Tailwind class merger (shadcn).
+│   ├── mockData.js           # Fallback fixtures used when VITE_USE_MOCK=true.
+│   └── __tests__/            # Unit tests for the pure helpers.
+│
+├── types/                    # Domain TS types — no runtime code.
+│   ├── common.ts             # Timestamps, UUID, SoftDeletable.
+│   ├── user.ts, pg.ts, amenity.ts, room.ts, tenant.ts, transaction.ts,
+│   │   expense.ts, ticket.ts, notification.ts
+│   └── index.ts              # Barrel: import type {...} from '../types'.
+│
+├── constants/                # Magic-string-free single sources of truth.
+│   ├── routes.ts             # ROUTES map + API path map (with param-builders).
+│   ├── options.ts            # Typed Option<T>[] arrays for every dropdown.
+│   ├── colors.ts             # Tailwind chip-class maps keyed by domain enums.
+│   └── index.ts              # Barrel.
+│
+└── test/setup.js             # Vitest setup (jest-dom matchers).
+```
 
-Every route is wrapped in `<AnimatedPage>` + `<AnimatePresence mode="wait">` using `pageVariants` (fade + slide-up).
+---
 
-Global overlays mounted at the top: `<ToastProvider>` and `<CommandPalette>` (opens via Cmd/Ctrl+K and a custom `open-command-palette` window event).
+## 5. Key dataflow walkthroughs
 
-## 5. Data layer
+### 5.1 "User opens /pg/:id/rooms"
 
-`src/lib/api.js` is the single API entry point. Notable behavior:
+1. Router renders `<MainLayout><PGRooms/></MainLayout>`.
+2. `MainLayout` reads `useUIStore` for sidebar collapsed state.
+3. `PGRooms.tsx` calls `apiRequest('/api/v1/rooms/?pg_id=...')` directly today; the
+   target architecture is `useResource('rooms', { pgId })`.
+4. `useResource` → `useDataPort()` → `httpAdapter` → `lib/api.js apiRequest` →
+   `getAuthToken()` from `store/auth-store` → adds `Authorization: Bearer`.
+5. Backend response normalized through `unwrapData`; rows enriched with `pgName` from
+   the `useResource('pgs')` join automatically.
+6. Page renders cards with `ROOM_THEME[deriveRoomStatus(...)]` from `lib/status`.
+7. "Delete" → `useFeedback().confirm({...})` → `apiRequest('...', {method:'DELETE'})` →
+   `useFeedback().error(promise, fallback, success)` shows toast + handles error.
 
-- `apiRequest(path, options)` — JSON fetch.
-  - On `401` or any thrown error, returns `getMockFallback(path)` instead of throwing (because `USE_MOCK = true`). This means **the UI never sees backend errors during dev** — it silently falls back to fixtures from `mockData.js`.
-- `apiFormRequest` — for `application/x-www-form-urlencoded` (used by `/auth/login`).
-- `setToken / clearToken` — stores JWT in `localStorage` under `pg_manager_token`.
-- `unwrapData(payload, fallback)` — normalizes `{ data: ... }` envelopes.
+### 5.2 "Login flow"
 
-Endpoints used (mock + real share the same paths):
-- `POST /api/v1/auth/login`, `POST /api/v1/auth/register`, `GET /api/v1/auth/me`
-- `GET/POST /api/v1/pg-facilities/`, `GET /api/v1/pg-facilities/:id`
-- `GET /api/v1/tenants/`
-- `GET /api/v1/rooms/`
-- `GET /api/v1/tickets/my`
-- `GET /api/v1/notices/`
-- `GET /api/v1/amenities/`
+1. `AuthPage` POSTs `/api/v1/auth/login` (form-urlencoded via `apiFormRequest`).
+2. On success, `setToken(data.access_token)` → delegates to `auth-store`'s `setAuthToken`.
+3. Zustand's `persist` middleware writes `{state:{token:...}}` to `localStorage` key
+   `pg_manager_auth`. Legacy raw-string `pg_manager_token` is auto-migrated on first read.
+4. Navigate to `/dashboard`. `useCurrentUser` (TanStack) fetches `/api/v1/auth/me`;
+   Sidebar + Header show real name/email.
 
-## 6. Reusable UI components (`src/components/ui/`)
+### 5.3 "Add PG (3-step wizard)" — staged commits
 
-shadcn-derived (lower-case files, Radix-based):
-- `dialog.tsx`, `sheet.tsx`, `dropdown-menu.tsx`, `tooltip.tsx`, `avatar.tsx`, `input.tsx`, `label.tsx`, `separator.tsx`, `table.tsx`, `sidebar.tsx`
+1. Step 1 (Basics) → `POST /api/v1/pg/` → save `pgId` in component state.
+2. Step 2 (Building amenities) → for each selected: `syncAmenities('pg', pgId, {add:[...]})`
+   from `lib/amenities`. Failures surface via `useFeedback().toast.warning`.
+3. Step 3 (Rooms) → repeated `RoomFormModal` opens; each `POST /api/v1/rooms/` then
+   per-amenity `syncAmenities('room', roomId, {add:[...]})`.
+4. Finish → `navigate('/pg/:id/rooms')`. If the user bails between steps, the PG plus any
+   committed amenities/rooms remain in the backend (intentional: "I made a PG and quit"
+   is a better failure mode than total loss).
 
-Project primitives (Pascal-case files):
-- **Button** — cva variants: `default | destructive | outline | secondary | ghost | link | primary (alias) | danger (alias)`. Sizes: `default | sm | md | lg | icon`. Supports `asChild` (Slot) and a legacy `icon` prop.
-- **Card** — `rounded-xl border border-border bg-card shadow-sm`. Subparts: CardHeader/Title/Description/Content/Footer.
-- **Badge** — variants: `default | secondary | destructive | outline | success | warning | info | neutral`. Has a `dot` prop. `BADGE_MAP` exports semantic mappings (`Occupied → destructive`, `Vacant → success`, `Paid → success`, `Pending → warning`, etc.).
-- **DataTable** — full-featured: search, sortable columns, client-side pagination (`Rows per page`), loading skeleton, empty state, row hover/click. **Note:** uses hardcoded hex colors (`#E5E7EB`, `#10B981`, `#F9FAFB`...) rather than design tokens — predates the token system.
-- **Drawer** — right-side slide-in.
-- **Loader** — spinner.
-- **Skeleton** — shimmer placeholder.
-- **Toast** — wraps `sonner` with `ToastProvider`.
-- **EmptyState**, **ConfirmModal**, **Select**, **CommandPalette**.
+---
 
-## 7. Design system
+## 6. Testing
 
-The product is branded **TrustCircle** — a green/cream professional look.
+- `npm test` (Vitest, `vitest run`) — 81 tests across 6 files, all green.
+  - `lib/__tests__/*` — pure helper unit tests (status, format, coerce, amenities).
+  - `hooks/__tests__/use-paginated-filtered-list.test.ts` — pagination hook.
+  - `data/__tests__/useResource.test.tsx` — boundary tests of `useResource`/`useRepo`/
+    `useAggregate` via `<DataProvider port={memoryAdapter(seed)}>`.
+- `.gitignore` excludes `src/test/` and `__tests__/` so test files stay local.
 
-### 7.1 Theme source of truth
+---
 
-All design tokens live in `src/index.css` inside a Tailwind v4 `@theme {}` block. There is **no `tailwind.config.js`** — Tailwind v4 reads the `@theme` directives directly. `components.json` declares "neutral" base color and `cssVariables: true`.
+## 7. Tooling commands
 
-### 7.2 Color palette
-
-**Brand green** (also exposed as `--color-mint-*` aliases for back-compat):
-| Token | Hex |
+| Command | Effect |
 |---|---|
-| `brand-50` | `#EEFBF4` |
-| `brand-100` | `#D5F5E3` |
-| `brand-200` | `#A8E6C3` |
-| `brand-300` | `#6FD19E` |
-| `brand-400` | `#3DBF7E` |
-| `brand-500` | `#1C6C41` ← **primary brand color** |
-| `brand-600` | `#155331` |
-| `brand-700` | `#104027` |
-| `brand-800` | `#0C2E1C` |
-| `brand-900` | `#071D12` |
+| `npm run dev` | Vite dev server (port 5173). Proxies `/api/*` to the deployed backend. |
+| `npm run build` | Production build into `dist/`. |
+| `npm test` | Run all Vitest tests once. |
+| `npm run test:watch` | Watch mode. |
+| `npm run lint` | ESLint everything. |
+| `npm run dup` | jscpd duplicate-code report (HTML at `.jscpd-report/`). |
+| Husky pre-commit | Runs `lint-staged` + `npm test` before each commit. |
 
-**Semantic tokens** (light theme, hardcoded — there is no dark mode):
-| Token | Value |
+Override the API target locally:
+```sh
+VITE_API_PROXY=http://localhost:8000 npm run dev
+```
+
+Use mocked data (no backend needed):
+```sh
+VITE_USE_MOCK=true npm run dev
+```
+
+---
+
+## 8. Conventions
+
+- **Imports**: relative within a directory; `@/` alias also configured. Pages typically
+  import from barrels: `'../data'`, `'../types'`, `'../constants'`.
+- **No CSS modules** — Tailwind classes inline. Theme tokens in `src/index.css` `@theme`.
+- **Server state lives in TanStack Query** (via `useResource`/`useAggregate`); never use
+  `useState` to cache server responses.
+- **Client state lives in Zustand stores** (`auth-store`, `ui-store`); add new stores
+  only for genuinely cross-page client state.
+- **Errors surface through `useFeedback`** — never `window.confirm`, `alert`, or raw
+  `console.error` in catch blocks. Use `fb.confirm(...)`, `fb.error(promise, fallback)`,
+  `fb.toast.success(msg)`.
+- **Status derivation** through `lib/status` (never inline ternaries) so backend term
+  drift (e.g. `vacant` vs `available`) is patched in one place.
+- **Currency / dates** through `lib/format` so locale + Intl caching are shared.
+- **New code lives in `.ts`/`.tsx`**; legacy `.js` files (`api.js`, `mockData.js`) are
+  not blocked but new code should be typed.
+
+---
+
+## 9. Backend reference (read-only from this repo)
+
+- Source: `d:/pg-maintenance` → `github.com/PandyaYog/pg-maintenance`.
+- FastAPI + SQLAlchemy 2 + Postgres + Alembic.
+- Layered: `app/api/v1/endpoints/*` (route handlers) → `app/services/*` (business logic) →
+  `app/models/*` (SQLAlchemy models) ↔ `app/schemas/*` (Pydantic v2 DTOs).
+- Auth dep: `app/api/deps.py` exports `get_current_user`, `require_role`, `require_owner`,
+  `verify_pg_ownership`. New endpoints/services should reuse these instead of inlining
+  role checks.
+- Tests: `pytest` with in-memory SQLite (`tests/conftest.py` patches PG UUID/ARRAY types).
+
+---
+
+## 10. Known followups (intentional debt)
+
+- `EditPG.tsx` saves only basic fields — phone/email/totalRooms inputs are unused; amenity
+  toggles aren't synced.
+- `Rooms.tsx` "Add Room" button is a no-op; `BookRoomModal` has hardcoded names.
+- `Sidebar.tsx` shows hardcoded `badges = {notifications: 0, maintenance: 0}` — not yet live.
+- 6 modals share ~150 lines of backdrop/header markup (jscpd flagged); future
+  `<ModalShell>` extraction.
+- Backend endpoints lack pagination, refresh-token rotation, OAuth CSRF state.
+
+---
+
+## 11. Where to start when adding a feature
+
+| Adding... | Touch these files |
 |---|---|
-| `--color-background` | `#F8F5F0` (warm cream — main canvas) |
-| `--color-foreground` | `#111827` |
-| `--color-card` | `#FFFFFF` |
-| `--color-popover` | `#FFFFFF` |
-| `--color-primary` | `#1C6C41` (= brand-500) |
-| `--color-primary-foreground` | `#FFFFFF` |
-| `--color-secondary` | `#F3F4F6` |
-| `--color-muted` | `#F3F4F6` |
-| `--color-muted-foreground` | `#6B7280` |
-| `--color-accent` | `#F3F4F6` |
-| `--color-destructive` | `#EF4444` |
-| `--color-border` | `#E5E7EB` |
-| `--color-input` | `#E5E7EB` |
-| `--color-ring` | `#1C6C41` |
-| `--color-sidebar` | `#FFFFFF` |
-| `--color-sidebar-accent` | `rgba(28,108,65,0.08)` (brand at 8%) |
-| Chart colors | `#1C6C41 / #2E90FA / #F79009 / #B692F6 / #F472B6` |
+| A new page + route | `src/pages/Foo.tsx` + register in `src/App.tsx` + add to `src/constants/routes.ts` |
+| A new resource end-to-end | extend `Resource` in `src/data/port.ts`, add `RESOURCE_BASE` entry in `httpAdapter.ts`, add `src/types/foo.ts` + barrel export, then call `useResource('foo')` from pages |
+| A new modal | `src/components/FooModal.tsx`, drive open state via `useResourceModal()`, fetch lookups via `useLookups()` |
+| A new pure helper | `src/lib/foo.ts` + `src/lib/__tests__/foo.test.ts` |
+| A new domain enum/option set | `src/types/foo.ts` for the type, `src/constants/options.ts` for the dropdown |
+| A new color theme map | `src/constants/colors.ts` |
 
-**Pastel chip palette** used in pages for PG/category tags (NOT in `@theme`, hardcoded inline):
-- Green: `bg-[#DCEEDF] text-[#1C6C41]` (default, "Sunrise PG", "rent")
-- Amber: `bg-[#FCF1DC] text-[#B45309]` ("Cozy Living PG", "maintenance")
-- Pink: `bg-[#FBE5F0] text-[#BE185D]`
-- Purple: `bg-[#E8E1F5] text-[#6D28D9]` ("deposit")
-- Coral: `bg-[#FBE5E0] text-[#A04D3A]` ("expense")
-
-### 7.3 Typography
-- **Sans / display:** `Manrope` (400, 500, 600, 700 — loaded from Google Fonts in `index.css`)
-- **Mono:** `JetBrains Mono`
-- Body: 14px default; common sizes: `text-[10.5px]` (eyebrow labels uppercase), `text-[11px]–[13px]` (meta), `text-sm` (14px body), `text-base–text-2xl` for stats. Tabular nums (`tabular-nums`) used for numbers.
-
-### 7.4 Radius & elevation
-- `--radius: 0.625rem` (10px). Variants: `--radius-sm | -md | -lg | -xl`.
-- Cards: `rounded-xl` (12px) with `shadow-sm`.
-- Most modals/drawers: `rounded-2xl` or `rounded-[10px]`.
-- Inputs: `rounded-md` to `rounded-[10px]` (h-9 to h-[42px]).
-- Header height: `--header-height: 60px` (actual header in code uses `h-[72px]` — slight inconsistency).
-
-### 7.5 Layout
-- **MainLayout** is full-height (`h-screen flex overflow-hidden bg-[#F8F5F0]`) with a fixed sidebar offsetting the content via `marginLeft`.
-- Sidebar widths from `sidebarVariants`: `expanded: 240px` / `collapsed: 64px`. State persisted to `localStorage` key `pg_sidebar_collapsed`.
-- Content max-width `1280px`, centered. Padding: `px-6 pt-6 pb-3` mobile / `px-10 pt-10 pb-3` desktop.
-- Header: 72px tall white bar with breadcrumbs, search-button (Cmd+K), notif bell, user menu.
-
-### 7.6 Sidebar nav structure
-Three sections (uppercase 10.5px section labels, brand-green 3px left bar on the active item, badge pills with brand-green bg, collapsed mode shows tooltips and badge dots):
-- **OVERVIEW** — Dashboard, Notifications
-- **MANAGE** — My PGs, Tenants, Rooms, Maintenance, Transactions
-- **SETTINGS** — Profile, Settings
-
-Logo at top: `/logo.png` (TrustCircle wordmark, 24px tall).
-
-### 7.7 Motion (`src/lib/animations.js`)
-All page transitions, drawers, modals, toasts go through pre-defined framer-motion variants:
-- `pageVariants` — opacity + 12px y, 220ms in / 160ms out, custom cubic-bezier `[0.25, 0.1, 0.25, 1]`
-- `staggerContainer` — `staggerChildren: 0.06`
-- `fadeUp`, `fadeIn`, `cardHover` (lifts card 2px on hover)
-- `drawerVariants` — slide-from-right, spring `damping: 30 / stiffness: 300`
-- `modalVariants` — fade + scale 0.95→1, 180ms
-- `backdropVariants` — opacity 200ms
-- `toastVariants` — slide-from-right spring
-- `sidebarVariants` — width 240↔64
-- `commandPaletteVariants` — fade + scale 0.96
-
-### 7.8 Iconography
-Always **lucide-react**. Common sizes: 14px (inline meta), 15–16px (buttons), 18–22px (nav). `[&_svg]:size-4` is the Button default.
-
-### 7.9 Custom UI details
-- **Custom scrollbars** (in `index.css`): 10px wide, brand-green thumb on cream track with 2px cream border for a "pill" effect; thin `scrollbar-width` on Firefox.
-- **Focus ring**: `outline: 2px solid var(--color-ring)` with 2px offset on `:focus-visible`.
-- **Avatar fallback**: gradient `from-[#1C6C41] to-[#3DBF7E]` circle with white initial — used in sidebar bottom + header.
-
-### 7.10 Status & semantic conventions
-- **Ticket priority** — high: red, medium: amber, low: brand-400 green.
-- **Ticket category tones** — plumbing: blue, electrical: orange, furniture: purple, cleaning: brand green, other: muted.
-- **Timeline dots** — ticket: red, tenant: brand-green, general: muted.
-- **Status badges** — open: destructive, in_progress: warning, resolved/paid/responded: success, closed/new: neutral/info.
-- Currency formatted as `₹X.XK` for thousands, full `₹X,XXX` for line items, with `tabular-nums`.
-
-## 8. Important conventions / gotchas
-
-- **File extensions are misleading**: most `.tsx` files don't actually use TypeScript types — they're effectively JS in TSX-named files. Do not add types unprompted.
-- **Mock-first**: every fetch is wrapped to return mock data on failure. Don't add error UI for network errors during dev — the user expects it to "just work" against fixtures.
-- **No global state library** — pages fetch their own data via `useEffect`. There is no Redux/Zustand/Context for app data. The empty `src/context/` folder exists but isn't used.
-- **DataTable uses hardcoded hex colors**, not theme tokens. The rest of the app uses tokens (`bg-card`, `text-muted-foreground`, `text-primary`). When refactoring DataTable, prefer tokens; when matching its style elsewhere, you'll see hex values.
-- **Brand color appears in two forms** in code: tokenized (`text-primary`, `bg-primary/15`) and hardcoded (`bg-[#1C6C41]`). Both are valid — the hex form is common in `Sidebar.tsx`, `Header.tsx`, `AuthPage.tsx`, and pastel-chip palettes.
-- **Page transitions wrap every route** — avoid adding `<motion.div>` outermost in pages or you'll double-animate.
-- **Cmd/Ctrl+K** opens the command palette via a global window event — preserve that contract if adding new search affordances.
-- **Sidebar collapse state** persisted under `pg_sidebar_collapsed` (string `"true"/"false"`). Both `MainLayout` and `Sidebar` read this independently.
-- **Currency, dates, names are India-localized**. Don't introduce $/USD or US-style date formatting.
-- All dates in mock data are in **2026** (the project's "current" year per global instructions).
-
-## 9. Things that are stubbed / partial
-
-- Auth has no real backend wired up — it just sets a fake token and routes to `/dashboard`.
-- Notification badge counts (`notifications: 3, inquiries: 5, maintenance: 2`) are hardcoded in `Sidebar.tsx`.
-- Inquiries page exists but its route is commented out.
-- Revenue/Due-this-week/Avg-rent on Dashboard are computed from `tenants.length × 8500` — there is no payments API.
-- `server/mock.js` has only GET endpoints + login/register; POSTs other than auth/PG echo back the body without persistence.
+When in doubt, read the file at the suggested path; the conventions above are followed
+consistently across the codebase.
