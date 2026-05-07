@@ -24,3 +24,13 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Tests (kept local, not committed)
+src/test/
+src/**/__tests__/
+src/**/*.test.*
+src/**/*.spec.*
+
+# Tooling artifacts
+.jscpd-report/
+coverage/

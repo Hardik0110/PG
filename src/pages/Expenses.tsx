@@ -10,6 +10,7 @@ import Select from '../components/ui/Select';
 import Loader from '../components/ui/Loader';
 import Pagination from '../components/ui/Pagination';
 import { useTablePageSize } from '../hooks/use-table-page-size';
+import { formatCurrency, formatCompact, formatDate } from '../lib/format';
 
 const CATEGORY_CHIP_COLORS = {
   electricity: 'bg-[#FCF1DC] text-[#B45309]',
@@ -123,20 +124,6 @@ function Expenses() {
     const entries = Object.entries(sums).sort((a, b) => b[1] - a[1]);
     return entries[0] || ['—', 0];
   }, [filteredExp]);
-
-  const formatCurrency = (amt) => {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amt || 0);
-  };
-
-  const formatCompact = (amt) => {
-    if (!amt) return '₹0';
-    if (amt >= 100000) return `₹${(amt / 100000).toFixed(1)}L`;
-    if (amt >= 1000) return `₹${Math.round(amt / 1000)}K`;
-    return `₹${amt}`;
-  };
-
-  const formatDate = (iso) =>
-    iso ? new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
 
   const handleExportCSV = () => {
     const headers = ['Vendor', 'PG', 'Category', 'Amount', 'Date', 'Method', 'Description'];

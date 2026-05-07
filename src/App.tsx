@@ -5,6 +5,7 @@ import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import AddPG from './pages/AddPG';
 import EditPG from './pages/EditPG';
+import PGRooms from './pages/PGRooms';
 
 import Maintenance from './pages/Maintenance';
 import Tenants from './pages/Tenants';
@@ -17,7 +18,8 @@ import Notifications from './pages/Notifications';
 import MyPGs from './pages/MyPGs';
 import MainLayout from './components/MainLayout';
 import CommandPalette from './components/ui/CommandPalette';
-import { ToastProvider } from './components/ui/Toast';
+import { FeedbackProvider } from './components/FeedbackProvider';
+import { DataProvider } from './data';
 
 function AnimatedPage({ children }) {
   return (
@@ -73,6 +75,16 @@ function AppRoutes() {
             <MainLayout>
               <AnimatedPage>
                 <EditPG />
+              </AnimatedPage>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/pg/:id/rooms"
+          element={
+            <MainLayout>
+              <AnimatedPage>
+                <PGRooms />
               </AnimatedPage>
             </MainLayout>
           }
@@ -184,10 +196,12 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <ToastProvider>
-        <CommandPalette />
-        <AppRoutes />
-      </ToastProvider>
+      <DataProvider>
+        <FeedbackProvider>
+          <CommandPalette />
+          <AppRoutes />
+        </FeedbackProvider>
+      </DataProvider>
     </BrowserRouter>
   );
 }

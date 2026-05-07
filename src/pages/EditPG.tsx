@@ -4,10 +4,12 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft, Check, Save, Wifi, Wind, Car, Cctv, ArrowUpFromDot,
   WashingMachine, Droplets, ShieldCheck, Zap, UtensilsCrossed, Bath, Tv,
+  DoorOpen, ArrowRight,
 } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import Loader from '../components/ui/Loader';
+import { useFeedback } from '../components/FeedbackProvider';
 
 const AMENITY_OPTIONS = [
   { key: 'wifi', label: 'WiFi', icon: Wifi },
@@ -32,6 +34,7 @@ const LABEL_CLASS = 'block text-[13px] font-medium text-[#6B7280] mb-1.5';
 
 function EditPG() {
   const navigate = useNavigate();
+  const fb = useFeedback();
   const { id } = useParams();
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -45,7 +48,7 @@ function EditPG() {
   const [ownerPhone, setOwnerPhone] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
   const [totalRooms, setTotalRooms] = useState('');
-  const [pgType, setPgType] = useState('Mixed');
+  const [pgType, setPgType] = useState('gents');
   const [amenities, setAmenities] = useState({});
 
   useEffect(() => {
@@ -62,7 +65,7 @@ function EditPG() {
         setOwnerPhone(data.owner_phone || '');
         setOwnerEmail(data.owner_email || '');
         setTotalRooms(data.total_rooms?.toString() || '');
-        setPgType(data.pg_type || 'Mixed');
+        setPgType(data.type || 'gents');
         if (data.amenities && typeof data.amenities === 'object') {
           setAmenities(data.amenities);
         }
@@ -105,25 +108,25 @@ function EditPG() {
     }
 
     setSaving(true);
-    try {
-      await apiRequest(`/api/v1/pg/${id}`, {
+    const result = await fb.error(
+      apiRequest(`/api/v1/pg/${id}`, {
         method: 'PATCH',
         body: {
           name,
           address,
           city,
           state,
-          pincode: undefined,  // pincode can be edited via separate input if needed
-          type: (pgType || 'gents').toLowerCase(),
+          type: pgType || 'gents',
         },
-      });
+      }),
+      'Failed to update PG',
+      'PG updated',
+    );
+    if (result !== undefined) {
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
-    } catch (err) {
-      console.error('Failed to update PG:', err);
-    } finally {
-      setSaving(false);
     }
+    setSaving(false);
   };
 
   if (loading) {
@@ -143,7 +146,7 @@ function EditPG() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="max-w-3xl mx-auto h-full overflow-y-auto pr-1"
+      className="max-w-5xl mx-auto"
     >
 
       {showSuccess && (
@@ -167,7 +170,7 @@ function EditPG() {
         >
           <ArrowLeft size={18} className="text-[#374151]" />
         </button>
-        <div>
+        <div className="flex-1 min-w-0">
           <button
             onClick={() => navigate('/dashboard')}
             className="text-sm text-[#6B7280] hover:text-[#1C6C41] transition-colors cursor-pointer bg-transparent border-none p-0"
@@ -178,15 +181,33 @@ function EditPG() {
             Edit PG {name ? <span className="text-[#6B7280] font-normal text-base sm:text-lg ml-1">/ {name}</span> : ''}
           </h1>
         </div>
+        <button
+          onClick={() => navigate(`/pg/${id}/rooms`)}
+          className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-white border border-[#1C6C41] text-[#1C6C41] hover:bg-[#1C6C41] hover:text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer shrink-0"
+        >
+          <DoorOpen size={16} />
+          Manage Rooms
+          <ArrowRight size={14} />
+        </button>
       </div>
+
+      <button
+        type="button"
+        onClick={() => navigate(`/pg/${id}/rooms`)}
+        className="sm:hidden w-full mb-6 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white border border-[#1C6C41] text-[#1C6C41] text-sm font-semibold rounded-lg transition-colors cursor-pointer"
+      >
+        <DoorOpen size={16} />
+        Manage Rooms
+        <ArrowRight size={14} />
+      </button>
 
       <form onSubmit={handleSubmit}>
         <motion.div variants={staggerContainer} initial="initial" animate="animate" className="flex flex-col gap-6">
 
           <motion.div variants={fadeUp} className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-6">
             <h2 className="text-base font-semibold text-[#111827] mb-5">Basic Information</h2>
-            <div className="flex flex-col gap-4">
-              <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
                 <label className={LABEL_CLASS}>PG Name *</label>
                 <input
                   type="text"
@@ -199,7 +220,7 @@ function EditPG() {
                 {errors.name && <p className="text-xs text-[#F04438] mt-1">{errors.name}</p>}
               </div>
 
-              <div>
+              <div className="md:col-span-2">
                 <label className={LABEL_CLASS}>Address *</label>
                 <input
                   type="text"
@@ -212,88 +233,82 @@ function EditPG() {
                 {errors.address && <p className="text-xs text-[#F04438] mt-1">{errors.address}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={LABEL_CLASS}>City</label>
-                  <input
-                    type="text"
-                    value={city}
-                    onChange={e => setCity(e.target.value)}
-                    placeholder="City"
-                    className={INPUT_CLASS}
-                  />
-                </div>
-                <div>
-                  <label className={LABEL_CLASS}>State</label>
-                  <input
-                    type="text"
-                    value={state}
-                    onChange={e => setState(e.target.value)}
-                    placeholder="State"
-                    className={INPUT_CLASS}
-                  />
-                </div>
+              <div>
+                <label className={LABEL_CLASS}>City</label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={e => setCity(e.target.value)}
+                  placeholder="City"
+                  className={INPUT_CLASS}
+                />
+              </div>
+              <div>
+                <label className={LABEL_CLASS}>State</label>
+                <input
+                  type="text"
+                  value={state}
+                  onChange={e => setState(e.target.value)}
+                  placeholder="State"
+                  className={INPUT_CLASS}
+                />
               </div>
             </div>
           </motion.div>
 
           <motion.div variants={fadeUp} className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-6">
             <h2 className="text-base font-semibold text-[#111827] mb-5">Contact & Details</h2>
-            <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={LABEL_CLASS}>Owner Phone</label>
-                  <input
-                    type="tel"
-                    value={ownerPhone}
-                    onChange={e => setOwnerPhone(e.target.value)}
-                    placeholder="+91 98765 43210"
-                    className={INPUT_CLASS}
-                  />
-                </div>
-                <div>
-                  <label className={LABEL_CLASS}>Owner Email</label>
-                  <input
-                    type="email"
-                    value={ownerEmail}
-                    onChange={e => setOwnerEmail(e.target.value)}
-                    placeholder="owner@example.com"
-                    className={INPUT_CLASS}
-                  />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className={LABEL_CLASS}>Owner Phone</label>
+                <input
+                  type="tel"
+                  value={ownerPhone}
+                  onChange={e => setOwnerPhone(e.target.value)}
+                  placeholder="+91 98765 43210"
+                  className={INPUT_CLASS}
+                />
+              </div>
+              <div>
+                <label className={LABEL_CLASS}>Owner Email</label>
+                <input
+                  type="email"
+                  value={ownerEmail}
+                  onChange={e => setOwnerEmail(e.target.value)}
+                  placeholder="owner@example.com"
+                  className={INPUT_CLASS}
+                />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={LABEL_CLASS}>Total Rooms</label>
-                  <input
-                    type="number"
-                    value={totalRooms}
-                    onChange={e => setTotalRooms(e.target.value)}
-                    placeholder="e.g. 20"
-                    min="1"
-                    className={INPUT_CLASS}
-                  />
-                </div>
-                <div>
-                  <label className={LABEL_CLASS}>Type</label>
-                  <select
-                    value={pgType}
-                    onChange={e => setPgType(e.target.value)}
-                    className={`${INPUT_CLASS} cursor-pointer`}
-                  >
-                    <option value="Mixed">Mixed</option>
-                    <option value="Boys">Boys</option>
-                    <option value="Girls">Girls</option>
-                  </select>
-                </div>
+              <div>
+                <label className={LABEL_CLASS}>Total Rooms</label>
+                <input
+                  type="number"
+                  value={totalRooms}
+                  onChange={e => setTotalRooms(e.target.value)}
+                  placeholder="e.g. 20"
+                  min="1"
+                  className={INPUT_CLASS}
+                />
+              </div>
+              <div>
+                <label className={LABEL_CLASS}>Type</label>
+                <select
+                  value={pgType}
+                  onChange={e => setPgType(e.target.value)}
+                  className={`${INPUT_CLASS} cursor-pointer`}
+                >
+                  <option value="gents">Gents</option>
+                  <option value="ladies">Ladies</option>
+                  <option value="coed">Co-ed</option>
+                </select>
               </div>
             </div>
           </motion.div>
 
           <motion.div variants={fadeUp} className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-6">
             <h2 className="text-base font-semibold text-[#111827] mb-5">Amenities</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {AMENITY_OPTIONS.map(({ key, label, icon: Icon }) => {
                 const checked = !!amenities[key];
                 return (

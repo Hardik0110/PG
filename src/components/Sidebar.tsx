@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -6,7 +6,6 @@ import {
   Bell,
   Users,
   Home,
-  MessageSquare,
   Wrench,
   CreditCard,
   Wallet,
@@ -14,14 +13,13 @@ import {
   Settings,
   LogOut,
   X,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Plus,
   Building,
 } from 'lucide-react';
 import { clearToken, setToken } from '../lib/api';
 import { sidebarVariants, backdropVariants } from '../lib/animations';
+import { useCurrentUser } from '../hooks/use-current-user';
 
 const LS_KEY = 'pg_sidebar_collapsed';
 
@@ -79,6 +77,7 @@ function Badge({ count }) {
 
 function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, onToggleCollapse }) {
   const navigate = useNavigate();
+  const { displayName, email, initial } = useCurrentUser();
 
   const [internalCollapsed, setInternalCollapsed] = useState(() => {
     try {
@@ -102,7 +101,7 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
     } else {
       setInternalCollapsed((prev) => {
         const next = !prev;
-        try { localStorage.setItem(LS_KEY, String(next)); } catch {}
+        try { localStorage.setItem(LS_KEY, String(next)); } catch { /* localStorage unavailable */ }
         return next;
       });
     }
@@ -224,16 +223,16 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
             collapsed ? 'flex-col gap-2 px-1 py-2' : 'gap-3 px-3 py-2 transition-colors hover:bg-gray-50'
           }`}
         >
-          <Tooltip label="User" show={collapsed}>
+          <Tooltip label={displayName} show={collapsed}>
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#1C6C41] to-[#3DBF7E] text-sm font-bold text-white">
-              U
+              {initial}
             </div>
           </Tooltip>
 
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13.5px] font-medium text-gray-800">User</p>
-              <p className="truncate text-[11.5px] text-gray-400 mt-0.5">user@trustcircle.com</p>
+              <p className="truncate text-[13.5px] font-medium text-gray-800">{displayName}</p>
+              {email && <p className="truncate text-[11.5px] text-gray-400 mt-0.5">{email}</p>}
             </div>
           )}
 

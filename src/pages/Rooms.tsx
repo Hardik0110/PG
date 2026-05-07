@@ -11,17 +11,16 @@ import {
 import BookRoomModal from '../components/BookRoomModal';
 import RoomDetailsModal from '../components/RoomDetailsModal';
 import Select from '../components/ui/Select';
+import { deriveRoomStatus, ROOM_THEME } from '../lib/status';
+import { formatCurrency as formatINR } from '../lib/format';
 
-function RoomCard({ room, formatCurrency, onBook, onView, tenantCount }) {
-  const isVacant = room.status === 'vacant';
+function RoomCard({ room, onBook, onView, tenantCount }) {
   const maxAmenities = 3;
   const baseCapacity = room.type === 'single' ? 1 : room.type === 'double' ? 2 : 3;
-  const capacity = Math.max(baseCapacity, tenantCount);
-
-  const bannerColor = isVacant ? 'bg-[#DCEEDF]' : 'bg-[#FBDED8]';
-  const accentText = isVacant ? 'text-[#1C6C41]' : 'text-[#B91C1C]';
-  const badgeRing = isVacant ? 'ring-[#1C6C41]/30' : 'ring-[#B91C1C]/30';
-  const badgeText = accentText;
+  const capacity = Math.max(room.capacity ?? baseCapacity, tenantCount);
+  const effectiveStatus = deriveRoomStatus(room.status, tenantCount, capacity);
+  const theme = ROOM_THEME[effectiveStatus];
+  const isVacant = effectiveStatus === 'available';
 
   return (
     <motion.div
@@ -32,21 +31,21 @@ function RoomCard({ room, formatCurrency, onBook, onView, tenantCount }) {
     >
       <motion.div variants={cardHover} className="flex flex-col flex-1">
 
-        <div className={`relative h-20 ${bannerColor} px-5 py-3`}>
-          <div className={`relative opacity-75 ${accentText}`}>
+        <div className={`relative h-20 ${theme.banner} px-5 py-3`}>
+          <div className={`relative opacity-75 ${theme.text}`}>
             <span className="text-[10px] font-semibold tracking-[0.2em] uppercase">
-              {isVacant ? 'Available' : 'Fully Booked'}
+              {theme.kicker}
             </span>
           </div>
-          <h2 className={`relative mt-1 text-xl font-black tracking-wide ${accentText}`}>
-            {isVacant ? 'VACANT' : 'ROOM FULL'}
+          <h2 className={`relative mt-1 text-xl font-black tracking-wide ${theme.text}`}>
+            {theme.headline}
           </h2>
 
           <div
-            className={`absolute top-1/2 -translate-y-1/2 right-5 h-14 w-14 rounded-full bg-white ring-4 ${badgeRing} shadow-md flex flex-col items-center justify-center`}
+            className={`absolute top-1/2 -translate-y-1/2 right-5 h-14 w-14 rounded-full bg-white ring-4 ${theme.ring} shadow-md flex flex-col items-center justify-center`}
           >
-            <Users className={`h-3.5 w-3.5 ${badgeText}`} strokeWidth={2.5} />
-            <span className={`text-sm font-bold leading-none mt-0.5 ${badgeText}`}>
+            <Users className={`h-3.5 w-3.5 ${theme.text}`} strokeWidth={2.5} />
+            <span className={`text-sm font-bold leading-none mt-0.5 ${theme.text}`}>
               {tenantCount}/{capacity}
             </span>
           </div>
@@ -67,7 +66,7 @@ function RoomCard({ room, formatCurrency, onBook, onView, tenantCount }) {
                 Monthly
               </p>
               <p className="mt-1 text-lg font-bold text-[#1C6C41] font-mono leading-tight">
-                {formatCurrency(room.rent)}
+                {formatINR(room.rent)}
               </p>
             </div>
           </div>
@@ -143,23 +142,20 @@ function Rooms() {
           setPgs(pgArr);
           if (Array.isArray(roomsData)) {
             setRooms(
-              roomsData.map((r) => {
-                const isOccupied = r.status === 'occupied' || r.current_occupancy >= r.capacity;
-                return {
-                  id: r.id,
-                  pgId: r.pg_id,
-                  pgName: pgById[r.pg_id]?.name || '—',
-                  roomNumber: r.room_number || 'N/A',
-                  floor: r.floor || 1,
-                  type: r.room_sharing || 'single',
-                  rent: r.monthly_rent_per_head || 0,
-                  status: isOccupied ? 'occupied' : (r.status || 'vacant'),
-                  capacity: r.capacity,
-                  currentOccupancy: r.current_occupancy,
-                  isAc: r.is_ac,
-                  amenities: (r.amenities || []).map(a => a.name || a),
-                };
-              }),
+              roomsData.map((r) => ({
+                id: r.id,
+                pgId: r.pg_id,
+                pgName: pgById[r.pg_id]?.name || '—',
+                roomNumber: r.room_number || 'N/A',
+                floor: r.floor ?? 0,
+                type: r.room_sharing || 'single',
+                rent: r.monthly_rent_per_head || 0,
+                status: r.status || 'available',
+                capacity: r.capacity,
+                currentOccupancy: r.current_occupancy,
+                isAc: r.is_ac,
+                amenities: (r.amenities || []).map(a => a.name || a),
+              })),
             );
           }
           if (Array.isArray(tenantsData)) setTenants(tenantsData);
@@ -198,10 +194,15 @@ function Rooms() {
     () =>
       rooms.filter((r) => {
         if (filterPg !== 'all' && r.pgId !== filterPg) return false;
-        if (filterStatus !== 'all' && r.status !== filterStatus) return false;
+        if (filterStatus !== 'all') {
+          const tCount = tenantCountByRoom.get(r.id) || 0;
+          const cap = Math.max(r.capacity ?? 0, tCount);
+          const effective = deriveRoomStatus(r.status, tCount, cap);
+          if (effective !== filterStatus) return false;
+        }
         return true;
       }),
-    [rooms, filterPg, filterStatus],
+    [rooms, filterPg, filterStatus, tenantCountByRoom],
   );
 
   const groupedRooms = useMemo(() => {
@@ -216,13 +217,6 @@ function Rooms() {
     });
     return Object.values(groups);
   }, [filteredRooms, filterPg]);
-
-  const formatCurrency = (amt) =>
-    new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(amt);
 
   const pgOptions = useMemo(() => {
     if (pgs.length > 0) return pgs.map(p => ({ id: p.id, name: p.name }));
@@ -276,8 +270,10 @@ function Rooms() {
             minWidth={150}
             options={[
               { value: 'all', label: 'All Status' },
+              { value: 'available', label: 'Available' },
               { value: 'occupied', label: 'Occupied' },
-              { value: 'vacant', label: 'Vacant' },
+              { value: 'maintenance', label: 'Maintenance' },
+              { value: 'reserved', label: 'Reserved' },
             ]}
           />
 
@@ -315,7 +311,6 @@ function Rooms() {
                   <RoomCard
                     key={room.id}
                     room={room}
-                    formatCurrency={formatCurrency}
                     onBook={setSelectedRoomToBook}
                     onView={setSelectedRoomToView}
                     tenantCount={getTenantCount(room)}
@@ -337,7 +332,6 @@ function Rooms() {
             <RoomCard
               key={room.id}
               room={room}
-              formatCurrency={formatCurrency}
               onBook={setSelectedRoomToBook}
               onView={setSelectedRoomToView}
               tenantCount={getTenantCount(room)}
@@ -350,11 +344,10 @@ function Rooms() {
         open={!!selectedRoomToBook}
         onClose={() => setSelectedRoomToBook(null)}
         roomLabel={selectedRoomToBook ? `${selectedRoomToBook.roomNumber} (${selectedRoomToBook.pgName})` : ''}
-        onSubmit={(data) => {
+        onSubmit={() => {
           if (!selectedRoomToBook) return;
-
           setRooms((prev) =>
-            prev.map(r => r.id === selectedRoomToBook.id ? { ...r, status: 'occupied' } : r)
+            prev.map((r) => (r.id === selectedRoomToBook.id ? { ...r, status: 'occupied' } : r)),
           );
         }}
       />

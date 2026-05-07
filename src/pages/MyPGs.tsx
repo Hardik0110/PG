@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { pageVariants, staggerContainer, fadeUp, cardHover } from '../lib/animations';
 import { apiRequest } from '../lib/api';
 import Loader from '../components/ui/Loader';
+import { useFeedback } from '../components/FeedbackProvider';
 
 const TYPE_THEME = {
   gents: {
@@ -115,6 +116,7 @@ function PGCard({ pg, onManage, onDelete }) {
 
 function MyPGs() {
   const navigate = useNavigate();
+  const fb = useFeedback();
   const [pgs, setPgs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
@@ -147,17 +149,25 @@ function MyPGs() {
   }, []);
 
   const handleDelete = async (pg) => {
-    const tenantsLine = pg.tenants > 0 ? `\n\nThis PG has ${pg.tenants} tenant(s) — they will be unlinked.` : '';
-    if (!window.confirm(`Delete "${pg.name}" permanently?${tenantsLine}`)) return;
+    const ok = await fb.confirm({
+      title: `Delete "${pg.name}"?`,
+      message: pg.tenants > 0
+        ? `This PG has ${pg.tenants} tenant(s) — they will be unlinked. This cannot be undone.`
+        : 'This cannot be undone.',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    });
+    if (!ok) return;
     setDeletingId(pg.id);
-    try {
-      await apiRequest(`/api/v1/pg/${pg.id}`, { method: 'DELETE' });
-      setPgs(prev => prev.filter(p => p.id !== pg.id));
-    } catch (err) {
-      alert(`Could not delete: ${err.message || 'unknown error'}`);
-    } finally {
-      setDeletingId(null);
+    const result = await fb.error(
+      apiRequest(`/api/v1/pg/${pg.id}`, { method: 'DELETE' }),
+      'Could not delete PG',
+      'PG deleted',
+    );
+    if (result !== undefined) {
+      setPgs((prev) => prev.filter((p) => p.id !== pg.id));
     }
+    setDeletingId(null);
   };
 
   return (
