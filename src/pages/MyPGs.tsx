@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Building, Plus, MapPin, Users, Settings, ArrowRight } from 'lucide-react';
+import { Building, Plus, MapPin, Users, Trash2, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { pageVariants, staggerContainer, fadeUp, cardHover } from '../lib/animations';
 import { apiRequest } from '../lib/api';
@@ -27,7 +27,7 @@ const TYPE_THEME = {
   },
 };
 
-function PGCard({ pg, onManage }) {
+function PGCard({ pg, onManage, onDelete }) {
   const theme = TYPE_THEME[pg.type] || TYPE_THEME.gents;
 
   return (
@@ -68,10 +68,12 @@ function PGCard({ pg, onManage }) {
               <span className="truncate">{pg.location}</span>
             </div>
             <button
-              className="text-[#A89580] hover:text-[#1C6C41] transition-colors cursor-pointer shrink-0"
-              aria-label="PG settings"
+              onClick={() => onDelete(pg)}
+              className="text-[#A89580] hover:text-red-600 hover:bg-red-50 rounded-md p-1 transition-colors cursor-pointer shrink-0"
+              aria-label="Delete PG"
+              title="Delete this PG"
             >
-              <Settings size={18} />
+              <Trash2 size={16} />
             </button>
           </div>
 
@@ -115,6 +117,7 @@ function MyPGs() {
   const navigate = useNavigate();
   const [pgs, setPgs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -142,6 +145,20 @@ function MyPGs() {
     })();
     return () => { mounted = false; };
   }, []);
+
+  const handleDelete = async (pg) => {
+    const tenantsLine = pg.tenants > 0 ? `\n\nThis PG has ${pg.tenants} tenant(s) — they will be unlinked.` : '';
+    if (!window.confirm(`Delete "${pg.name}" permanently?${tenantsLine}`)) return;
+    setDeletingId(pg.id);
+    try {
+      await apiRequest(`/api/v1/pg/${pg.id}`, { method: 'DELETE' });
+      setPgs(prev => prev.filter(p => p.id !== pg.id));
+    } catch (err) {
+      alert(`Could not delete: ${err.message || 'unknown error'}`);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <motion.div
@@ -187,8 +204,14 @@ function MyPGs() {
               key={pg.id}
               pg={pg}
               onManage={() => navigate(`/pg/edit/${pg.id}`)}
+              onDelete={handleDelete}
             />
           ))}
+          {deletingId && (
+            <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 pointer-events-none">
+              <div className="bg-white rounded-lg px-6 py-4 shadow-xl text-sm text-[#5C4632]">Deleting…</div>
+            </div>
+          )}
         </motion.div>
       )}
     </motion.div>
