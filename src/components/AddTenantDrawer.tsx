@@ -1,9 +1,12 @@
-import { useState } from 'react';
-import { X, UserPlus, UploadCloud, ChevronRight, ChevronLeft } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { X, UserPlus, ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { apiRequest } from '../lib/api';
 
-export default function AddTenantDrawer({ open, onClose, onSubmit }) {
+export default function AddTenantDrawer({ open, onClose, onSubmit, pgs = [], rooms = [] }) {
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -16,22 +19,73 @@ export default function AddTenantDrawer({ open, onClose, onSubmit }) {
     guardianPhone: '',
     relation: '',
     workplace: '',
+    occupation: '',
+    pg_id: '',
+    room_id: '',
+    monthly_rent: '',
+    security_deposit: '',
+    move_in_date: new Date().toISOString().split('T')[0],
+    password: 'changeme123',
   });
+
+  useEffect(() => {
+    if (open && !formData.pg_id && pgs.length > 0) {
+      setFormData(prev => ({ ...prev, pg_id: pgs[0].id }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, pgs]);
+
+  const roomsForPg = useMemo(
+    () => rooms.filter(r => r.pg_id === formData.pg_id && r.current_occupancy < r.capacity),
+    [rooms, formData.pg_id]
+  );
 
   if (!open) return null;
 
   const handleNext = () => setStep((s) => Math.min(4, s + 1));
   const handlePrev = () => setStep((s) => Math.max(1, s - 1));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (step < 4) {
       handleNext();
       return;
     }
-    onSubmit(formData);
-    onClose();
-    setTimeout(() => setStep(1), 300);
+    setSubmitError('');
+    setSubmitting(true);
+    try {
+      const payload = {
+        user: {
+          email: formData.email,
+          full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+          phone_number: formData.phone || null,
+          password: formData.password || 'changeme123',
+        },
+        pg_id: formData.pg_id,
+        room_id: formData.room_id || null,
+        move_in_date: formData.move_in_date,
+        monthly_rent: parseFloat(formData.monthly_rent || '0'),
+        security_deposit: parseFloat(formData.security_deposit || '0'),
+        aadhar_no: formData.aadharNo || null,
+        pan_no: formData.panNo || null,
+        guardian_name: formData.guardianName || null,
+        guardian_phone: formData.guardianPhone || null,
+        guardian_relation: formData.relation || null,
+        workplace: formData.workplace || null,
+        occupation: formData.occupation || null,
+      };
+      const created = await apiRequest('/api/v1/tenants/onboard', {
+        method: 'POST',
+        body: payload,
+      });
+      onSubmit?.(created);
+      onClose();
+      setTimeout(() => setStep(1), 300);
+    } catch (err) {
+      setSubmitError(err.message || 'Failed to onboard tenant');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const renderStep = () => {
@@ -39,31 +93,24 @@ export default function AddTenantDrawer({ open, onClose, onSubmit }) {
       case 1:
         return (
           <div className="flex flex-col gap-5 animate-in fade-in slide-in-from-right-4 duration-300">
-            <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1">Profile Photo</label>
-              <button type="button" className="w-full flex flex-col items-center justify-center gap-2 py-6 border-2 border-dashed border-[#E5E7EB] rounded-lg hover:border-[#1C6C41]/50 hover:bg-[#F9FAFB] transition-colors text-sm text-[#6B7280]">
-                <UploadCloud size={24} className="text-[#9CA3AF]" />
-                Click to upload
-              </button>
-            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-[#374151] mb-1">First Name</label>
+                <label className="block text-sm font-medium text-[#374151] mb-1">First Name *</label>
                 <input required type="text" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#374151] mb-1">Last Name</label>
+                <label className="block text-sm font-medium text-[#374151] mb-1">Last Name *</label>
                 <input required type="text" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1">Phone Number</label>
+              <label className="block text-sm font-medium text-[#374151] mb-1">Phone Number *</label>
               <input required type="tel" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-[#374151] mb-1">Email</label>
-                <input type="email" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                <label className="block text-sm font-medium text-[#374151] mb-1">Email *</label>
+                <input required type="email" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#374151] mb-1">Blood Group</label>
@@ -92,13 +139,6 @@ export default function AddTenantDrawer({ open, onClose, onSubmit }) {
             <div>
               <label className="block text-sm font-medium text-[#374151] mb-1">PAN Number</label>
               <input type="text" placeholder="10-digit PAN (Optional)" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm uppercase" value={formData.panNo} onChange={(e) => setFormData({ ...formData, panNo: e.target.value })} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1">Upload ID Proof (Front & Back)</label>
-              <button type="button" className="w-full flex flex-col items-center justify-center gap-2 py-8 border-2 border-dashed border-[#E5E7EB] rounded-lg hover:border-[#1C6C41]/50 hover:bg-[#F9FAFB] transition-colors text-sm text-[#6B7280]">
-                <UploadCloud size={24} className="text-[#9CA3AF]" />
-                Select PDF or Image
-              </button>
             </div>
           </div>
         );
@@ -131,13 +171,58 @@ export default function AddTenantDrawer({ open, onClose, onSubmit }) {
         return (
           <div className="flex flex-col gap-5 animate-in fade-in slide-in-from-right-4 duration-300">
             <div>
-              <label className="block text-sm font-medium text-[#374151] mb-1">College / Company Name</label>
-              <input required type="text" placeholder="e.g., Christ University or TCS" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.workplace} onChange={(e) => setFormData({ ...formData, workplace: e.target.value })} />
+              <label className="block text-sm font-medium text-[#374151] mb-1">College / Company</label>
+              <input type="text" placeholder="e.g., Christ University or TCS" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.workplace} onChange={(e) => setFormData({ ...formData, workplace: e.target.value })} />
             </div>
 
-            <div className="p-4 bg-[#ECFDF3] border border-[#A8E6C3] rounded-lg mt-4">
-              <h4 className="text-sm font-semibold text-[#1C6C41] mb-2">Ready to submit!</h4>
-              <p className="text-xs text-[#064E3B]">The tenant profile will be created. You can book a room for them from the Rooms page next.</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1">PG *</label>
+                <select required className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm bg-white" value={formData.pg_id} onChange={(e) => setFormData({ ...formData, pg_id: e.target.value, room_id: '' })}>
+                  <option value="" disabled>Select PG</option>
+                  {pgs.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1">Room</label>
+                <select className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm bg-white" value={formData.room_id} onChange={(e) => setFormData({ ...formData, room_id: e.target.value })}>
+                  <option value="">— Unassigned —</option>
+                  {roomsForPg.map(r => <option key={r.id} value={r.id}>Room {r.room_number} ({r.current_occupancy}/{r.capacity})</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1">Move-in Date *</label>
+                <input required type="date" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.move_in_date} onChange={(e) => setFormData({ ...formData, move_in_date: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1">Monthly Rent (₹) *</label>
+                <input required type="number" min="0" placeholder="8000" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.monthly_rent} onChange={(e) => setFormData({ ...formData, monthly_rent: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1">Security Deposit (₹) *</label>
+                <input required type="number" min="0" placeholder="16000" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.security_deposit} onChange={(e) => setFormData({ ...formData, security_deposit: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1">Temp Password</label>
+                <input type="text" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+              </div>
+            </div>
+
+            {submitError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
+                {submitError}
+              </div>
+            )}
+
+            <div className="p-4 bg-[#ECFDF3] border border-[#A8E6C3] rounded-lg">
+              <h4 className="text-sm font-semibold text-[#1C6C41] mb-1">Ready to onboard</h4>
+              <p className="text-xs text-[#064E3B]">A user account is created with the temp password. The tenant can log in and reset it later.</p>
             </div>
           </div>
         );
@@ -207,9 +292,10 @@ export default function AddTenantDrawer({ open, onClose, onSubmit }) {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-[#1C6C41] rounded-lg hover:bg-[#155331] flex items-center gap-2"
+                disabled={submitting}
+                className="px-4 py-2 text-sm font-medium text-white bg-[#1C6C41] rounded-lg hover:bg-[#155331] flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {step === 4 ? 'Create Tenant' : <>Next <ChevronRight size={16}/></>}
+                {step === 4 ? (submitting ? 'Creating…' : 'Create Tenant') : <>Next <ChevronRight size={16}/></>}
               </button>
             </div>
           </form>

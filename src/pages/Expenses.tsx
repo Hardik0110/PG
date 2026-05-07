@@ -1,24 +1,24 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  TrendingUp, Clock, CalendarDays, Download, Plus, Calendar,
+  TrendingDown, Wallet, CalendarDays, Download, Plus, Calendar,
 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
-import Badge, { BADGE_MAP } from '../components/ui/Badge';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
-import RecordPaymentModal from '../components/RecordPaymentModal';
+import AddExpenseModal from '../components/AddExpenseModal';
 import Select from '../components/ui/Select';
 import Loader from '../components/ui/Loader';
 import Pagination from '../components/ui/Pagination';
 import { useTablePageSize } from '../hooks/use-table-page-size';
 
-const TYPE_CHIP_COLORS = {
-  rent: 'bg-[#DCEEDF] text-[#1C6C41]',
-  deposit: 'bg-[#E8E1F5] text-[#6D28D9]',
-  utility: 'bg-[#FCF1DC] text-[#B45309]',
-  fine: 'bg-[#FBE5E0] text-[#A04D3A]',
-  food: 'bg-[#FBE5F0] text-[#BE185D]',
-  refund: 'bg-[#EFE7DA] text-[#5C4632]',
+const CATEGORY_CHIP_COLORS = {
+  electricity: 'bg-[#FCF1DC] text-[#B45309]',
+  water: 'bg-[#DCEEDF] text-[#1C6C41]',
+  internet: 'bg-[#E8E1F5] text-[#6D28D9]',
+  maintenance: 'bg-[#FBE5E0] text-[#A04D3A]',
+  staff: 'bg-[#FBE5F0] text-[#BE185D]',
+  supplies: 'bg-[#EFE7DA] text-[#5C4632]',
+  repair: 'bg-[#FCF1DC] text-[#B45309]',
   other: 'bg-[#EFE7DA] text-[#5C4632]',
 };
 
@@ -35,16 +35,15 @@ function getMonthOptions() {
   return months;
 }
 
-function Transactions() {
-  const [transactions, setTransactions] = useState([]);
+function Expenses() {
+  const [expenses, setExpenses] = useState([]);
   const [pgs, setPgs] = useState([]);
-  const [tenants, setTenants] = useState([]);
   const [filterPg, setFilterPg] = useState('all');
   const [filterMonth, setFilterMonth] = useState('all');
-  const [filterType, setFilterType] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [hoveredRow, setHoveredRow] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExpenseOpen, setIsExpenseOpen] = useState(false);
   const [page, setPage] = useState(1);
 
   const [tableRef, pageSize] = useTablePageSize({ mobile: 40, tablet: 44, desktop: 48 });
@@ -56,23 +55,22 @@ function Transactions() {
     (async () => {
       try {
         const pgList = (await apiRequest('/api/v1/pg-facilities/')) || [];
-        const tenantList = (await apiRequest('/api/v1/tenants/')) || [];
         if (!mounted) return;
         setPgs(Array.isArray(pgList) ? pgList : []);
-        setTenants(Array.isArray(tenantList) ? tenantList : []);
 
-        const all = [];
+        // Fetch expenses for each PG, then merge.
+        const allExp = [];
         for (const pg of pgList) {
           try {
-            const list = await apiRequest(`/api/v1/transactions/?pg_id=${pg.id}`);
+            const list = await apiRequest(`/api/v1/expenses/?pg_id=${pg.id}`);
             if (Array.isArray(list)) {
-              for (const tx of list) {
-                all.push({ ...tx, pg_name: pg.name });
+              for (const e of list) {
+                allExp.push({ ...e, pg_name: pg.name });
               }
             }
-          } catch { /* skip */ }
+          } catch { /* skip this PG */ }
         }
-        if (mounted) setTransactions(all);
+        if (mounted) setExpenses(allExp);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -80,53 +78,55 @@ function Transactions() {
     return () => { mounted = false; };
   }, []);
 
-  const tenantById = useMemo(() => {
-    const m = {};
-    for (const t of tenants) m[t.id] = t;
-    return m;
-  }, [tenants]);
-
-  const filteredTx = useMemo(() => {
-    return transactions.filter(tx => {
-      if (filterPg !== 'all' && tx.pg_id !== filterPg) return false;
-      if (filterType !== 'all' && tx.type !== filterType) return false;
-      if (filterMonth !== 'all' && tx.transaction_date) {
-        const d = new Date(tx.transaction_date);
+  const filteredExp = useMemo(() => {
+    return expenses.filter(e => {
+      if (filterPg !== 'all' && e.pg_id !== filterPg) return false;
+      if (filterCategory !== 'all' && e.category !== filterCategory) return false;
+      if (filterMonth !== 'all' && e.expense_date) {
+        const d = new Date(e.expense_date);
         const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         if (m !== filterMonth) return false;
       }
       return true;
     });
-  }, [transactions, filterPg, filterType, filterMonth]);
+  }, [expenses, filterPg, filterCategory, filterMonth]);
 
-  useEffect(() => { setPage(1); }, [filterPg, filterType, filterMonth]);
+  useEffect(() => { setPage(1); }, [filterPg, filterCategory, filterMonth]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredTx.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(filteredExp.length / pageSize));
   const safePage = Math.min(page, totalPages);
   const pageStart = (safePage - 1) * pageSize;
-  const pagedTx = filteredTx.slice(pageStart, pageStart + pageSize);
+  const pagedExp = filteredExp.slice(pageStart, pageStart + pageSize);
 
-  const totalCollected = useMemo(
-    () => filteredTx.filter(t => t.status === 'paid').reduce((sum, t) => sum + (t.amount || 0), 0),
-    [filteredTx]
+  const totalSpent = useMemo(
+    () => filteredExp.reduce((sum, e) => sum + (e.amount || 0), 0),
+    [filteredExp]
   );
-  const pendingTx = useMemo(() => filteredTx.filter(t => t.status === 'pending'), [filteredTx]);
-  const totalPending = useMemo(() => pendingTx.reduce((sum, t) => sum + (t.amount || 0), 0), [pendingTx]);
 
   const now = new Date();
   const thisMonthTotal = useMemo(() => {
-    return filteredTx
-      .filter(t => {
-        if (!t.transaction_date) return false;
-        const d = new Date(t.transaction_date);
+    return filteredExp
+      .filter(e => {
+        if (!e.expense_date) return false;
+        const d = new Date(e.expense_date);
         return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
       })
-      .reduce((sum, t) => sum + (t.amount || 0), 0);
+      .reduce((sum, e) => sum + (e.amount || 0), 0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredTx]);
+  }, [filteredExp]);
 
-  const formatCurrency = (amt) =>
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amt || 0);
+  const topCategoryEntry = useMemo(() => {
+    const sums = {};
+    for (const e of filteredExp) {
+      sums[e.category] = (sums[e.category] || 0) + e.amount;
+    }
+    const entries = Object.entries(sums).sort((a, b) => b[1] - a[1]);
+    return entries[0] || ['—', 0];
+  }, [filteredExp]);
+
+  const formatCurrency = (amt) => {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amt || 0);
+  };
 
   const formatCompact = (amt) => {
     if (!amt) return '₹0';
@@ -138,44 +138,40 @@ function Transactions() {
   const formatDate = (iso) =>
     iso ? new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
 
-  const tenantName = (id) => tenantById[id]?.user?.full_name || '—';
-
   const handleExportCSV = () => {
-    const headers = ['Tenant', 'PG', 'Amount', 'Type', 'Date', 'Status', 'Method', 'Reference'];
-    const rows = filteredTx.map(tx => [
-      tenantName(tx.tenant_id), tx.pg_name || '', tx.amount, tx.type,
-      formatDate(tx.transaction_date), tx.status, tx.payment_method || '', tx.reference_number || '',
+    const headers = ['Vendor', 'PG', 'Category', 'Amount', 'Date', 'Method', 'Description'];
+    const rows = filteredExp.map(e => [
+      e.vendor || '', e.pg_name || '', e.category, e.amount,
+      formatDate(e.expense_date), e.payment_method || '', e.description || '',
     ]);
     const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'transactions.csv';
+    a.download = 'expenses.csv';
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  const handleRecordPayment = async (data) => {
+  const handleAddExpense = async (data) => {
     try {
-      const created = await apiRequest('/api/v1/transactions/', {
+      const created = await apiRequest('/api/v1/expenses/', {
         method: 'POST',
         body: {
-          pg_id: data.pg_id,
-          tenant_id: data.tenant_id || null,
-          type: data.type,
+          pg_id: data.pg,
+          category: data.category,
           amount: parseFloat(data.amount),
-          transaction_date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
-          status: 'paid',
+          expense_date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
           payment_method: data.method,
-          reference_number: data.reference || null,
+          vendor: data.vendor || null,
           description: data.description || null,
         },
       });
       const pg = pgs.find(p => p.id === created.pg_id);
-      setTransactions(prev => [{ ...created, pg_name: pg?.name || '—' }, ...prev]);
+      setExpenses(prev => [{ ...created, pg_name: pg?.name || '—' }, ...prev]);
     } catch (e) {
-      console.error('Failed to record payment', e);
+      console.error('Failed to add expense', e);
     }
   };
 
@@ -184,7 +180,7 @@ function Transactions() {
       <div className="flex items-center justify-center h-[60vh] text-[#6B7280]">
         <div className="flex flex-col items-center gap-3">
           <Loader size={32} />
-          <span className="text-sm">Loading transactions...</span>
+          <span className="text-sm">Loading expenses...</span>
         </div>
       </div>
     );
@@ -199,7 +195,7 @@ function Transactions() {
       className="h-full flex flex-col"
     >
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 gap-3">
-        <h1 className="text-xl sm:text-2xl font-bold text-[#111827]">Transactions</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-[#111827]">Expenses</h1>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <button
             onClick={handleExportCSV}
@@ -210,12 +206,12 @@ function Transactions() {
             Export CSV
           </button>
           <button
-            onClick={() => setIsModalOpen(true)}
-            className="h-10 px-3 sm:px-4 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
+            onClick={() => setIsExpenseOpen(true)}
+            className="h-10 px-3 sm:px-4 bg-[#B45309] hover:bg-[#92400E] text-white text-sm font-semibold rounded-lg
                        inline-flex items-center gap-2 whitespace-nowrap transition-colors cursor-pointer"
           >
             <Plus size={16} />
-            Record Payment
+            Add Expense
           </button>
         </div>
       </div>
@@ -243,17 +239,18 @@ function Transactions() {
         />
 
         <Select
-          value={filterType}
-          onChange={setFilterType}
+          value={filterCategory}
+          onChange={setFilterCategory}
           minWidth={140}
           options={[
-            { value: 'all', label: 'All Types' },
-            { value: 'rent', label: 'Rent' },
-            { value: 'deposit', label: 'Deposit' },
-            { value: 'utility', label: 'Utility' },
-            { value: 'fine', label: 'Fine' },
-            { value: 'food', label: 'Food' },
-            { value: 'refund', label: 'Refund' },
+            { value: 'all', label: 'All Categories' },
+            { value: 'electricity', label: 'Electricity' },
+            { value: 'water', label: 'Water' },
+            { value: 'internet', label: 'Internet' },
+            { value: 'maintenance', label: 'Maintenance' },
+            { value: 'staff', label: 'Staff' },
+            { value: 'supplies', label: 'Supplies' },
+            { value: 'repair', label: 'Repair' },
             { value: 'other', label: 'Other' },
           ]}
         />
@@ -267,28 +264,28 @@ function Transactions() {
       >
         <motion.div variants={fadeUp} className="flex items-center gap-1.5 sm:gap-fluid-2 p-2 sm:p-fluid-2">
           <div className="flex size-7 sm:size-9 shrink-0 items-center justify-center rounded-md bg-[#F3F4F6] text-[#6B7280]">
-            <TrendingUp className="size-3 sm:size-4" />
+            <TrendingDown className="size-3 sm:size-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[9px] sm:text-fluid-xs font-semibold uppercase tracking-wider text-[#8B7355] truncate">Total Collected</p>
-            <p className="text-[11px] sm:text-fluid-base font-bold tabular-nums text-[#1C6C41] font-mono leading-tight">
-              <span className="sm:hidden">{formatCompact(totalCollected)}</span>
-              <span className="hidden sm:inline">{formatCurrency(totalCollected)}</span>
+            <p className="text-[9px] sm:text-fluid-xs font-semibold uppercase tracking-wider text-[#8B7355] truncate">Total Spent</p>
+            <p className="text-[11px] sm:text-fluid-base font-bold tabular-nums text-[#B45309] font-mono leading-tight">
+              <span className="sm:hidden">{formatCompact(totalSpent)}</span>
+              <span className="hidden sm:inline">{formatCurrency(totalSpent)}</span>
             </p>
           </div>
         </motion.div>
 
         <motion.div variants={fadeUp} className="flex items-center gap-1.5 sm:gap-fluid-2 p-2 sm:p-fluid-2">
           <div className="flex size-7 sm:size-9 shrink-0 items-center justify-center rounded-md bg-[#F3F4F6] text-[#6B7280]">
-            <Clock className="size-3 sm:size-4" />
+            <Wallet className="size-3 sm:size-4" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[9px] sm:text-fluid-xs font-semibold uppercase tracking-wider text-[#8B7355] truncate">
-              Pending <span className="normal-case tracking-normal text-[#A89580]">({pendingTx.length})</span>
+              Top: <span className="capitalize">{topCategoryEntry[0]}</span>
             </p>
-            <p className="text-[11px] sm:text-fluid-base font-bold tabular-nums text-[#B45309] font-mono leading-tight">
-              <span className="sm:hidden">{formatCompact(totalPending)}</span>
-              <span className="hidden sm:inline">{formatCurrency(totalPending)}</span>
+            <p className="text-[11px] sm:text-fluid-base font-bold tabular-nums text-[#2B1D14] font-mono leading-tight">
+              <span className="sm:hidden">{formatCompact(topCategoryEntry[1])}</span>
+              <span className="hidden sm:inline">{formatCurrency(topCategoryEntry[1])}</span>
             </p>
           </div>
         </motion.div>
@@ -309,16 +306,16 @@ function Transactions() {
 
       <div ref={tableRef} className="bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
-          {filteredTx.length === 0 ? (
+          {filteredExp.length === 0 ? (
             <div className="py-16 text-center text-[#8B7355]">
-              <p className="text-base font-medium">No transactions found</p>
-              <p className="text-sm mt-1">Try adjusting your filters or record a payment</p>
+              <p className="text-base font-medium">No expenses found</p>
+              <p className="text-sm mt-1">Try adjusting your filters or add an expense</p>
             </div>
           ) : (
             <table className="w-full border-collapse">
-              <thead className="bg-[#1C6C41]">
+              <thead className="bg-[#B45309]">
                 <tr>
-                  {['Tenant', 'PG', 'Amount', 'Date', 'Status', 'Type'].map(h => (
+                  {['Vendor', 'PG', 'Category', 'Amount', 'Date', 'Method'].map(h => (
                     <th
                       key={h}
                       className="text-left px-fluid-2 py-fluid-2 text-[12px] font-semibold text-white/90 uppercase tracking-[0.08em] whitespace-nowrap"
@@ -329,49 +326,46 @@ function Transactions() {
                 </tr>
               </thead>
               <motion.tbody variants={staggerContainer} initial="initial" animate="animate">
-                {pagedTx.map((tx) => {
-                  const typeChip = TYPE_CHIP_COLORS[tx.type] || TYPE_CHIP_COLORS.other;
-                  const statusLabel = (tx.status || '').charAt(0).toUpperCase() + (tx.status || '').slice(1);
-                  const badgeVariant = BADGE_MAP[statusLabel] || 'neutral';
-
+                {pagedExp.map((e) => {
+                  const catChip = CATEGORY_CHIP_COLORS[e.category] || CATEGORY_CHIP_COLORS.other;
                   return (
                     <motion.tr
-                      key={tx.id}
+                      key={e.id}
                       variants={fadeUp}
-                      onMouseEnter={() => setHoveredRow(tx.id)}
+                      onMouseEnter={() => setHoveredRow(e.id)}
                       onMouseLeave={() => setHoveredRow(null)}
                       className={`border-b border-[#F3EEE5] transition-colors duration-150
-                                  ${hoveredRow === tx.id ? 'bg-[#FAF7F2]' : 'bg-white'}`}
+                                  ${hoveredRow === e.id ? 'bg-[#FAF7F2]' : 'bg-white'}`}
                     >
                       <td className="px-fluid-2 py-fluid-2">
                         <span className="text-fluid-sm font-semibold text-[#2B1D14] whitespace-nowrap">
-                          {tenantName(tx.tenant_id)}
+                          {e.vendor || '—'}
                         </span>
                       </td>
                       <td className="px-fluid-2 py-fluid-2">
                         <span className="text-fluid-sm text-[#5C4632] whitespace-nowrap">
-                          {tx.pg_name || '—'}
+                          {e.pg_name || '—'}
                         </span>
                       </td>
                       <td className="px-fluid-2 py-fluid-2">
-                        <span className="font-mono font-bold text-fluid-sm text-[#1C6C41] whitespace-nowrap">
-                          {formatCurrency(tx.amount)}
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-fluid-xs font-semibold capitalize whitespace-nowrap ${catChip}`}>
+                          {e.category}
+                        </span>
+                      </td>
+                      <td className="px-fluid-2 py-fluid-2">
+                        <span className="font-mono font-bold text-fluid-sm text-[#B45309] whitespace-nowrap">
+                          {formatCurrency(e.amount)}
                         </span>
                       </td>
                       <td className="px-fluid-2 py-fluid-2">
                         <span className="inline-flex items-center gap-1.5 text-fluid-sm text-[#5C4632] whitespace-nowrap">
                           <Calendar size={13} className="text-[#A89580]" />
-                          {formatDate(tx.transaction_date)}
+                          {formatDate(e.expense_date)}
                         </span>
                       </td>
                       <td className="px-fluid-2 py-fluid-2">
-                        <Badge variant={badgeVariant} dot>
-                          {statusLabel}
-                        </Badge>
-                      </td>
-                      <td className="px-fluid-2 py-fluid-2">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-fluid-xs font-semibold capitalize whitespace-nowrap ${typeChip}`}>
-                          {tx.type}
+                        <span className="text-fluid-sm text-[#5C4632] capitalize whitespace-nowrap">
+                          {e.payment_method || '—'}
                         </span>
                       </td>
                     </motion.tr>
@@ -384,21 +378,20 @@ function Transactions() {
         <Pagination
           page={safePage}
           totalPages={totalPages}
-          total={filteredTx.length}
+          total={filteredExp.length}
           pageSize={pageSize}
           onPageChange={setPage}
         />
       </div>
 
-      <RecordPaymentModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleRecordPayment}
+      <AddExpenseModal
+        open={isExpenseOpen}
+        onClose={() => setIsExpenseOpen(false)}
+        onSubmit={handleAddExpense}
         pgs={pgs}
-        tenants={tenants}
       />
     </motion.div>
   );
 }
 
-export default Transactions;
+export default Expenses;

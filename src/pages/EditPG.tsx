@@ -113,18 +113,14 @@ function EditPG() {
           address,
           city,
           state,
-          owner_phone: ownerPhone,
-          owner_email: ownerEmail,
-          total_rooms: totalRooms ? parseInt(totalRooms, 10) : undefined,
-          pg_type: pgType,
-          amenities,
+          pincode: undefined,  // pincode can be edited via separate input if needed
+          type: (pgType || 'gents').toLowerCase(),
         },
       });
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
-    } catch {
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2000);
+    } catch (err) {
+      console.error('Failed to update PG:', err);
     } finally {
       setSaving(false);
     }

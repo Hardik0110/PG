@@ -118,6 +118,7 @@ function RoomCard({ room, formatCurrency, onBook, onView, tenantCount }) {
 function Rooms() {
   const [rooms, setRooms] = useState([]);
   const [tenants, setTenants] = useState([]);
+  const [pgs, setPgs] = useState([]);
   const [filterPg, setFilterPg] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [loading, setLoading] = useState(true);
@@ -128,31 +129,40 @@ function Rooms() {
     let mounted = true;
     const loadData = async () => {
       try {
-        const [roomsPayload, tenantsPayload] = await Promise.all([
+        const [pgPayload, roomsPayload, tenantsPayload] = await Promise.all([
+          apiRequest('/api/v1/pg-facilities/'),
           apiRequest('/api/v1/rooms/'),
           apiRequest('/api/v1/tenants/'),
         ]);
+        const pgArr = Array.isArray(pgPayload) ? pgPayload : [];
+        const pgById = Object.fromEntries(pgArr.map(p => [p.id, p]));
         const roomsData = unwrapData(roomsPayload, []);
         const tenantsData = unwrapData(tenantsPayload, []);
 
-        if (mounted && Array.isArray(roomsData)) {
-          setRooms(
-            roomsData.map((r) => ({
-              id: r.id,
-              pgId: r.pg_id,
-              pgName:
-                r.pg_id === 'pg-001' ? 'Sunrise PG' : 'Cozy Living PG',
-              roomNumber: r.room_number || 'N/A',
-              floor: r.floor || 1,
-              type: r.type || 'single',
-              rent: r.rent || 0,
-              status: r.status || 'vacant',
-              amenities: r.amenities || [],
-            })),
-          );
-        }
-        if (mounted && Array.isArray(tenantsData)) {
-          setTenants(tenantsData);
+        if (mounted) {
+          setPgs(pgArr);
+          if (Array.isArray(roomsData)) {
+            setRooms(
+              roomsData.map((r) => {
+                const isOccupied = r.status === 'occupied' || r.current_occupancy >= r.capacity;
+                return {
+                  id: r.id,
+                  pgId: r.pg_id,
+                  pgName: pgById[r.pg_id]?.name || '—',
+                  roomNumber: r.room_number || 'N/A',
+                  floor: r.floor || 1,
+                  type: r.room_sharing || 'single',
+                  rent: r.monthly_rent_per_head || 0,
+                  status: isOccupied ? 'occupied' : (r.status || 'vacant'),
+                  capacity: r.capacity,
+                  currentOccupancy: r.current_occupancy,
+                  isAc: r.is_ac,
+                  amenities: (r.amenities || []).map(a => a.name || a),
+                };
+              }),
+            );
+          }
+          if (Array.isArray(tenantsData)) setTenants(tenantsData);
         }
       } catch {
         if (mounted) {
@@ -171,24 +181,18 @@ function Rooms() {
 
   const tenantsForSelectedRoom = useMemo(() => {
     if (!selectedRoomToView) return [];
-    return tenants.filter(
-      (t) =>
-        t.pg_id === selectedRoomToView.pgId &&
-        String(t.room_number) === String(selectedRoomToView.roomNumber),
-    );
+    return tenants.filter(t => t.room_id === selectedRoomToView.id);
   }, [tenants, selectedRoomToView]);
 
   const tenantCountByRoom = useMemo(() => {
     const map = new Map();
     tenants.forEach((t) => {
-      const key = `${t.pg_id}:${t.room_number}`;
-      map.set(key, (map.get(key) || 0) + 1);
+      if (t.room_id) map.set(t.room_id, (map.get(t.room_id) || 0) + 1);
     });
     return map;
   }, [tenants]);
 
-  const getTenantCount = (room) =>
-    tenantCountByRoom.get(`${room.pgId}:${room.roomNumber}`) || 0;
+  const getTenantCount = (room) => tenantCountByRoom.get(room.id) || 0;
 
   const filteredRooms = useMemo(
     () =>
@@ -221,12 +225,13 @@ function Rooms() {
     }).format(amt);
 
   const pgOptions = useMemo(() => {
+    if (pgs.length > 0) return pgs.map(p => ({ id: p.id, name: p.name }));
     const unique = [...new Set(rooms.map((r) => r.pgId))];
     return unique.map((id) => ({
       id,
       name: rooms.find((r) => r.pgId === id)?.pgName || id,
     }));
-  }, [rooms]);
+  }, [rooms, pgs]);
 
   if (loading) {
     return (

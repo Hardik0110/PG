@@ -46,35 +46,51 @@ function Tenants() {
 
   const [tableRef, pageSize] = useTablePageSize({ mobile: 60, tablet: 64, desktop: 68 });
 
+  const [pgs, setPgs] = useState([]);
+  const [rooms, setRooms] = useState([]);
+
   useEffect(() => {
     let mounted = true;
-    const loadTenants = async () => {
+    (async () => {
       try {
-        const payload = await apiRequest('/api/v1/tenants/');
-        const data = unwrapData(payload, []);
-        if (mounted && Array.isArray(data)) {
-          setTenants(data.map(t => ({
-            id: t.id,
-            name: t.name || 'Unknown',
-            email: t.email || 'N/A',
-            phone: t.phone_number || 'N/A',
-            pgId: t.pg_id,
-            pgName: t.pg_name || (t.pg_id === 'pg-001' ? 'Sunrise PG' : 'Cozy Living PG'),
-            room: t.room_number || 'N/A',
-            rent: t.rent || 0,
-            moveInRaw: t.move_in_date || null,
-            moveIn: t.move_in_date
-              ? new Date(t.move_in_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-              : 'N/A',
-          })));
+        const [pgList, tenantPayload, roomList] = await Promise.all([
+          apiRequest('/api/v1/pg-facilities/'),
+          apiRequest('/api/v1/tenants/'),
+          apiRequest('/api/v1/rooms/'),
+        ]);
+        const pgArr = Array.isArray(pgList) ? pgList : [];
+        const roomArr = Array.isArray(roomList) ? roomList : [];
+        const tenantArr = unwrapData(tenantPayload, []) || [];
+        const pgById = Object.fromEntries(pgArr.map(p => [p.id, p]));
+        const roomById = Object.fromEntries(roomArr.map(r => [r.id, r]));
+
+        if (mounted) {
+          setPgs(pgArr);
+          setRooms(roomArr);
+          setTenants(
+            (Array.isArray(tenantArr) ? tenantArr : []).map(t => ({
+              id: t.id,
+              name: t.user?.full_name || 'Unknown',
+              email: t.user?.email || 'N/A',
+              phone: t.user?.phone_number || 'N/A',
+              pgId: t.pg_id,
+              pgName: pgById[t.pg_id]?.name || '—',
+              roomId: t.room_id,
+              room: roomById[t.room_id]?.room_number || 'N/A',
+              rent: t.monthly_rent || 0,
+              moveInRaw: t.move_in_date || null,
+              moveIn: t.move_in_date
+                ? new Date(t.move_in_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                : 'N/A',
+            }))
+          );
         }
       } catch {
         if (mounted) setTenants([]);
       } finally {
         if (mounted) setLoading(false);
       }
-    };
-    loadTenants();
+    })();
     return () => { mounted = false; };
   }, []);
 
@@ -166,8 +182,7 @@ function Tenants() {
             onChange={setFilterPg}
             options={[
               { value: 'all', label: 'All PG' },
-              { value: 'pg-001', label: 'Sunrise PG' },
-              { value: 'pg-002', label: 'Cozy Living PG' },
+              ...pgs.map(p => ({ value: p.id, label: p.name })),
             ]}
           />
 
@@ -282,20 +297,27 @@ function Tenants() {
       <AddTenantDrawer
         open={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        onSubmit={(data) => {
-
-          setTenants([{
-            id: 'tnt-' + Math.random().toString(36).substr(2, 9),
-            name: `${data.firstName} ${data.lastName}`,
-            email: data.email || 'N/A',
-            phone: data.phone,
-            pgId: 'pg-001',
-            pgName: 'Sunrise PG',
-            room: 'Unassigned',
-            rent: 0,
-            moveInRaw: new Date().toISOString(),
-            moveIn: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-          }, ...tenants]);
+        pgs={pgs}
+        rooms={rooms}
+        onSubmit={(created) => {
+          if (!created) return;
+          const pg = pgs.find(p => p.id === created.pg_id);
+          const room = rooms.find(r => r.id === created.room_id);
+          setTenants(prev => [{
+            id: created.id,
+            name: created.user?.full_name || 'Unknown',
+            email: created.user?.email || 'N/A',
+            phone: created.user?.phone_number || 'N/A',
+            pgId: created.pg_id,
+            pgName: pg?.name || '—',
+            roomId: created.room_id,
+            room: room?.room_number || 'Unassigned',
+            rent: created.monthly_rent || 0,
+            moveInRaw: created.move_in_date,
+            moveIn: created.move_in_date
+              ? new Date(created.move_in_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+              : 'N/A',
+          }, ...prev]);
         }}
       />
     </motion.div>

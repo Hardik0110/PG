@@ -1,21 +1,44 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { X, Receipt } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function RecordPaymentModal({ open, onClose, onSubmit }) {
+export default function RecordPaymentModal({ open, onClose, onSubmit, pgs = [], tenants = [] }) {
   const [formData, setFormData] = useState({
-    tenant: '',
+    pg_id: '',
+    tenant_id: '',
     amount: '',
     type: 'rent',
     method: 'upi',
     date: new Date().toISOString().split('T')[0],
     reference: '',
-    sendReceipt: true
+    description: '',
   });
+
+  // Default to first PG when list arrives
+  useEffect(() => {
+    if (open && !formData.pg_id && pgs.length > 0) {
+      setFormData(prev => ({ ...prev, pg_id: pgs[0].id }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, pgs]);
+
+  const tenantsForPg = useMemo(
+    () => tenants.filter(t => !formData.pg_id || t.pg_id === formData.pg_id),
+    [tenants, formData.pg_id]
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit({
+      pg_id: formData.pg_id,
+      tenant_id: formData.tenant_id || null,
+      amount: formData.amount,
+      type: formData.type,
+      method: formData.method,
+      date: formData.date,
+      reference: formData.reference,
+      description: formData.description,
+    });
     onClose();
   };
 
@@ -30,7 +53,6 @@ export default function RecordPaymentModal({ open, onClose, onSubmit }) {
             onClick={onClose}
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
           />
-
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -48,19 +70,36 @@ export default function RecordPaymentModal({ open, onClose, onSubmit }) {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
-              <div>
-                <label className="block text-sm font-medium text-[#374151] mb-1">Tenant</label>
-                <select
-                  required
-                  className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm bg-white"
-                  value={formData.tenant}
-                  onChange={(e) => setFormData({ ...formData, tenant: e.target.value })}
-                >
-                  <option value="" disabled>Select Tenant</option>
-                  <option value="John Doe">John Doe (Room 101)</option>
-                  <option value="Alice Smith">Alice Smith (Room 102)</option>
-                  <option value="Bob Wilson">Bob Wilson (Room 201)</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#374151] mb-1">PG</label>
+                  <select
+                    required
+                    className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm bg-white"
+                    value={formData.pg_id}
+                    onChange={(e) => setFormData({ ...formData, pg_id: e.target.value, tenant_id: '' })}
+                  >
+                    <option value="" disabled>Select PG</option>
+                    {pgs.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#374151] mb-1">Tenant (optional)</label>
+                  <select
+                    className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm bg-white"
+                    value={formData.tenant_id}
+                    onChange={(e) => setFormData({ ...formData, tenant_id: e.target.value })}
+                  >
+                    <option value="">— None —</option>
+                    {tenantsForPg.map(t => (
+                      <option key={t.id} value={t.id}>
+                        {t.user?.full_name || 'Tenant'} {t.room_id ? '' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -76,6 +115,8 @@ export default function RecordPaymentModal({ open, onClose, onSubmit }) {
                     <option value="utility">Utility Bill</option>
                     <option value="fine">Late Fine</option>
                     <option value="food">Food/Mess</option>
+                    <option value="refund">Refund</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
                 <div>
@@ -104,6 +145,7 @@ export default function RecordPaymentModal({ open, onClose, onSubmit }) {
                     <option value="cash">Cash</option>
                     <option value="bank">Bank Transfer</option>
                     <option value="card">Card</option>
+                    <option value="cheque">Cheque</option>
                   </select>
                 </div>
                 <div>
@@ -129,15 +171,16 @@ export default function RecordPaymentModal({ open, onClose, onSubmit }) {
                 />
               </div>
 
-              <label className="flex items-center gap-2 mt-2 cursor-pointer">
+              <div>
+                <label className="block text-sm font-medium text-[#374151] mb-1">Description (Optional)</label>
                 <input
-                  type="checkbox"
-                  className="w-4 h-4 text-[#1C6C41] border-[#E5E7EB] rounded focus:ring-[#1C6C41]"
-                  checked={formData.sendReceipt}
-                  onChange={(e) => setFormData({ ...formData, sendReceipt: e.target.checked })}
+                  type="text"
+                  placeholder="e.g., May 2026 rent"
+                  className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
-                <span className="text-sm text-[#374151]">Send SMS/Email Receipt to Tenant</span>
-              </label>
+              </div>
 
               <div className="pt-2 flex justify-end gap-3 mt-2">
                 <button

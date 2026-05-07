@@ -39,7 +39,7 @@ function MainLayout({ children }) {
         </div>
 
         <main className="flex-1 overflow-y-auto">
-          <div className="px-4 pt-4 pb-3 md:px-10 md:pt-10 md:pb-3 max-w-[1280px] mx-auto w-full">
+          <div className="px-4 pt-4 pb-3 md:px-5 md:pt-5 lg:px-10 lg:pt-10 max-w-[1280px] mx-auto w-full">
             {children}
           </div>
         </main>

@@ -49,7 +49,8 @@ function AddPG() {
     e.preventDefault();
     try {
       setSubmitting(true);
-      await apiRequest('/api/v1/pg-facilities/', {
+      // 1) Create the PG
+      const created = await apiRequest('/api/v1/pg-facilities/', {
         method: 'POST',
         body: {
           name: formData.name,
@@ -57,22 +58,35 @@ function AddPG() {
           city: formData.city,
           state: formData.state,
           pincode: formData.pincode,
-          description: formData.description,
+          description: formData.description || null,
           type: formData.type,
-          amenities: formData.amenities,
-          photos,
+          is_active: true,
         },
       });
+      // 2) Link selected amenities (look up master list, match by name)
+      if (formData.amenities.length > 0 && created?.id) {
+        try {
+          const allAmenities = await apiRequest('/api/v1/amenities/');
+          const byName = Object.fromEntries(
+            (Array.isArray(allAmenities) ? allAmenities : []).map(a => [a.name.toLowerCase(), a.id])
+          );
+          for (const name of formData.amenities) {
+            const aid = byName[name.toLowerCase()];
+            if (aid) {
+              await apiRequest(`/api/v1/amenities/pg/${created.id}`, {
+                method: 'POST',
+                body: { amenity_id: aid },
+              });
+            }
+          }
+        } catch (err) {
+          console.warn('Amenity linking partially failed:', err.message);
+        }
+      }
       setShowSuccess(true);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
-    } catch {
-
-      setShowSuccess(true);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
+      setTimeout(() => navigate('/pgs'), 1200);
+    } catch (err) {
+      console.error('Failed to create PG:', err);
     } finally {
       setSubmitting(false);
     }

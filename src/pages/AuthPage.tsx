@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, Loader2 } from 'lucide-react';
 import Loader from '../components/ui/Loader';
 import { motion } from 'framer-motion';
-import { setToken } from '../lib/api';
+import { setToken, apiRequest, apiFormRequest } from '../lib/api';
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -51,20 +51,51 @@ function AuthPage() {
     e.preventDefault();
     if (!validateLogin()) return;
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setToken('mock-token');
-    setSubmitting(false);
-    navigate('/dashboard');
+    try {
+      // OAuth2PasswordRequestForm expects form-urlencoded with `username` (not email)
+      const body = new URLSearchParams({
+        username: formData.email,
+        password: formData.password,
+      }).toString();
+      const data = await apiFormRequest('/api/v1/auth/login', { body });
+      setToken(data.access_token);
+      navigate('/dashboard');
+    } catch (err) {
+      setErrors({ password: err.message || 'Login failed' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
     if (!validateSignup()) return;
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setToken('mock-token');
-    setSubmitting(false);
-    navigate('/dashboard');
+    try {
+      // 1) Register the owner
+      await apiRequest('/api/v1/auth/register', {
+        method: 'POST',
+        body: {
+          email: formData.email,
+          password: formData.password,
+          full_name: formData.fullName,
+          phone_number: formData.phone || null,
+          role: 'owner',
+        },
+      });
+      // 2) Auto-login
+      const body = new URLSearchParams({
+        username: formData.email,
+        password: formData.password,
+      }).toString();
+      const data = await apiFormRequest('/api/v1/auth/login', { body });
+      setToken(data.access_token);
+      navigate('/dashboard');
+    } catch (err) {
+      setErrors({ email: err.message || 'Sign-up failed' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputClass = (fieldName) =>

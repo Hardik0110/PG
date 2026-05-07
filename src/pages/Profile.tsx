@@ -39,11 +39,17 @@ function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-
+      await apiRequest('/api/v1/users/me', {
+        method: 'PATCH',
+        body: {
+          full_name: formData.fullName,
+          phone_number: formData.phone || null,
+        },
+      });
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
-    } catch {
-      setShowSuccess(false);
+    } catch (err) {
+      console.error('Failed to update profile:', err);
     }
   };
 

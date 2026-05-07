@@ -4,26 +4,32 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Select from './ui/Select';
 
 const CATEGORIES = [
-  { value: 'utilities', label: 'Utilities (Electricity / Water)' },
+  { value: 'electricity', label: 'Electricity' },
+  { value: 'water', label: 'Water' },
   { value: 'internet', label: 'Internet / WiFi' },
-  { value: 'maintenance', label: 'Maintenance / Repairs' },
-  { value: 'salary', label: 'Staff Salary' },
-  { value: 'supplies', label: 'Supplies / Cleaning' },
-  { value: 'food', label: 'Food / Groceries' },
-  { value: 'rent', label: 'Property Rent / Lease' },
+  { value: 'maintenance', label: 'Maintenance' },
+  { value: 'staff', label: 'Staff Salary' },
+  { value: 'supplies', label: 'Supplies' },
+  { value: 'repair', label: 'Repair' },
   { value: 'other', label: 'Other' },
 ];
 
-export default function AddExpenseModal({ open, onClose, onSubmit }) {
+export default function AddExpenseModal({ open, onClose, onSubmit, pgs = [] }) {
   const [formData, setFormData] = useState({
-    category: 'utilities',
+    category: 'electricity',
     amount: '',
-    pg: 'pg-001',
+    pg: '',
     method: 'upi',
     date: new Date().toISOString().split('T')[0],
     vendor: '',
-    note: '',
+    description: '',
   });
+
+  // Default to first PG when list arrives
+  if (open && !formData.pg && pgs.length > 0 && !formData._init) {
+    // mutate-on-render guard via flag (form state is local; safe enough)
+    setTimeout(() => setFormData(prev => prev.pg ? prev : { ...prev, pg: pgs[0].id, _init: true }), 0);
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -80,10 +86,7 @@ export default function AddExpenseModal({ open, onClose, onSubmit }) {
                   <Select
                     value={formData.pg}
                     onChange={(v) => setFormData({ ...formData, pg: v })}
-                    options={[
-                      { value: 'pg-001', label: 'Sunrise PG' },
-                      { value: 'pg-002', label: 'Cozy Living PG' },
-                    ]}
+                    options={pgs.map(p => ({ value: p.id, label: p.name }))}
                     className="w-full"
                     minWidth={0}
                   />
@@ -145,14 +148,14 @@ export default function AddExpenseModal({ open, onClose, onSubmit }) {
 
               <div>
                 <label className="block text-sm font-medium text-[#374151] mb-1">
-                  Note <span className="text-[#9CA3AF] font-normal">(optional)</span>
+                  Description <span className="text-[#9CA3AF] font-normal">(optional)</span>
                 </label>
                 <textarea
                   rows={2}
                   placeholder="Brief note about this expense"
                   className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm resize-none"
-                  value={formData.note}
-                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
               </div>
 

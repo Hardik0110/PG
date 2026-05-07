@@ -1,7 +1,10 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Building, Plus, MapPin, Users, Settings, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { pageVariants, staggerContainer, fadeUp, cardHover } from '../lib/animations';
+import { apiRequest } from '../lib/api';
+import Loader from '../components/ui/Loader';
 
 const TYPE_THEME = {
   gents: {
@@ -16,11 +19,11 @@ const TYPE_THEME = {
     ring: 'ring-[#B45309]/30',
     label: 'Co-ed PG',
   },
-  girls: {
+  ladies: {
     banner: 'bg-[#FBE5F0]',
     accent: 'text-[#BE185D]',
     ring: 'ring-[#BE185D]/30',
-    label: 'Girls PG',
+    label: 'Ladies PG',
   },
 };
 
@@ -110,10 +113,35 @@ function PGCard({ pg, onManage }) {
 
 function MyPGs() {
   const navigate = useNavigate();
-  const pgs = [
-    { id: 'pg-001', name: 'Sunrise PG', location: 'Koramangala, Bangalore', tenants: 45, rooms: 20, type: 'gents' },
-    { id: 'pg-002', name: 'Cozy Living PG', location: 'HSR Layout, Bangalore', tenants: 28, rooms: 15, type: 'coed' },
-  ];
+  const [pgs, setPgs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const [pgList, tenantList, roomList] = await Promise.all([
+          apiRequest('/api/v1/pg-facilities/'),
+          apiRequest('/api/v1/tenants/'),
+          apiRequest('/api/v1/rooms/'),
+        ]);
+        const tenants = Array.isArray(tenantList) ? tenantList : [];
+        const rooms = Array.isArray(roomList) ? roomList : [];
+        const pgArr = (Array.isArray(pgList) ? pgList : []).map(pg => ({
+          id: pg.id,
+          name: pg.name,
+          location: [pg.address, pg.city].filter(Boolean).join(', '),
+          tenants: tenants.filter(t => t.pg_id === pg.id).length,
+          rooms: rooms.filter(r => r.pg_id === pg.id).length,
+          type: pg.type,
+        }));
+        if (mounted) setPgs(pgArr);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <motion.div
@@ -137,20 +165,32 @@ function MyPGs() {
         </button>
       </div>
 
-      <motion.div
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-      >
-        {pgs.map((pg) => (
-          <PGCard
-            key={pg.id}
-            pg={pg}
-            onManage={() => navigate('/rooms')}
-          />
-        ))}
-      </motion.div>
+      {loading ? (
+        <div className="flex items-center justify-center h-[50vh] text-[#6B7280]">
+          <Loader size={32} />
+        </div>
+      ) : pgs.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-[#8B7355]">
+          <Building size={32} className="text-[#A89580] mb-2" />
+          <p className="text-base font-medium">No PGs yet</p>
+          <p className="text-sm mt-1">Click “Add New PG” to create your first property.</p>
+        </div>
+      ) : (
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {pgs.map((pg) => (
+            <PGCard
+              key={pg.id}
+              pg={pg}
+              onManage={() => navigate(`/pg/edit/${pg.id}`)}
+            />
+          ))}
+        </motion.div>
+      )}
     </motion.div>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, ChevronDown, MoreHorizontal, Wrench, Calendar } from 'lucide-react';
-import { apiRequest, unwrapData } from '../lib/api';
+import { apiRequest } from '../lib/api';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import Badge from '../components/ui/Badge';
 import Drawer from '../components/ui/Drawer';
@@ -50,34 +50,54 @@ function Maintenance() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const menuRef = useRef(null);
   const [page, setPage] = useState(1);
+  const [pgs, setPgs] = useState([]);
+  const [rooms, setRooms] = useState([]);
 
   const [tableRef, pageSize] = useTablePageSize(56);
 
   useEffect(() => {
     let mounted = true;
-    const loadTickets = async () => {
+    (async () => {
       try {
-        const payload = await apiRequest('/api/v1/tickets/my');
-        const data = unwrapData(payload, []);
-        if (mounted && Array.isArray(data) && !data.detail) {
-          setTickets(data.map((ticket) => ({
-            id: ticket.id,
-            title: ticket.title || 'Untitled ticket',
-            description: ticket.description || '',
-            category: ticket.category || 'other',
-            priority: ticket.priority || 'medium',
-            status: ticket.status || 'open',
-            createdAt: ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'N/A',
-            rawCreatedAt: ticket.created_at ? new Date(ticket.created_at).toLocaleString() : 'N/A',
-          })));
+        const [pgList, roomList] = await Promise.all([
+          apiRequest('/api/v1/pg-facilities/'),
+          apiRequest('/api/v1/rooms/'),
+        ]);
+        const pgArr = Array.isArray(pgList) ? pgList : [];
+        const roomArr = Array.isArray(roomList) ? roomList : [];
+        if (mounted) {
+          setPgs(pgArr);
+          setRooms(roomArr);
         }
+        const all = [];
+        for (const pg of pgArr) {
+          try {
+            const list = await apiRequest(`/api/v1/tickets/pg/${pg.id}`);
+            if (Array.isArray(list)) {
+              for (const ticket of list) {
+                all.push({
+                  id: ticket.id,
+                  pg_id: ticket.pg_id,
+                  pg_name: pg.name,
+                  title: ticket.title || 'Untitled ticket',
+                  description: ticket.description || '',
+                  category: ticket.category || 'other',
+                  priority: ticket.priority || 'medium',
+                  status: ticket.status || 'open',
+                  createdAt: ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'N/A',
+                  rawCreatedAt: ticket.created_at ? new Date(ticket.created_at).toLocaleString() : 'N/A',
+                });
+              }
+            }
+          } catch { /* skip */ }
+        }
+        if (mounted) setTickets(all);
       } catch {
         if (mounted) setTickets([]);
       } finally {
         if (mounted) setLoading(false);
       }
-    };
-    loadTickets();
+    })();
     return () => { mounted = false; };
   }, []);
 
@@ -90,14 +110,23 @@ function Maintenance() {
     return () => document.removeEventListener('mousedown', handler);
   }, [openMenuId]);
 
-  const updateTicketStatus = (ticketId, newStatus) => {
-    setTickets((prev) =>
-      prev.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t))
-    );
-    if (selectedTicket?.id === ticketId) {
-      setSelectedTicket((prev) => ({ ...prev, status: newStatus }));
+  const updateTicketStatus = async (ticketId, newStatus) => {
+    try {
+      await apiRequest(`/api/v1/tickets/${ticketId}`, {
+        method: 'PATCH',
+        body: { status: newStatus },
+      });
+      setTickets((prev) =>
+        prev.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t))
+      );
+      if (selectedTicket?.id === ticketId) {
+        setSelectedTicket((prev) => ({ ...prev, status: newStatus }));
+      }
+    } catch (e) {
+      console.error('Failed to update ticket status:', e);
+    } finally {
+      setOpenMenuId(null);
     }
-    setOpenMenuId(null);
   };
 
   const filteredTickets = tickets.filter((ticket) => {
@@ -413,18 +442,37 @@ function Maintenance() {
       <NewTicketModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={(data) => {
-
-          setTickets([{
-            id: 'tkt-' + Math.random().toString(36).substr(2, 9),
-            title: data.subject,
-            description: data.description,
-            category: data.category,
-            priority: data.priority,
-            status: 'open',
-            createdAt: new Date().toLocaleDateString(),
-            rawCreatedAt: new Date().toLocaleString()
-          }, ...tickets]);
+        pgs={pgs}
+        rooms={rooms}
+        onSubmit={async (data) => {
+          try {
+            const created = await apiRequest('/api/v1/tickets/', {
+              method: 'POST',
+              body: {
+                pg_id: data.pg_id,
+                room_id: data.room_id || null,
+                title: data.subject,
+                description: data.description,
+                category: data.category,
+                priority: data.priority,
+              },
+            });
+            const pg = pgs.find(p => p.id === created.pg_id);
+            setTickets(prev => [{
+              id: created.id,
+              pg_id: created.pg_id,
+              pg_name: pg?.name || '—',
+              title: created.title,
+              description: created.description || '',
+              category: created.category,
+              priority: created.priority,
+              status: created.status,
+              createdAt: created.created_at ? new Date(created.created_at).toLocaleDateString() : 'N/A',
+              rawCreatedAt: created.created_at ? new Date(created.created_at).toLocaleString() : 'N/A',
+            }, ...prev]);
+          } catch (e) {
+            console.error('Failed to create ticket:', e);
+          }
         }}
       />
     </motion.div>

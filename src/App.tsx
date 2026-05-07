@@ -10,6 +10,7 @@ import Maintenance from './pages/Maintenance';
 import Tenants from './pages/Tenants';
 import Rooms from './pages/Rooms';
 import Transactions from './pages/Transactions';
+import Expenses from './pages/Expenses';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
@@ -113,6 +114,16 @@ function AppRoutes() {
             <MainLayout>
               <AnimatedPage>
                 <Transactions />
+              </AnimatedPage>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/expenses"
+          element={
+            <MainLayout>
+              <AnimatedPage>
+                <Expenses />
               </AnimatedPage>
             </MainLayout>
           }

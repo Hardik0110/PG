@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Bell, ChevronRight, Menu, User, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { clearToken, setToken } from '../lib/api';
+import { clearToken, setToken, apiRequest } from '../lib/api';
 
 const BREADCRUMB_MAP = {
   '/dashboard': ['Dashboard'],
@@ -25,11 +25,14 @@ function resolveBreadcrumbs(pathname) {
   return segments.map(s => s.charAt(0).toUpperCase() + s.slice(1));
 }
 
-const mockNotifications = [
-  { id: 1, message: 'New inquiry from Rahul Sharma', time: '2 min ago', read: false },
-  { id: 2, message: 'Maintenance ticket: Water leakage', time: '15 min ago', read: false },
-  { id: 3, message: 'Rent payment received from Priya Singh', time: '1 hour ago', read: true },
-];
+function relativeTime(iso) {
+  if (!iso) return '';
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
 
 const dropdownVariants = {
   hidden: { opacity: 0, y: -8, scale: 0.96 },
@@ -42,11 +45,26 @@ function Header({ onMenuClick }) {
   const location = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const notifRef = useRef(null);
   const userRef = useRef(null);
 
   const breadcrumbs = useMemo(() => resolveBreadcrumbs(location.pathname), [location.pathname]);
-  const unreadCount = mockNotifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  // Poll notifications every 60s
+  useEffect(() => {
+    let mounted = true;
+    const fetchNotifications = async () => {
+      try {
+        const list = await apiRequest('/api/v1/notifications/');
+        if (mounted) setNotifications(Array.isArray(list) ? list.slice(0, 10) : []);
+      } catch { /* ignore */ }
+    };
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60_000);
+    return () => { mounted = false; clearInterval(interval); };
+  }, []);
 
   useEffect(() => {
     function handleClick(e) {
@@ -151,16 +169,20 @@ function Header({ onMenuClick }) {
                   )}
                 </div>
                 <div className="max-h-[280px] overflow-y-auto">
-                  {mockNotifications.map(notif => (
+                  {notifications.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-xs text-gray-400">No notifications</div>
+                  ) : notifications.map(notif => (
                     <div
                       key={notif.id}
-                      className={`px-4 py-3 border-b border-gray-50 last:border-b-0 cursor-pointer hover:bg-gray-50 transition-colors ${!notif.read ? 'bg-[#1C6C41]/[0.03]' : ''}`}
+                      onClick={() => { setShowNotifications(false); navigate('/notifications'); }}
+                      className={`px-4 py-3 border-b border-gray-50 last:border-b-0 cursor-pointer hover:bg-gray-50 transition-colors ${!notif.is_read ? 'bg-[#1C6C41]/[0.03]' : ''}`}
                     >
                       <div className="flex items-start gap-2.5">
-                        {!notif.read && <span className="mt-1.5 w-1.5 h-1.5 bg-[#1C6C41] rounded-full shrink-0" />}
+                        {!notif.is_read && <span className="mt-1.5 w-1.5 h-1.5 bg-[#1C6C41] rounded-full shrink-0" />}
                         <div>
-                          <p className="text-[13px] text-gray-800 leading-snug">{notif.message}</p>
-                          <p className="text-[11px] text-gray-400 mt-0.5">{notif.time}</p>
+                          <p className="text-[13px] text-gray-800 leading-snug">{notif.title}</p>
+                          {notif.body && <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">{notif.body}</p>}
+                          <p className="text-[11px] text-gray-400 mt-0.5">{relativeTime(notif.created_at)}</p>
                         </div>
                       </div>
                     </div>

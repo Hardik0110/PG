@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Wrench,
   CreditCard,
+  Wallet,
   User,
   Settings,
   LogOut,
@@ -41,6 +42,7 @@ const NAV_SECTIONS = [
 
       { path: '/maintenance', icon: Wrench, label: 'Maintenance', badgeKey: 'maintenance' },
       { path: '/transactions', icon: CreditCard, label: 'Transactions' },
+      { path: '/expenses', icon: Wallet, label: 'Expenses' },
     ],
   },
   {
