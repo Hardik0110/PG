@@ -34,3 +34,6 @@ src/**/*.spec.*
 # Tooling artifacts
 .jscpd-report/
 coverage/
+
+# Lock file
+package-lock.json
