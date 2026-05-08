@@ -85,7 +85,8 @@ function RoomFormModal({ open, onClose, onSubmit, initial, saving }) {
       setError('Room number is required');
       return;
     }
-    if (!form.monthly_rent_per_head && form.monthly_rent_per_head !== 0) {
+    const rentNum = Number(form.monthly_rent_per_head);
+    if (form.monthly_rent_per_head === '' || form.monthly_rent_per_head === null || form.monthly_rent_per_head === undefined || Number.isNaN(rentNum)) {
       setError('Monthly rent is required');
       return;
     }

@@ -135,6 +135,8 @@ export default function BookRoomModal({ open, onClose, roomLabel, onSubmit }) {
                   <input
                     type="number"
                     required
+                    min={1}
+                    step="0.01"
                     className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm"
                     value={formData.rentAmount}
                     onChange={(e) => setFormData({ ...formData, rentAmount: e.target.value })}
@@ -145,6 +147,8 @@ export default function BookRoomModal({ open, onClose, roomLabel, onSubmit }) {
                   <input
                     type="number"
                     required
+                    min={0}
+                    step="0.01"
                     className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm"
                     value={formData.depositAmount}
                     onChange={(e) => setFormData({ ...formData, depositAmount: e.target.value })}

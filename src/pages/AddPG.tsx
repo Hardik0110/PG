@@ -9,6 +9,7 @@ import { apiRequest } from '../lib/api';
 import { pageVariants, fadeUp } from '../lib/animations';
 import { BUILDING_AMENITY_NAMES, filterAmenitiesByNames, syncAmenities } from '../lib/amenities';
 import { formatCurrency } from '../lib/format';
+import { filterPincode } from '../lib/validation';
 import { useFeedback } from '../components/FeedbackProvider';
 import RoomFormModal from '../components/RoomFormModal';
 
@@ -100,7 +101,15 @@ function StepBasics({ value, onChange, onNext, submitting, error }) {
         </div>
         <div>
           <label className={LABEL_CLASS}>Pincode *</label>
-          <input type="text" value={value.pincode} onChange={setField('pincode')} placeholder="6-digit pincode" maxLength={10} className={INPUT_CLASS} />
+          <input
+            type="text"
+            inputMode="numeric"
+            value={value.pincode}
+            onChange={(e) => onChange({ ...value, pincode: filterPincode(e.target.value) })}
+            placeholder="6-digit pincode"
+            maxLength={6}
+            className={INPUT_CLASS}
+          />
         </div>
         <div>
           <label className={LABEL_CLASS}>PG Type *</label>

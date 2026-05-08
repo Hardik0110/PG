@@ -93,6 +93,7 @@ export default function NewTicketModal({ open, onClose, onSubmit, pgs = [], room
                   type="text"
                   required
                   minLength={3}
+                  maxLength={150}
                   placeholder="e.g., Broken tap in bathroom"
                   className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm"
                   value={formData.subject}
@@ -137,6 +138,7 @@ export default function NewTicketModal({ open, onClose, onSubmit, pgs = [], room
                 <textarea
                   required
                   minLength={10}
+                  maxLength={2000}
                   rows={3}
                   placeholder="Describe the issue in detail (at least 10 characters)..."
                   className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm resize-none"

@@ -14,8 +14,19 @@ const CATEGORIES = [
   { value: 'other', label: 'Other' },
 ];
 
+type ExpenseFormState = {
+  category: string;
+  amount: string;
+  pg: string;
+  method: string;
+  date: string;
+  vendor: string;
+  description: string;
+  _init?: boolean;
+};
+
 export default function AddExpenseModal({ open, onClose, onSubmit, pgs = [] }) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ExpenseFormState>({
     category: 'electricity',
     amount: '',
     pg: '',
@@ -139,6 +150,7 @@ export default function AddExpenseModal({ open, onClose, onSubmit, pgs = [] }) {
                 </label>
                 <input
                   type="text"
+                  maxLength={100}
                   placeholder="e.g., BESCOM, Airtel, Ravi (cleaner)"
                   className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm"
                   value={formData.vendor}
@@ -152,6 +164,7 @@ export default function AddExpenseModal({ open, onClose, onSubmit, pgs = [] }) {
                 </label>
                 <textarea
                   rows={2}
+                  maxLength={500}
                   placeholder="Brief note about this expense"
                   className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm resize-none"
                   value={formData.description}

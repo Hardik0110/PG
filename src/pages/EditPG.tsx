@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
+import { filterPhone, isValidEmail, isValidPhone } from '../lib/validation';
 import Loader from '../components/ui/Loader';
 import { useFeedback } from '../components/FeedbackProvider';
 
@@ -102,6 +103,12 @@ function EditPG() {
     const newErrors: Record<string, string> = {};
     if (!name.trim()) newErrors.name = 'PG Name is required';
     if (!address.trim()) newErrors.address = 'Address is required';
+    if (ownerEmail.trim() && !isValidEmail(ownerEmail)) {
+      newErrors.ownerEmail = 'Enter a valid email';
+    }
+    if (ownerPhone && !isValidPhone(ownerPhone)) {
+      newErrors.ownerPhone = 'Phone must be 10 digits';
+    }
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -263,9 +270,11 @@ function EditPG() {
                 <label className={LABEL_CLASS}>Owner Phone</label>
                 <input
                   type="tel"
+                  inputMode="numeric"
                   value={ownerPhone}
-                  onChange={e => setOwnerPhone(e.target.value)}
-                  placeholder="+91 98765 43210"
+                  onChange={e => setOwnerPhone(filterPhone(e.target.value))}
+                  placeholder="10-digit phone"
+                  maxLength={10}
                   className={INPUT_CLASS}
                 />
               </div>

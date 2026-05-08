@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Bell, ChevronRight, Menu, User, Settings, LogOut, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { clearToken, setToken, apiRequest } from '../lib/api';
 
 const BREADCRUMB_MAP = {
@@ -34,10 +34,10 @@ function relativeTime(iso) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-const dropdownVariants = {
+const dropdownVariants: Variants = {
   hidden: { opacity: 0, y: -8, scale: 0.96 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.18, ease: 'easeOut' } },
-  exit: { opacity: 0, y: -6, scale: 0.97, transition: { duration: 0.12, ease: 'easeIn' } },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.18, ease: 'easeOut' as const } },
+  exit: { opacity: 0, y: -6, scale: 0.97, transition: { duration: 0.12, ease: 'easeIn' as const } },
 };
 
 function Header({ onMenuClick }) {

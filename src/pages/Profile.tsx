@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { User, Mail, Phone, Save, Check } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
+import { filterPhone, isValidEmail, isValidPhone } from '../lib/validation';
 
 function Profile() {
   const [formData, setFormData] = useState({
@@ -32,12 +33,30 @@ function Profile() {
     };
   }, []);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const next = name === 'phone' ? filterPhone(value) : value;
+    setFormData({ ...formData, [name]: next });
+    setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const newErrors: Record<string, string> = {};
+    if (formData.email && !isValidEmail(formData.email)) {
+      newErrors.email = 'Enter a valid email';
+    }
+    if (formData.phone && !isValidPhone(formData.phone)) {
+      newErrors.phone = 'Phone must be 10 digits';
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     try {
       await apiRequest('/api/v1/users/me', {
         method: 'PATCH',
@@ -212,9 +231,12 @@ function Profile() {
                 }} />
                 <input
                   type="tel"
+                  inputMode="numeric"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
+                  maxLength={10}
+                  placeholder="10-digit phone"
                   style={{
                     width: '100%',
                     padding: '12px 16px 12px 44px',
