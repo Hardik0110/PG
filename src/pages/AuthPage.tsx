@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, Loader2 } from 'lucide-react';
 import Loader from '../components/ui/Loader';
 import { motion } from 'framer-motion';
-import { setToken, apiRequest, apiFormRequest } from '../lib/api';
+import { setToken, clearToken, apiRequest, apiFormRequest } from '../lib/api';
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -12,9 +12,9 @@ function AuthPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
-    email: 'admin@trustcircle.com',
+    email: '',
     phone: '',
-    password: 'password123',
+    password: '',
     confirmPassword: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -51,9 +51,11 @@ function AuthPage() {
     e.preventDefault();
     if (!validateLogin()) return;
     setSubmitting(true);
+    clearToken();
     try {
+      const email = formData.email.trim().toLowerCase();
       const body = new URLSearchParams({
-        username: formData.email,
+        username: email,
         password: formData.password,
       }).toString();
       const data = await apiFormRequest('/api/v1/auth/login', { body });
@@ -70,12 +72,14 @@ function AuthPage() {
     e.preventDefault();
     if (!validateSignup()) return;
     setSubmitting(true);
+    clearToken();
     try {
+      const email = formData.email.trim().toLowerCase();
       // 1) Register the owner
       await apiRequest('/api/v1/auth/register', {
         method: 'POST',
         body: {
-          email: formData.email,
+          email,
           password: formData.password,
           full_name: formData.fullName,
           phone_number: formData.phone || null,
@@ -84,7 +88,7 @@ function AuthPage() {
       });
       // 2) Auto-login
       const body = new URLSearchParams({
-        username: formData.email,
+        username: email,
         password: formData.password,
       }).toString();
       const data = await apiFormRequest('/api/v1/auth/login', { body });
