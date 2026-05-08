@@ -17,6 +17,7 @@ import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
 import MyPGs from './pages/MyPGs';
 import MainLayout from './components/MainLayout';
+import OnboardingGuard from './components/OnboardingGuard';
 import CommandPalette from './components/ui/CommandPalette';
 import { FeedbackProvider } from './components/FeedbackProvider';
 import { DataProvider } from './data';
@@ -35,6 +36,16 @@ function AnimatedPage({ children }) {
   );
 }
 
+function Protected({ children }: { children: React.ReactNode }) {
+  return (
+    <OnboardingGuard>
+      <MainLayout>
+        <AnimatedPage>{children}</AnimatedPage>
+      </MainLayout>
+    </OnboardingGuard>
+  );
+}
+
 function AppRoutes() {
   const location = useLocation();
 
@@ -49,137 +60,19 @@ function AppRoutes() {
             </AnimatedPage>
           }
         />
-        <Route
-          path="/dashboard"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <Dashboard />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/pg/add"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <AddPG />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/pg/edit/:id"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <EditPG />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/pg/:id/rooms"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <PGRooms />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-
-        <Route
-          path="/maintenance"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <Maintenance />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/tenants"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <Tenants />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/rooms"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <Rooms />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/transactions"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <Transactions />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/expenses"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <Expenses />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <Profile />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <Settings />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/notifications"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <Notifications />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/pgs"
-          element={
-            <MainLayout>
-              <AnimatedPage>
-                <MyPGs />
-              </AnimatedPage>
-            </MainLayout>
-          }
-        />
+        <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
+        <Route path="/pg/add" element={<Protected><AddPG /></Protected>} />
+        <Route path="/pg/edit/:id" element={<Protected><EditPG /></Protected>} />
+        <Route path="/pg/:id/rooms" element={<Protected><PGRooms /></Protected>} />
+        <Route path="/maintenance" element={<Protected><Maintenance /></Protected>} />
+        <Route path="/tenants" element={<Protected><Tenants /></Protected>} />
+        <Route path="/rooms" element={<Protected><Rooms /></Protected>} />
+        <Route path="/transactions" element={<Protected><Transactions /></Protected>} />
+        <Route path="/expenses" element={<Protected><Expenses /></Protected>} />
+        <Route path="/profile" element={<Protected><Profile /></Protected>} />
+        <Route path="/settings" element={<Protected><Settings /></Protected>} />
+        <Route path="/notifications" element={<Protected><Notifications /></Protected>} />
+        <Route path="/pgs" element={<Protected><MyPGs /></Protected>} />
         <Route
           path="/"
           element={

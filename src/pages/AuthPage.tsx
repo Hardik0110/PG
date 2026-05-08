@@ -93,7 +93,8 @@ function AuthPage() {
       }).toString();
       const data = await apiFormRequest('/api/v1/auth/login', { body });
       setToken(data.access_token);
-      navigate('/dashboard');
+      // New owner: send straight to PG creation wizard.
+      navigate('/pg/add');
     } catch (err) {
       setErrors({ email: err.message || 'Sign-up failed' });
     } finally {

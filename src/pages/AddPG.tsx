@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../data/hooks';
 import {
   ArrowLeft, ArrowRight, Check, Plus, Pencil, Trash2,
   Home, MapPin, Wind, Users, FileText,
@@ -330,6 +332,7 @@ function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, deletingR
 function AddPG() {
   const navigate = useNavigate();
   const fb = useFeedback();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState(1);
   const [pgId, setPgId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -390,6 +393,9 @@ function AddPG() {
         },
       });
       setPgId(created?.id);
+      // Tell TanStack the pgs list is stale so OnboardingGuard sees count > 0
+      // immediately and stops redirecting back here on subsequent navigations.
+      queryClient.invalidateQueries({ queryKey: queryKeys.resource('pgs') });
       setStep(2);
     } catch (err) {
       setStepError(err?.message || 'Could not create PG');
@@ -489,8 +495,7 @@ function AddPG() {
   };
 
   const finish = () => {
-    if (pgId) navigate(`/pg/${pgId}/rooms`);
-    else navigate('/pgs');
+    navigate('/dashboard');
   };
 
   return (
