@@ -239,7 +239,7 @@ function Maintenance() {
               <img
                 src="/illustrations/B5-empty-maintenance_001.jpg"
                 alt=""
-                className="w-full h-64 sm:h-80 object-cover"
+                className="w-full h-64 sm:h-80 object-contain bg-[#F8F5F0]"
                 loading="lazy"
               />
               <div className="py-8 text-center text-[#6B7280]">

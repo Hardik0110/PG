@@ -290,7 +290,7 @@ function Rooms() {
           <img
             src="/illustrations/B3-empty-rooms_001.jpg"
             alt=""
-            className="w-full h-64 sm:h-80 object-cover"
+            className="w-full h-64 sm:h-80 object-contain bg-[#F8F5F0]"
             loading="lazy"
           />
           <p className="py-8 text-center text-[#9CA3AF] text-sm">
