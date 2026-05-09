@@ -85,20 +85,21 @@ export default function StatCards({ cards, className }: StatCardsProps) {
                 )}
               />
 
-              {card.imageSrc ? (
-                <img
-                  src={card.imageSrc}
-                  alt={card.imageAlt ?? ''}
-                  aria-hidden={card.imageAlt ? undefined : 'true'}
-                  loading="lazy"
-                  className="pointer-events-none absolute -bottom-2 -right-2 hidden h-20 w-20 select-none object-contain opacity-70 sm:block md:h-24 md:w-24 lg:h-28 lg:w-28"
-                />
-              ) : null}
-
               <div className="flex items-center justify-between gap-2">
-                <p className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {card.label}
-                </p>
+                <div className="flex min-w-0 items-center gap-2">
+                  {card.imageSrc ? (
+                    <img
+                      src={card.imageSrc}
+                      alt={card.imageAlt ?? ''}
+                      aria-hidden={card.imageAlt ? undefined : 'true'}
+                      loading="lazy"
+                      className="h-7 w-7 shrink-0 rounded-full object-cover ring-1 ring-border bg-background"
+                    />
+                  ) : null}
+                  <p className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {card.label}
+                  </p>
+                </div>
                 <span
                   className={cn(
                     'shrink-0 inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums',
