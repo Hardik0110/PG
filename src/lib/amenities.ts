@@ -42,6 +42,21 @@ export function filterAmenitiesByNames<T extends { name: string }>(
   return (allAmenities ?? []).filter((a) => wanted.has(norm(a.name)));
 }
 
+/**
+ * Create a new amenity in the master list. Owner-only on the backend.
+ * Use to inline-add amenities the user wants but that aren't seeded yet.
+ */
+export async function createAmenity(
+  name: string,
+  category: string = 'general',
+  iconKey?: string,
+): Promise<AmenityRecord> {
+  return apiRequest('/api/v1/amenities/', {
+    method: 'POST',
+    body: { name: name.trim(), category, icon_key: iconKey ?? null },
+  });
+}
+
 export interface AmenitySyncChanges {
   add?: string[];
   remove?: string[];

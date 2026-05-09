@@ -172,7 +172,8 @@ function PGRooms() {
           <img
             src="/illustrations/B3-empty-rooms_001.jpg"
             alt=""
-            className="w-full h-48 sm:h-56 object-contain bg-[#F8F5F0]"
+            className="w-full h-48 sm:h-56 object-contain"
+            style={{ backgroundColor: '#F0E6C3' }}
             loading="lazy"
           />
           <div className="py-8 text-center text-[#8B7355]">

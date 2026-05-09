@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { pageVariants, fadeUp } from '../lib/animations';
-import { BUILDING_AMENITY_NAMES, filterAmenitiesByNames, syncAmenities } from '../lib/amenities';
+import { BUILDING_AMENITY_NAMES, filterAmenitiesByNames, syncAmenities, createAmenity } from '../lib/amenities';
 import { formatCurrency } from '../lib/format';
 import { filterPincode } from '../lib/validation';
 import { useFeedback } from '../components/FeedbackProvider';
@@ -161,7 +161,36 @@ function StepBasics({ value, onChange, onNext, submitting, error }) {
   );
 }
 
-function StepBuildingAmenities({ amenities, selectedIds, onToggle, onNext, onBack, submitting, error }) {
+function StepBuildingAmenities({
+  amenities,
+  selectedIds,
+  onToggle,
+  onCreate,
+  onNext,
+  onBack,
+  submitting,
+  error,
+}) {
+  const [customName, setCustomName] = useState('');
+  const [creatingName, setCreatingName] = useState('');
+  const existingLowerNames = useMemo(
+    () => new Set(amenities.map((a) => String(a.name).trim().toLowerCase())),
+    [amenities],
+  );
+  const missingPresets = BUILDING_AMENITY_NAMES.filter((n) => !existingLowerNames.has(n));
+
+  const submitCustom = async () => {
+    const name = customName.trim();
+    if (!name || creatingName) return;
+    setCreatingName(name);
+    try {
+      await onCreate(name);
+      setCustomName('');
+    } finally {
+      setCreatingName('');
+    }
+  };
+
   return (
     <motion.div variants={fadeUp} initial="initial" animate="animate" className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] p-6">
       <div className="flex items-center gap-2 mb-2">
@@ -173,7 +202,9 @@ function StepBuildingAmenities({ amenities, selectedIds, onToggle, onNext, onBac
       </p>
 
       {amenities.length === 0 ? (
-        <p className="text-sm text-[#9CA3AF] py-6 text-center">No amenities found. You can skip this step.</p>
+        <p className="text-sm text-[#9CA3AF] py-4 text-center">
+          No amenities yet — type one below or pick from the suggestions to get started.
+        </p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
           {amenities.map((a) => {
@@ -200,6 +231,63 @@ function StepBuildingAmenities({ amenities, selectedIds, onToggle, onNext, onBac
           })}
         </div>
       )}
+
+      {missingPresets.length > 0 && (
+        <div className="mt-5">
+          <p className="text-xs font-medium text-[#6B7280] mb-2 uppercase tracking-wide">
+            Quick-add common amenities
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {missingPresets.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                disabled={creatingName === preset}
+                onClick={() => {
+                  setCreatingName(preset);
+                  Promise.resolve(onCreate(preset)).finally(() => setCreatingName(''));
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#1C6C41] hover:text-[#1C6C41] transition-colors cursor-pointer disabled:opacity-60 capitalize"
+              >
+                <Plus size={12} />
+                {creatingName === preset ? 'Adding…' : preset}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-5 pt-5 border-t border-[#E5E7EB]">
+        <p className="text-xs font-medium text-[#6B7280] mb-2 uppercase tracking-wide">
+          Add a custom amenity
+        </p>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={customName}
+            onChange={(e) => setCustomName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                submitCustom();
+              }
+            }}
+            placeholder="e.g. Rooftop garden"
+            maxLength={100}
+            className="flex-1 h-11 px-3.5 py-2.5 border border-[#D1D5DB] rounded-lg text-sm bg-white focus:outline-none focus:border-[#1C6C41] focus:ring-2 focus:ring-[#1C6C41]/12 transition-all"
+          />
+          <button
+            type="button"
+            onClick={submitCustom}
+            disabled={!customName.trim() || !!creatingName}
+            className="h-11 px-4 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
+                       inline-flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Plus size={14} />
+            Add
+          </button>
+        </div>
+      </div>
 
       {error && (
         <p className="mt-4 text-sm text-[#F04438] bg-[#FEF3F2] border border-[#FECDCA] rounded px-3 py-2">
