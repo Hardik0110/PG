@@ -202,6 +202,19 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
         {NAV_SECTIONS.map(renderSection)}
       </nav>
 
+      {!collapsed && (
+        <div className="shrink-0 px-3 pb-3">
+          <div className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F8F5F0]">
+            <img
+              src="/illustrations/S1-sidebar-promo_001.jpg"
+              alt=""
+              className="block w-full aspect-[4/3] object-contain"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      )}
+
       <div className="mx-3 border-t border-gray-200" />
 
       <div className={`shrink-0 ${collapsed ? 'px-2 py-3' : 'px-3 py-3'}`}>
@@ -328,6 +341,17 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
                 </div>
               ))}
             </nav>
+
+            <div className="shrink-0 px-3 pb-3">
+              <div className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F8F5F0]">
+                <img
+                  src="/illustrations/S1-sidebar-promo_001.jpg"
+                  alt=""
+                  className="block w-full aspect-[4/3] object-contain"
+                  loading="lazy"
+                />
+              </div>
+            </div>
 
             <div className="mx-3 border-t border-gray-200" />
 
