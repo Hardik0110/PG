@@ -276,6 +276,7 @@ function PGRooms() {
         onSubmit={handleSubmit}
         initial={editingRoom}
         saving={saving}
+        availableAmenities={pg?.amenities || []}
       />
     </motion.div>
   );

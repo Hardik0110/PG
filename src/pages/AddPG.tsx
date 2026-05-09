@@ -375,6 +375,13 @@ function AddPG() {
     [allAmenities],
   );
 
+  // Only the building amenities the user picked at step 2 are eligible
+  // as room amenities. Each room can subset this list.
+  const selectedBuildingAmenities = useMemo(
+    () => buildingAmenities.filter((a) => selectedBuildingIds.has(a.id)),
+    [buildingAmenities, selectedBuildingIds],
+  );
+
   const handleStep1Submit = async () => {
     setSubmitting(true);
     setStepError('');
@@ -574,6 +581,7 @@ function AddPG() {
         onSubmit={handleRoomSubmit}
         initial={editingRoom}
         saving={savingRoom}
+        availableAmenities={selectedBuildingAmenities}
       />
     </motion.div>
   );

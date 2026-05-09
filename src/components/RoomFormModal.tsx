@@ -19,7 +19,7 @@ const EMPTY = {
   notes: '',
 };
 
-function RoomFormModal({ open, onClose, onSubmit, initial, saving }) {
+function RoomFormModal({ open, onClose, onSubmit, initial, saving, availableAmenities }) {
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState('');
   const [amenityOptions, setAmenityOptions] = useState([]);
@@ -27,6 +27,15 @@ function RoomFormModal({ open, onClose, onSubmit, initial, saving }) {
 
   useEffect(() => {
     if (!open) return;
+
+    // If the parent supplied a list of building amenities, use that as the
+    // pool — rooms can only have amenities the building itself offers.
+    if (Array.isArray(availableAmenities)) {
+      setAmenityOptions(availableAmenities);
+      return;
+    }
+
+    // Fallback: fetch and filter by ROOM_AMENITY_NAMES (legacy behavior).
     let mounted = true;
     (async () => {
       try {
@@ -38,7 +47,7 @@ function RoomFormModal({ open, onClose, onSubmit, initial, saving }) {
       }
     })();
     return () => { mounted = false; };
-  }, [open]);
+  }, [open, availableAmenities]);
 
   useEffect(() => {
     if (!open) return;
