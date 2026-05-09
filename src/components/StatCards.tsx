@@ -19,6 +19,8 @@ export interface StatCard {
   progress: number | null;
   status: string;
   semantic: StatSemantic;
+  imageSrc?: string;
+  imageAlt?: string;
 }
 
 interface StatCardsProps {
@@ -82,6 +84,16 @@ export default function StatCards({ cards, className }: StatCardsProps) {
                   SEMANTIC_ACCENT[card.semantic]
                 )}
               />
+
+              {card.imageSrc ? (
+                <img
+                  src={card.imageSrc}
+                  alt={card.imageAlt ?? ''}
+                  aria-hidden={card.imageAlt ? undefined : 'true'}
+                  loading="lazy"
+                  className="pointer-events-none absolute -bottom-2 -right-2 hidden h-20 w-20 select-none object-contain opacity-70 sm:block md:h-24 md:w-24 lg:h-28 lg:w-28"
+                />
+              ) : null}
 
               <div className="flex items-center justify-between gap-2">
                 <p className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">

@@ -313,6 +313,7 @@ function Dashboard() {
             progress: totalRooms > 0 ? Math.min(100, (totalTenants / totalRooms) * 100) : 0,
             status: totalTenants > totalRooms ? "Over capacity" : "Within capacity",
             semantic: totalTenants > totalRooms ? "danger" : "success",
+            imageSrc: "/illustrations/SC1-tenants_001.jpg",
           },
           {
             label: "Occupancy",
@@ -322,6 +323,7 @@ function Dashboard() {
             progress: occupancy,
             status: "On track",
             semantic: "success",
+            imageSrc: "/illustrations/SC2-occupancy_001.jpg",
           },
           {
             label: "Vacant Rooms",
@@ -331,6 +333,7 @@ function Dashboard() {
             progress: totalRooms > 0 ? Math.round((vacantRooms / totalRooms) * 100) : 0,
             status: "Revenue opportunity",
             semantic: "warning",
+            imageSrc: "/illustrations/SC3-vacant-rooms_001.jpg",
           },
           {
             label: "Open Tickets",
@@ -340,6 +343,7 @@ function Dashboard() {
             progress: null,
             status: "Trending down",
             semantic: "info",
+            imageSrc: "/illustrations/SC4-open-tickets_001.jpg",
           },
         ] satisfies StatCardData[]}
       />
