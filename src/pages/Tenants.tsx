@@ -203,7 +203,7 @@ function Tenants() {
               <img
                 src="/illustrations/B2-empty-tenants_001.jpg"
                 alt=""
-                className="w-full h-64 sm:h-80 object-contain bg-[#F8F5F0]"
+                className="w-full h-48 sm:h-56 object-contain bg-[#F8F5F0]"
                 loading="lazy"
               />
               <div className="py-8 text-center text-[#8B7355]">
