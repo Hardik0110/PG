@@ -21,6 +21,7 @@ import OnboardingGuard from './components/OnboardingGuard';
 import CommandPalette from './components/ui/CommandPalette';
 import { FeedbackProvider } from './components/FeedbackProvider';
 import { DataProvider } from './data';
+import { Analytics } from '@vercel/analytics/react';
 
 function AnimatedPage({ children }) {
   return (
@@ -93,6 +94,7 @@ function App() {
         <FeedbackProvider>
           <CommandPalette />
           <AppRoutes />
+          <Analytics />
         </FeedbackProvider>
       </DataProvider>
     </BrowserRouter>
