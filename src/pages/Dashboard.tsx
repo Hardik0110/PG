@@ -252,7 +252,7 @@ function Dashboard() {
         <img
           src="/illustrations/E1-welcome-banner_001.jpg"
           alt=""
-          className="absolute inset-0 h-full w-full object-cover object-bottom opacity-90"
+          className="absolute inset-0 h-full w-full object-cover object-[center_85%] opacity-90"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#F8F5F0]/85 via-[#F8F5F0]/40 to-transparent" />
@@ -365,7 +365,7 @@ function Dashboard() {
               <img
                 src={tile.src}
                 alt=""
-                className="h-full w-full object-cover object-bottom transition-transform duration-300 group-hover:scale-105"
+                className="h-full w-full object-cover object-[center_80%] transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
               />
             </div>
