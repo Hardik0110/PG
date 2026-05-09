@@ -37,3 +37,8 @@ coverage/
 
 # Lock file
 package-lock.json
+
+# Env files (re-set on Vercel dashboard)
+.env
+.env.production
+.env.development

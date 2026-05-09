@@ -290,9 +290,17 @@ function Transactions() {
       <div ref={tableRef} className="bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
           {filteredTx.length === 0 ? (
-            <div className="py-16 text-center text-[#8B7355]">
-              <p className="text-base font-medium">No transactions found</p>
-              <p className="text-sm mt-1">Try adjusting your filters or record a payment</p>
+            <div className="flex flex-col">
+              <img
+                src="/illustrations/B4-empty-transactions_001.jpg"
+                alt=""
+                className="w-full h-64 sm:h-80 object-cover"
+                loading="lazy"
+              />
+              <div className="py-8 text-center text-[#8B7355]">
+                <p className="text-base font-medium">No transactions found</p>
+                <p className="text-sm mt-1">Try adjusting your filters or record a payment</p>
+              </div>
             </div>
           ) : (
             <table className="w-full border-collapse">

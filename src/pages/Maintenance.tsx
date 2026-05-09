@@ -235,15 +235,17 @@ function Maintenance() {
       <div ref={tableRef} className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
           {filteredTickets.length === 0 ? (
-            <div className="flex flex-col items-center py-16 text-[#6B7280]">
+            <div className="flex flex-col">
               <img
                 src="/illustrations/B5-empty-maintenance_001.jpg"
                 alt=""
-                className="w-44 h-44 object-contain mb-4"
+                className="w-full h-64 sm:h-80 object-cover"
                 loading="lazy"
               />
-              <p className="text-base font-medium">No tickets found</p>
-              <p className="text-sm mt-1">All clear — no open maintenance requests.</p>
+              <div className="py-8 text-center text-[#6B7280]">
+                <p className="text-base font-medium">No tickets found</p>
+                <p className="text-sm mt-1">All clear — no open maintenance requests.</p>
+              </div>
             </div>
           ) : (
             <table className="w-full border-collapse">

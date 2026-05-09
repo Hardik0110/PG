@@ -286,14 +286,16 @@ function Rooms() {
       </div>
 
       {filteredRooms.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-[#9CA3AF] text-sm py-16">
+        <div className="flex-1 flex flex-col overflow-hidden rounded-xl border border-[#E8DFD2] bg-white">
           <img
             src="/illustrations/B3-empty-rooms_001.jpg"
             alt=""
-            className="w-44 h-44 object-contain mb-4"
+            className="w-full h-64 sm:h-80 object-cover"
             loading="lazy"
           />
-          <p>No rooms found matching the selected filters.</p>
+          <p className="py-8 text-center text-[#9CA3AF] text-sm">
+            No rooms found matching the selected filters.
+          </p>
         </div>
       ) : groupedRooms ? (
 

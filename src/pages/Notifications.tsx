@@ -111,15 +111,17 @@ function Notifications() {
           <Loader size={32} />
         </div>
       ) : notifications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-[#8B7355]">
+        <div className="flex flex-col overflow-hidden rounded-xl border border-[#E8DFD2] bg-white">
           <img
             src="/illustrations/B6-empty-notifications_001.jpg"
             alt=""
-            className="w-44 h-44 object-contain mb-4"
+            className="w-full h-64 sm:h-80 object-cover"
             loading="lazy"
           />
-          <p className="text-base font-medium">No notifications yet</p>
-          <p className="text-sm mt-1">You'll see updates here when tickets, payments, or tenants change.</p>
+          <div className="py-8 text-center text-[#8B7355]">
+            <p className="text-base font-medium">No notifications yet</p>
+            <p className="text-sm mt-1">You'll see updates here when tickets, payments, or tenants change.</p>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
