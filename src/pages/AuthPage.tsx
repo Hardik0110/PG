@@ -114,7 +114,7 @@ function AuthPage() {
           <div className="hidden md:flex md:items-center md:justify-center md:max-w-[420px]">
             <div className="relative w-full h-full rounded-[30px] overflow-hidden">
               <img
-                src="/login-hero.png"
+                src="/illustrations/D1-auth-hero_001.jpg"
                 alt="PG Management illustration"
                 width="420"
                 height="600"

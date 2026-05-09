@@ -294,7 +294,13 @@ function Expenses() {
       <div ref={tableRef} className="bg-white rounded-xl shadow-[0_8px_24px_-12px_rgba(60,30,15,0.15)] border border-[#E8DFD2] overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
           {filteredExp.length === 0 ? (
-            <div className="py-16 text-center text-[#8B7355]">
+            <div className="flex flex-col items-center py-16 text-[#8B7355]">
+              <img
+                src="/illustrations/B7-empty-expenses_001.jpg"
+                alt=""
+                className="w-44 h-44 object-contain mb-4"
+                loading="lazy"
+              />
               <p className="text-base font-medium">No expenses found</p>
               <p className="text-sm mt-1">Try adjusting your filters or add an expense</p>
             </div>

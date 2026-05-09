@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 
 export default function EmptyState({
   icon: Icon,
+  imageSrc,
+  imageAlt = '',
   title,
   description,
   actionLabel,
@@ -15,11 +17,18 @@ export default function EmptyState({
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="flex flex-col items-center justify-center py-16 px-6 text-center"
     >
-      {Icon && (
+      {imageSrc ? (
+        <img
+          src={imageSrc}
+          alt={imageAlt}
+          className="w-44 h-44 mb-5 object-contain"
+          loading="lazy"
+        />
+      ) : Icon ? (
         <div className="mb-4">
           <Icon size={48} strokeWidth={1.5} className="text-[#9CA3AF]" />
         </div>
-      )}
+      ) : null}
 
       {title && (
         <h3 className="text-[16px] font-semibold text-[#111827] mb-1">

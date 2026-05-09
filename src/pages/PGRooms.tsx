@@ -169,7 +169,12 @@ function PGRooms() {
 
       {rooms.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-[#8B7355] bg-white rounded-2xl border border-[#E8DFD2]">
-          <Home size={32} className="text-[#A89580] mb-2" />
+          <img
+            src="/illustrations/B3-empty-rooms_001.jpg"
+            alt=""
+            className="w-44 h-44 object-contain mb-4"
+            loading="lazy"
+          />
           <p className="text-base font-medium">No rooms yet</p>
           <p className="text-sm mt-1">Click "Add Room" to create your first room.</p>
         </div>

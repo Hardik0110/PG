@@ -112,7 +112,12 @@ function Notifications() {
         </div>
       ) : notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-[#8B7355]">
-          <Bell size={32} className="text-[#A89580] mb-2" />
+          <img
+            src="/illustrations/B6-empty-notifications_001.jpg"
+            alt=""
+            className="w-44 h-44 object-contain mb-4"
+            loading="lazy"
+          />
           <p className="text-base font-medium">No notifications yet</p>
           <p className="text-sm mt-1">You'll see updates here when tickets, payments, or tenants change.</p>
         </div>

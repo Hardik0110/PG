@@ -198,7 +198,12 @@ function MyPGs() {
         </div>
       ) : pgs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-[#8B7355]">
-          <Building size={32} className="text-[#A89580] mb-2" />
+          <img
+            src="/illustrations/B1-empty-pgs_001.jpg"
+            alt=""
+            className="w-44 h-44 object-contain mb-4"
+            loading="lazy"
+          />
           <p className="text-base font-medium">No PGs yet</p>
           <p className="text-sm mt-1">Click “Add New PG” to create your first property.</p>
         </div>

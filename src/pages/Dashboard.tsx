@@ -245,6 +245,27 @@ function Dashboard() {
   return (
     <div className="flex flex-col gap-fluid-3">
 
+      <div
+        className="relative overflow-hidden rounded-2xl border border-[#E8DFD2] bg-[#F8F5F0] h-32 sm:h-36 md:h-40"
+        aria-hidden="true"
+      >
+        <img
+          src="/illustrations/E1-welcome-banner_001.jpg"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-90"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F8F5F0]/80 via-[#F8F5F0]/30 to-transparent" />
+        <div className="relative flex h-full items-center px-6 sm:px-8">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-[#1C6C41]">Welcome back</p>
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#111827] mt-1">
+              {totalTenants} tenants · {occupancy}% occupied
+            </h2>
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
@@ -322,6 +343,35 @@ function Dashboard() {
           },
         ] satisfies StatCardData[]}
       />
+
+      {/* Quick-action feature tiles */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[
+          { src: "/illustrations/C1-manage-pgs_001.jpg",            title: "Manage PGs",     to: "/pgs" },
+          { src: "/illustrations/C2-track-payments_001.jpg",        title: "Track payments", to: "/transactions" },
+          { src: "/illustrations/C3-onboard-tenants_001.jpg",       title: "Onboard tenants",to: "/tenants" },
+          { src: "/illustrations/C4-maintenance-tracking_001.jpg",  title: "Maintenance",    to: "/maintenance" },
+        ].map((tile) => (
+          <Link
+            key={tile.to}
+            to={tile.to}
+            className="group flex flex-col overflow-hidden rounded-xl border border-[#E8DFD2] bg-white shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div className="aspect-[4/3] w-full overflow-hidden bg-[#F8F5F0]">
+              <img
+                src={tile.src}
+                alt=""
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                loading="lazy"
+              />
+            </div>
+            <div className="flex items-center justify-between gap-2 px-4 py-3">
+              <span className="text-sm font-semibold text-[#111827]">{tile.title}</span>
+              <ArrowRight size={14} className="text-[#1C6C41] transition-transform group-hover:translate-x-0.5" />
+            </div>
+          </Link>
+        ))}
+      </div>
 
       <Card className="grid grid-cols-1 divide-y divide-border sm:grid-cols-2 sm:divide-x xl:grid-cols-4 xl:divide-y-0">
         <MiniMetric
