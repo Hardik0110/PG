@@ -18,7 +18,7 @@ interface EmptyCardStateProps {
 export default function EmptyCardState({
   message = 'Nothing to show yet',
   className = '',
-  imageSrc = '/illustrations/EZ-empty-card_001.jpg',
+  imageSrc = '/illustrations/EZ-empty-card_001.png',
 }: EmptyCardStateProps) {
   return (
     <div
