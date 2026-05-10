@@ -28,34 +28,37 @@ const STEPS = [
 
 function StepIndicator({ current }) {
   return (
-    <div className="flex items-center justify-center mb-8">
+    <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
       {STEPS.map((s, idx) => {
         const done = current > s.num;
         const active = current === s.num;
         return (
-          <div key={s.num} className="flex items-center">
-            <div className="flex flex-col items-center gap-1.5">
+          <div key={s.num} className="flex items-center gap-1.5 sm:gap-2.5">
+            <div className="flex items-center gap-2">
               <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${done
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors shrink-0 ${
+                  done
                     ? 'bg-[#1C6C41] text-white'
                     : active
                       ? 'bg-[#1C6C41] text-white ring-4 ring-[#1C6C41]/15'
                       : 'bg-white border border-[#D1D5DB] text-[#9CA3AF]'
-                  }`}
+                }`}
               >
-                {done ? <Check size={16} /> : s.num}
+                {done ? <Check size={14} /> : s.num}
               </div>
               <span
-                className={`text-[11px] font-semibold tracking-wide uppercase ${active ? 'text-[#1C6C41]' : 'text-[#9CA3AF]'
-                  }`}
+                className={`hidden sm:inline text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap ${
+                  active ? 'text-[#1C6C41]' : done ? 'text-[#374151]' : 'text-[#9CA3AF]'
+                }`}
               >
                 {s.title}
               </span>
             </div>
             {idx < STEPS.length - 1 && (
               <div
-                className={`w-12 sm:w-20 h-[2px] mx-2 mb-5 transition-colors ${current > s.num ? 'bg-[#1C6C41]' : 'bg-[#E5E7EB]'
-                  }`}
+                className={`w-6 sm:w-10 h-[2px] transition-colors ${
+                  current > s.num ? 'bg-[#1C6C41]' : 'bg-[#E5E7EB]'
+                }`}
               />
             )}
           </div>
@@ -661,7 +664,7 @@ function AddPG() {
         <button
           onClick={() => navigate('/pgs')}
           className="w-9 h-9 flex items-center justify-center bg-white border border-[#E5E7EB] rounded-lg
-                     hover:bg-[#F9FAFB] transition-colors cursor-pointer"
+                     hover:bg-[#F9FAFB] transition-colors cursor-pointer shrink-0"
         >
           <ArrowLeft size={18} className="text-[#374151]" />
         </button>
@@ -681,9 +684,8 @@ function AddPG() {
             )}
           </h1>
         </div>
+        <StepIndicator current={step} />
       </div>
-
-      <StepIndicator current={step} />
 
       {step === 1 && (
         <StepBasics
