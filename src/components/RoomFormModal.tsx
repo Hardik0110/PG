@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X, Check } from 'lucide-react';
 import { apiRequest } from '../lib/api';
-import { ROOM_AMENITY_NAMES, filterAmenitiesByNames } from '../lib/amenities';
+import { ROOM_AMENITY_NAMES, filterAmenitiesByNames, getAmenityIcon } from '../lib/amenities';
 
 const INPUT_CLASS =
   'w-full h-10 px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm bg-white ' +
@@ -242,18 +242,19 @@ function RoomFormModal({ open, onClose, onSubmit, initial, saving, availableAmen
               <div className="flex flex-wrap gap-2">
                 {amenityOptions.map((a) => {
                   const checked = selectedAmenityIds.has(a.id);
+                  const Icon = getAmenityIcon(a.name);
                   return (
                     <button
                       key={a.id}
                       type="button"
                       onClick={() => toggleAmenity(a.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer border ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer border capitalize ${
                         checked
                           ? 'bg-[#1C6C41]/10 border-[#1C6C41] text-[#1C6C41]'
                           : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:border-[#D1D5DB]'
                       }`}
                     >
-                      {checked && <Check size={12} />}
+                      {checked ? <Check size={12} /> : <Icon size={13} className="opacity-80" />}
                       {a.name}
                     </button>
                   );

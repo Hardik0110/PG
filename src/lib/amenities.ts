@@ -1,4 +1,43 @@
+import {
+  Wifi, Car, ShieldCheck, Camera, ChevronsUp, Zap,
+  UtensilsCrossed, Shirt, Droplet, UserCog,
+  Wind, Bath, Tv, BookOpen, Trees, Flame, Sparkles,
+  type LucideIcon,
+} from 'lucide-react';
 import { apiRequest } from './api';
+
+const AMENITY_ICON_MAP: Record<string, LucideIcon> = {
+  // Building amenities
+  'wifi': Wifi,
+  'parking': Car,
+  'security': ShieldCheck,
+  'cctv': Camera,
+  'lift': ChevronsUp,
+  'elevator': ChevronsUp,
+  'power backup': Zap,
+  'meals included': UtensilsCrossed,
+  'food': UtensilsCrossed,
+  'laundry': Shirt,
+  'water purifier': Droplet,
+  'security guard': UserCog,
+  // Room amenities
+  'ac': Wind,
+  'air conditioning': Wind,
+  'attached bathroom': Bath,
+  'bathroom': Bath,
+  'balcony': Trees,
+  'tv': Tv,
+  'geyser': Flame,
+  'hot water': Flame,
+  'wardrobe': Shirt,
+  'study table': BookOpen,
+};
+
+/** Map an amenity name (any casing) to a lucide-react icon component.
+ *  Falls back to a generic sparkle for unknowns. */
+export function getAmenityIcon(name: string): LucideIcon {
+  return AMENITY_ICON_MAP[String(name).trim().toLowerCase()] || Sparkles;
+}
 
 export const BUILDING_AMENITY_NAMES = [
   'wifi',

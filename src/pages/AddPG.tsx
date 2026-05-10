@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { pageVariants, fadeUp } from '../lib/animations';
-import { BUILDING_AMENITY_NAMES, filterAmenitiesByNames, syncAmenities, createAmenity } from '../lib/amenities';
+import { BUILDING_AMENITY_NAMES, filterAmenitiesByNames, syncAmenities, createAmenity, getAmenityIcon } from '../lib/amenities';
 import { formatCurrency } from '../lib/format';
 import { filterPincode } from '../lib/validation';
 import { useFeedback } from '../components/FeedbackProvider';
@@ -80,7 +80,7 @@ function StepBasics({ value, onChange, onNext, submitting, error }) {
       <img
         src="/illustrations/F1-step-basics_001.jpg"
         alt=""
-        className="block w-full h-32 sm:h-40 object-cover bg-[#F8F5F0]"
+        className="block w-full h-40 sm:h-48 object-contain bg-[#F8F5F0]"
         loading="lazy"
       />
       <div className="p-6">
@@ -207,7 +207,7 @@ function StepBuildingAmenities({
       <img
         src="/illustrations/F2-step-amenities_001.jpg"
         alt=""
-        className="block w-full h-32 sm:h-40 object-cover bg-[#F8F5F0]"
+        className="block w-full h-40 sm:h-48 object-contain bg-[#F8F5F0]"
         loading="lazy"
       />
       <div className="p-6">
@@ -227,6 +227,7 @@ function StepBuildingAmenities({
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
           {amenities.map((a) => {
             const checked = selectedIds.has(a.id);
+            const Icon = getAmenityIcon(a.name);
             return (
               <button
                 key={a.id}
@@ -243,6 +244,7 @@ function StepBuildingAmenities({
                 >
                   {checked && <Check size={10} className="text-white" />}
                 </div>
+                <Icon size={15} className="shrink-0 opacity-80" />
                 <span className="capitalize truncate">{a.name}</span>
               </button>
             );
@@ -256,21 +258,25 @@ function StepBuildingAmenities({
             Quick-add common amenities
           </p>
           <div className="flex flex-wrap gap-2">
-            {missingPresets.map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                disabled={creatingName === preset}
-                onClick={() => {
-                  setCreatingName(preset);
-                  Promise.resolve(onCreate(preset)).finally(() => setCreatingName(''));
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#1C6C41] hover:text-[#1C6C41] transition-colors cursor-pointer disabled:opacity-60 capitalize"
-              >
-                <Plus size={12} />
-                {creatingName === preset ? 'Adding…' : preset}
-              </button>
-            ))}
+            {missingPresets.map((preset) => {
+              const Icon = getAmenityIcon(preset);
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  disabled={creatingName === preset}
+                  onClick={() => {
+                    setCreatingName(preset);
+                    Promise.resolve(onCreate(preset)).finally(() => setCreatingName(''));
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#1C6C41] hover:text-[#1C6C41] transition-colors cursor-pointer disabled:opacity-60 capitalize"
+                >
+                  <Icon size={13} className="opacity-70" />
+                  <Plus size={12} />
+                  {creatingName === preset ? 'Adding…' : preset}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -346,7 +352,7 @@ function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, deletingR
       <img
         src="/illustrations/F3-step-rooms_001.jpg"
         alt=""
-        className="block w-full h-32 sm:h-40 object-cover bg-[#F8F5F0]"
+        className="block w-full h-40 sm:h-48 object-contain bg-[#F8F5F0]"
         loading="lazy"
       />
       <div className="p-6">
