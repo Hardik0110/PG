@@ -108,6 +108,19 @@ export interface AmenitySyncResult {
   failures: Array<{ amenityId: string; op: 'add' | 'remove'; error: Error }>;
 }
 
+// "Already linked" / "not found" should be treated as the target state
+// already being achieved, not as a failure. The backend currently 409s
+// duplicate links and 404s missing ones; if those rules change we just
+// stop swallowing fewer messages.
+function isBenign(opError: Error): boolean {
+  const msg = String(opError?.message || '').toLowerCase();
+  return (
+    msg.includes('already linked') ||
+    msg.includes('already exists') ||
+    msg.includes('not found')
+  );
+}
+
 export async function syncAmenities(
   scope: 'pg' | 'room',
   scopeId: string,
@@ -124,12 +137,18 @@ export async function syncAmenities(
         body: { amenity_id: id },
       })
         .then(() => result.added.push(id))
-        .catch((error: Error) => result.failures.push({ amenityId: id, op: 'add', error })),
+        .catch((error: Error) => {
+          if (isBenign(error)) result.added.push(id);
+          else result.failures.push({ amenityId: id, op: 'add', error });
+        }),
     ),
     ...removes.map((id) =>
       apiRequest(`/api/v1/amenities/${scope}/${scopeId}/${id}`, { method: 'DELETE' })
         .then(() => result.removed.push(id))
-        .catch((error: Error) => result.failures.push({ amenityId: id, op: 'remove', error })),
+        .catch((error: Error) => {
+          if (isBenign(error)) result.removed.push(id);
+          else result.failures.push({ amenityId: id, op: 'remove', error });
+        }),
     ),
   ]);
 
