@@ -13,6 +13,7 @@ import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Separator } from "@/components/ui/separator"
 import StatCards, { type StatCard as StatCardData } from "@/components/StatCards"
+import EmptyCardState from "@/components/ui/EmptyCardState"
 
 function relativeTime(dateString?: string) {
   if (!dateString) return ""
@@ -431,9 +432,7 @@ function Dashboard() {
           }
         >
           {recentTenants.length === 0 ? (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              No tenants yet
-            </div>
+            <EmptyCardState message="No tenants yet" />
           ) : (
             <ul className="divide-y divide-border">
               {recentTenants.map((t, idx) => (
@@ -491,9 +490,7 @@ function Dashboard() {
           }
         >
           {filteredTickets.length === 0 ? (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              No tickets
-            </div>
+            <EmptyCardState message="No open tickets" />
           ) : (
             <ul className="divide-y divide-border">
               {filteredTickets.map((t) => {
@@ -546,9 +543,7 @@ function Dashboard() {
           className="h-[300px] lg:col-span-2"
         >
           {timeline.length === 0 ? (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              No recent activity
-            </div>
+            <EmptyCardState message="No recent activity" />
           ) : (
             <ul className="space-y-1 px-4 py-3">
               {timeline.map((item) => (
