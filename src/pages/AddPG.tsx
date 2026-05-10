@@ -11,7 +11,7 @@ import { apiRequest } from '../lib/api';
 import { pageVariants, fadeUp } from '../lib/animations';
 import { BUILDING_AMENITY_NAMES, filterAmenitiesByNames, syncAmenities, createAmenity, getAmenityIcon } from '../lib/amenities';
 import { formatCurrency } from '../lib/format';
-import { filterPincode } from '../lib/validation';
+import { filterPincode, isValidPincode } from '../lib/validation';
 import { useFeedback } from '../components/FeedbackProvider';
 import RoomFormModal from '../components/RoomFormModal';
 
@@ -73,7 +73,10 @@ function StepBasics({ value, onChange, onNext, submitting, error }) {
     value.address.trim() &&
     value.city.trim() &&
     value.state.trim() &&
-    value.pincode.trim();
+    isValidPincode(value.pincode);
+
+  const pincodeTouched = value.pincode.length > 0;
+  const pincodeError = pincodeTouched && !isValidPincode(value.pincode);
 
   return (
     <motion.div variants={fadeUp} initial="initial" animate="animate" className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-hidden">
@@ -120,8 +123,12 @@ function StepBasics({ value, onChange, onNext, submitting, error }) {
             onChange={(e) => onChange({ ...value, pincode: filterPincode(e.target.value) })}
             placeholder="6-digit pincode"
             maxLength={6}
-            className={INPUT_CLASS}
+            aria-invalid={pincodeError || undefined}
+            className={`${INPUT_CLASS} ${pincodeError ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : ''}`}
           />
+          {pincodeError && (
+            <p className="mt-1 text-[12px] text-red-500">Pincode must be exactly 6 digits</p>
+          )}
         </div>
         <div>
           <label className={LABEL_CLASS}>PG Type *</label>
