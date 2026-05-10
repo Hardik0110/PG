@@ -553,6 +553,22 @@ function AddPG() {
     });
   };
 
+  const handleCreateAmenity = async (name) => {
+    try {
+      const created = await createAmenity(name, 'building');
+      if (created?.id) {
+        setAllAmenities((prev) => [...prev, created]);
+        setSelectedBuildingIds((prev) => {
+          const next = new Set(prev);
+          next.add(created.id);
+          return next;
+        });
+      }
+    } catch (err) {
+      fb.toast.error(err?.message || 'Could not add amenity');
+    }
+  };
+
   const openAddRoom = () => {
     setEditingRoom(null);
     setRoomModalOpen(true);
@@ -671,6 +687,7 @@ function AddPG() {
           amenities={buildingAmenities}
           selectedIds={selectedBuildingIds}
           onToggle={toggleBuildingAmenity}
+          onCreate={handleCreateAmenity}
           onNext={handleStep2Submit}
           onBack={() => setStep(1)}
           submitting={submitting}
