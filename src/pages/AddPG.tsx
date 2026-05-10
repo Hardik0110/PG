@@ -76,11 +76,21 @@ function StepBasics({ value, onChange, onNext, submitting, error }) {
     value.pincode.trim();
 
   return (
-    <motion.div variants={fadeUp} initial="initial" animate="animate" className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] p-6">
-      <div className="flex items-center gap-2 mb-5">
-        <Home size={18} className="text-[#1C6C41]" />
-        <h2 className="text-base font-semibold text-[#111827]">Basic Information</h2>
-      </div>
+    <motion.div variants={fadeUp} initial="initial" animate="animate" className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-hidden">
+      <img
+        src="/illustrations/F1-step-basics_001.jpg"
+        alt=""
+        className="block w-full h-32 sm:h-40 object-cover bg-[#F8F5F0]"
+        loading="lazy"
+      />
+      <div className="p-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Home size={18} className="text-[#1C6C41]" />
+          <h2 className="text-base font-semibold text-[#111827]">Basic Information</h2>
+        </div>
+        <p className="text-sm text-[#6B7280] mb-5">
+          Tell us about your property — name, location, and a short description.
+        </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="md:col-span-2 lg:col-span-4">
@@ -157,6 +167,7 @@ function StepBasics({ value, onChange, onNext, submitting, error }) {
           {!submitting && <ArrowRight size={16} />}
         </button>
       </div>
+      </div>
     </motion.div>
   );
 }
@@ -192,7 +203,14 @@ function StepBuildingAmenities({
   };
 
   return (
-    <motion.div variants={fadeUp} initial="initial" animate="animate" className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] p-6">
+    <motion.div variants={fadeUp} initial="initial" animate="animate" className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-hidden">
+      <img
+        src="/illustrations/F2-step-amenities_001.jpg"
+        alt=""
+        className="block w-full h-32 sm:h-40 object-cover bg-[#F8F5F0]"
+        loading="lazy"
+      />
+      <div className="p-6">
       <div className="flex items-center gap-2 mb-2">
         <MapPin size={18} className="text-[#1C6C41]" />
         <h2 className="text-base font-semibold text-[#111827]">Building Amenities</h2>
@@ -317,13 +335,21 @@ function StepBuildingAmenities({
           {!submitting && <ArrowRight size={16} />}
         </button>
       </div>
+      </div>
     </motion.div>
   );
 }
 
 function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, deletingRoomId }) {
   return (
-    <motion.div variants={fadeUp} initial="initial" animate="animate" className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] p-6">
+    <motion.div variants={fadeUp} initial="initial" animate="animate" className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-hidden">
+      <img
+        src="/illustrations/F3-step-rooms_001.jpg"
+        alt=""
+        className="block w-full h-32 sm:h-40 object-cover bg-[#F8F5F0]"
+        loading="lazy"
+      />
+      <div className="p-6">
       <div className="flex items-center justify-between gap-3 mb-2">
         <div className="flex items-center gap-2">
           <Users size={18} className="text-[#1C6C41]" />
@@ -412,6 +438,7 @@ function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, deletingR
           <Check size={16} />
           Finish
         </button>
+      </div>
       </div>
     </motion.div>
   );
