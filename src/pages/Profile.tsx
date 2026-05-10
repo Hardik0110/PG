@@ -237,10 +237,11 @@ function Profile() {
                   onChange={handleChange}
                   maxLength={10}
                   placeholder="10-digit phone"
+                  aria-invalid={(formData.phone.length > 0 && !isValidPhone(formData.phone)) || undefined}
                   style={{
                     width: '100%',
                     padding: '12px 16px 12px 44px',
-                    border: '1px solid var(--color-border)',
+                    border: `1px solid ${formData.phone.length > 0 && !isValidPhone(formData.phone) ? '#F87171' : 'var(--color-border)'}`,
                     borderRadius: 'var(--radius-md)',
                     fontSize: '15px',
                     fontFamily: 'var(--font-sans)',
@@ -248,6 +249,14 @@ function Profile() {
                   }}
                 />
               </div>
+              {formData.phone.length > 0 && !isValidPhone(formData.phone) && (
+                <p style={{ marginTop: '4px', fontSize: '12px', color: '#EF4444' }}>
+                  Enter a valid 10-digit Indian mobile number (starts with 6, 7, 8, or 9)
+                </p>
+              )}
+              {errors.phone && (
+                <p style={{ marginTop: '4px', fontSize: '12px', color: '#EF4444' }}>{errors.phone}</p>
+              )}
             </div>
           </div>
 

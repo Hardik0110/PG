@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { X, UserPlus, ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiRequest } from '../lib/api';
-import { filterPhone, filterAadhar, filterPan } from '../lib/validation';
+import { filterPhone, filterAadhar, filterPan, isValidPhone } from '../lib/validation';
 
 export default function AddTenantDrawer({ open, onClose, onSubmit, pgs = [], rooms = [] }) {
   const [step, setStep] = useState(1);
@@ -106,7 +106,26 @@ export default function AddTenantDrawer({ open, onClose, onSubmit, pgs = [], roo
             </div>
             <div>
               <label className="block text-sm font-medium text-[#374151] mb-1">Phone Number *</label>
-              <input required type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit phone" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: filterPhone(e.target.value) })} />
+              <input
+                required
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                placeholder="10-digit phone"
+                aria-invalid={(formData.phone.length > 0 && !isValidPhone(formData.phone)) || undefined}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 text-sm ${
+                  formData.phone.length > 0 && !isValidPhone(formData.phone)
+                    ? 'border-red-400 focus:ring-red-200 focus:border-red-500'
+                    : 'border-[#E5E7EB] focus:ring-[#1C6C41]/20 focus:border-[#1C6C41]'
+                }`}
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: filterPhone(e.target.value) })}
+              />
+              {formData.phone.length > 0 && !isValidPhone(formData.phone) && (
+                <p className="mt-1 text-[12px] text-red-500">
+                  Enter a valid 10-digit Indian mobile (starts with 6-9)
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -163,7 +182,26 @@ export default function AddTenantDrawer({ open, onClose, onSubmit, pgs = [], roo
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#374151] mb-1">Guardian Phone</label>
-                <input required type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit phone" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.guardianPhone} onChange={(e) => setFormData({ ...formData, guardianPhone: filterPhone(e.target.value) })} />
+                <input
+                  required
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="10-digit phone"
+                  aria-invalid={(formData.guardianPhone.length > 0 && !isValidPhone(formData.guardianPhone)) || undefined}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 text-sm ${
+                    formData.guardianPhone.length > 0 && !isValidPhone(formData.guardianPhone)
+                      ? 'border-red-400 focus:ring-red-200 focus:border-red-500'
+                      : 'border-[#E5E7EB] focus:ring-[#1C6C41]/20 focus:border-[#1C6C41]'
+                  }`}
+                  value={formData.guardianPhone}
+                  onChange={(e) => setFormData({ ...formData, guardianPhone: filterPhone(e.target.value) })}
+                />
+                {formData.guardianPhone.length > 0 && !isValidPhone(formData.guardianPhone) && (
+                  <p className="mt-1 text-[12px] text-red-500">
+                    Enter a valid 10-digit Indian mobile (starts with 6-9)
+                  </p>
+                )}
               </div>
             </div>
           </div>

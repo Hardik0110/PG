@@ -42,3 +42,8 @@ package-lock.json
 .env
 .env.production
 .env.development
+
+# Personal portfolio assets + helper scripts (kept local, not shipped)
+portfolio/
+scripts/
+scripts-portfolio-screenshots.mjs

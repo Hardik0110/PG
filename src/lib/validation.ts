@@ -27,8 +27,13 @@ export const filterPan = (value: string): string => filterAlnumUpper(value, 10);
 export const isValidEmail = (email: string): boolean =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
+/**
+ * Indian mobile number: exactly 10 digits, must start with 6, 7, 8, or 9
+ * (the only valid first digits for Indian mobile carriers under the
+ * National Numbering Plan).
+ */
 export const isValidPhone = (phone: string): boolean =>
-  /^\d{10}$/.test(phone);
+  /^[6-9]\d{9}$/.test(phone);
 
 export const isValidPincode = (pincode: string): boolean =>
   /^\d{6}$/.test(pincode);

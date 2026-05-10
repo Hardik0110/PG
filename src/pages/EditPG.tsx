@@ -275,8 +275,14 @@ function EditPG() {
                   onChange={e => setOwnerPhone(filterPhone(e.target.value))}
                   placeholder="10-digit phone"
                   maxLength={10}
-                  className={INPUT_CLASS}
+                  aria-invalid={(ownerPhone.length > 0 && !isValidPhone(ownerPhone)) || undefined}
+                  className={`${INPUT_CLASS} ${ownerPhone.length > 0 && !isValidPhone(ownerPhone) ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : ''}`}
                 />
+                {ownerPhone.length > 0 && !isValidPhone(ownerPhone) && (
+                  <p className="mt-1 text-[12px] text-red-500">
+                    Enter a valid 10-digit Indian mobile (starts with 6-9)
+                  </p>
+                )}
               </div>
               <div>
                 <label className={LABEL_CLASS}>Owner Email</label>
