@@ -173,13 +173,13 @@ function StepBasics({ value, onChange, onNext, submitting, error }) {
         </p>
       )}
 
-      <div className="flex items-center justify-end gap-2 pt-5 mt-5 border-t border-[#E5E7EB]">
+      <div className="sticky bottom-0 bg-white flex items-center justify-end gap-2 py-4 mt-5 border-t border-[#E5E7EB] -mx-6 px-6 z-10">
         <button
           type="button"
           onClick={onNext}
           disabled={!valid || submitting}
           className="h-11 px-6 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
-                     inline-flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                     inline-flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
         >
           Continue
           <ArrowRight size={16} />
@@ -275,7 +275,10 @@ function StepBuildingAmenities({
           <p className="text-xs font-medium text-[#6B7280] mb-2 uppercase tracking-wide">
             Quick-add common amenities
           </p>
-          <div className="flex flex-wrap gap-2">
+          {/* Same lg-pill style as the selected grid above, with a dashed
+              border + cream tint so they read as 'not yet added but
+              one click to add' rather than feeling like footnotes. */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
             {missingPresets.map((preset) => {
               const Icon = getAmenityIcon(preset);
               return (
@@ -287,11 +290,11 @@ function StepBuildingAmenities({
                     setCreatingName(preset);
                     Promise.resolve(onCreate(preset)).finally(() => setCreatingName(''));
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#1C6C41] hover:text-[#1C6C41] transition-colors cursor-pointer disabled:opacity-60 capitalize"
+                  className="flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-sm font-medium border-2 border-dashed border-[#D1D5DB] bg-[#F8F5F0] text-[#374151] hover:border-[#1C6C41] hover:text-[#1C6C41] hover:bg-[#1C6C41]/5 transition-colors cursor-pointer disabled:opacity-60 capitalize"
                 >
-                  <Icon size={13} className="opacity-70" />
-                  <Plus size={12} />
-                  {creatingName === preset ? 'Adding…' : preset}
+                  <Plus size={14} className="shrink-0 text-[#1C6C41]" />
+                  <Icon size={15} className="shrink-0 opacity-80" />
+                  <span className="truncate">{creatingName === preset ? 'Adding…' : preset}</span>
                 </button>
               );
             })}
@@ -322,8 +325,11 @@ function StepBuildingAmenities({
             type="button"
             onClick={submitCustom}
             disabled={!customName.trim() || !!creatingName}
-            className="h-11 px-4 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
-                       inline-flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`h-11 px-4 text-sm font-semibold rounded-lg inline-flex items-center gap-1.5 transition-all ${
+              customName.trim() && !creatingName
+                ? 'bg-[#1C6C41] hover:bg-[#155331] text-white shadow-sm hover:shadow-md cursor-pointer'
+                : 'bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed'
+            }`}
           >
             <Plus size={14} />
             Add
@@ -337,7 +343,7 @@ function StepBuildingAmenities({
         </p>
       )}
 
-      <div className="flex items-center justify-between gap-2 pt-5 mt-5 border-t border-[#E5E7EB]">
+      <div className="sticky bottom-0 bg-white flex items-center justify-between gap-2 py-4 mt-5 border-t border-[#E5E7EB] -mx-6 px-6 z-10">
         <button
           type="button"
           onClick={onBack}
@@ -353,7 +359,7 @@ function StepBuildingAmenities({
           onClick={onNext}
           disabled={submitting}
           className="h-11 px-6 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
-                     inline-flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                     inline-flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50 shadow-sm hover:shadow-md"
         >
           {selectedIds.size > 0 ? 'Continue' : 'Skip & Continue'}
           <ArrowRight size={16} />
@@ -442,7 +448,7 @@ function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, submittin
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-2 pt-5 mt-5 border-t border-[#E5E7EB]">
+      <div className="sticky bottom-0 bg-white flex items-center justify-between gap-2 py-4 mt-5 border-t border-[#E5E7EB] -mx-6 px-6 z-10">
         <button
           type="button"
           onClick={onBack}
@@ -458,7 +464,7 @@ function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, submittin
           onClick={onFinish}
           disabled={submitting}
           className="h-11 px-6 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
-                     inline-flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+                     inline-flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
         >
           {submitting ? 'Creating your PG…' : (<><Check size={16} /> Finish</>)}
         </button>

@@ -111,28 +111,31 @@ function Profile() {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '16px',
-            marginBottom: '32px'
+            gap: '14px',
+            marginBottom: '28px',
+            paddingBottom: '20px',
+            borderBottom: '1px solid var(--color-border)'
           }}>
             <div style={{
-              width: 80,
-              height: 80,
+              width: 56,
+              height: 56,
               borderRadius: '50%',
-              background: '#1C6C41',
+              background: 'linear-gradient(135deg,#1C6C41,#3DBF7E)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '32px',
+              fontSize: '22px',
               fontWeight: 700,
-              color: 'white'
+              color: 'white',
+              flexShrink: 0
             }}>
-              {formData.fullName.charAt(0)}
+              {(formData.fullName || 'U').charAt(0).toUpperCase()}
             </div>
-            <div>
-              <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--color-foreground)', margin: 0 }}>
-                {formData.fullName}
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-foreground)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {formData.fullName || 'Your name'}
               </h2>
-              <p style={{ fontSize: '14px', color: 'var(--color-muted-foreground)', margin: '4px 0 0' }}>
+              <p style={{ fontSize: '13px', color: 'var(--color-muted-foreground)', margin: '2px 0 0' }}>
                 PG Owner
               </p>
             </div>
