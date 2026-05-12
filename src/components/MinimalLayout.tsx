@@ -43,8 +43,25 @@ export default function MinimalLayout({ children, banner }: Props) {
       {banner !== null && (
         <div className="shrink-0 border-b border-[#E5E7EB] bg-gradient-to-r from-[#1C6C41]/8 via-[#A8E6C3]/12 to-transparent">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#1C6C41]/15 flex items-center justify-center shrink-0">
-              <span role="img" aria-label="namaste" className="text-xl leading-none">🙏</span>
+            <div className="w-9 h-9 rounded-full bg-[#1C6C41]/15 flex items-center justify-center shrink-0 text-[#1C6C41]">
+              {/* Namaste / hands-praying — inline SVG so it inherits currentColor.
+                  Based on Phosphor Icons' HandsPraying (MIT-licensed). */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 256 256"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="16"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                role="img"
+                aria-label="namaste"
+              >
+                <path d="M120,200V102.45a8,8,0,0,1,1.18-4.18l38-62.39a16,16,0,0,1,29.34,11.74L172.4,99.2a8,8,0,0,0,3.55,9.93l40.2,22.71a16,16,0,0,1,5.94,22.93l-41.74,62.61a16,16,0,0,1-23.45,3.6L120,200Z" />
+                <path d="M136,200V102.45a8,8,0,0,0-1.18-4.18l-38-62.39A16,16,0,0,0,67.48,47.62L83.6,99.2a8,8,0,0,1-3.55,9.93l-40.2,22.71a16,16,0,0,0-5.94,22.93l41.74,62.61a16,16,0,0,0,23.45,3.6L136,200Z" />
+              </svg>
             </div>
             <div>
               {banner ?? (
