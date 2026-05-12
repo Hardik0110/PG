@@ -46,6 +46,59 @@ export default function AddTenantDrawer({ open, onClose, onSubmit, pgs = [], roo
   const handleNext = () => setStep((s) => Math.min(4, s + 1));
   const handlePrev = () => setStep((s) => Math.max(1, s - 1));
 
+  const tenantPayload = (overrides = {}) => ({
+    user: {
+      email: formData.email.trim().toLowerCase(),
+      full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+      phone_number: formData.phone || null,
+      password: formData.password || 'changeme123',
+    },
+    pg_id: formData.pg_id,
+    room_id: formData.room_id || null,
+    move_in_date: formData.move_in_date,
+    monthly_rent: parseFloat(formData.monthly_rent || '0'),
+    security_deposit: parseFloat(formData.security_deposit || '0'),
+    aadhar_no: formData.aadharNo || null,
+    pan_no: formData.panNo || null,
+    guardian_name: formData.guardianName || null,
+    guardian_phone: formData.guardianPhone || null,
+    guardian_relation: formData.relation || null,
+    workplace: formData.workplace || null,
+    occupation: formData.occupation || null,
+    ...overrides,
+  });
+
+  // When the backend rejects onboarding because the email is already
+  // tied to an existing user, look that user up and offer to link them
+  // to the new tenant record rather than create a duplicate.
+  const linkExistingByEmail = async () => {
+    setSubmitError('');
+    setSubmitting(true);
+    try {
+      const email = formData.email.trim().toLowerCase();
+      // Backend endpoint shape: GET /users/?email= isn't standard here,
+      // but tenants/onboard accepts existing_user_id when present.
+      // Best-effort: query users and filter client-side.
+      const users = await apiRequest(`/api/v1/users/?email=${encodeURIComponent(email)}`).catch(() => null);
+      const list = Array.isArray(users) ? users : (users?.data ?? []);
+      const match = list.find?.((u: any) => String(u.email).toLowerCase() === email);
+      if (!match?.id) {
+        setSubmitError(`Could not find an existing user with ${email}. Please use a different email.`);
+        return;
+      }
+      // Re-submit with existing_user_id so backend skips user creation.
+      const payload = tenantPayload({ user: undefined, existing_user_id: match.id });
+      const created = await apiRequest('/api/v1/tenants/onboard', { method: 'POST', body: payload });
+      onSubmit?.(created);
+      onClose();
+      setTimeout(() => setStep(1), 300);
+    } catch (err: any) {
+      setSubmitError(err?.message || 'Failed to link existing user');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (step < 4) {
@@ -55,29 +108,9 @@ export default function AddTenantDrawer({ open, onClose, onSubmit, pgs = [], roo
     setSubmitError('');
     setSubmitting(true);
     try {
-      const payload = {
-        user: {
-          email: formData.email,
-          full_name: `${formData.firstName} ${formData.lastName}`.trim(),
-          phone_number: formData.phone || null,
-          password: formData.password || 'changeme123',
-        },
-        pg_id: formData.pg_id,
-        room_id: formData.room_id || null,
-        move_in_date: formData.move_in_date,
-        monthly_rent: parseFloat(formData.monthly_rent || '0'),
-        security_deposit: parseFloat(formData.security_deposit || '0'),
-        aadhar_no: formData.aadharNo || null,
-        pan_no: formData.panNo || null,
-        guardian_name: formData.guardianName || null,
-        guardian_phone: formData.guardianPhone || null,
-        guardian_relation: formData.relation || null,
-        workplace: formData.workplace || null,
-        occupation: formData.occupation || null,
-      };
       const created = await apiRequest('/api/v1/tenants/onboard', {
         method: 'POST',
-        body: payload,
+        body: tenantPayload(),
       });
       onSubmit?.(created);
       onClose();
@@ -253,11 +286,35 @@ export default function AddTenantDrawer({ open, onClose, onSubmit, pgs = [], roo
               </div>
             </div>
 
-            {submitError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
-                {submitError}
-              </div>
-            )}
+            {submitError && (() => {
+              const isDuplicateEmail =
+                /already exists|already registered|existing user_id|POST \/tenants\//i.test(submitError);
+              if (isDuplicateEmail) {
+                return (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs">
+                    <p className="text-amber-900 font-medium mb-1">
+                      An account with <span className="font-semibold">{formData.email}</span> already exists.
+                    </p>
+                    <p className="text-amber-800 mb-2">
+                      Want to link the existing user as a tenant of this PG instead?
+                    </p>
+                    <button
+                      type="button"
+                      onClick={linkExistingByEmail}
+                      disabled={submitting}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1C6C41] text-white rounded-md text-xs font-semibold hover:bg-[#155331] disabled:opacity-60"
+                    >
+                      {submitting ? 'Linking…' : 'Link existing user'}
+                    </button>
+                  </div>
+                );
+              }
+              return (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
+                  {submitError}
+                </div>
+              );
+            })()}
 
             <div className="p-4 bg-[#ECFDF3] border border-[#A8E6C3] rounded-lg">
               <h4 className="text-sm font-semibold text-[#1C6C41] mb-1">Ready to onboard</h4>

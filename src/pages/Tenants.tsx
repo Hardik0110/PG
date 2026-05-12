@@ -1,9 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, ChevronRight, UserPlus, Calendar } from 'lucide-react';
+import { Search, ChevronRight, UserPlus, Calendar, Pencil } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import AddTenantDrawer from '../components/AddTenantDrawer';
+import EditTenantModal from '../components/EditTenantModal';
 import Select from '../components/ui/Select';
 import Loader from '../components/ui/Loader';
 import Pagination from '../components/ui/Pagination';
@@ -40,6 +41,8 @@ function Tenants() {
   const [loading, setLoading] = useState(true);
   const [hoveredRow, setHoveredRow] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [editingTenantId, setEditingTenantId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [page, setPage] = useState(1);
 
   const [tableRef, pageSize] = useTablePageSize({ mobile: 60, tablet: 64, desktop: 68 });
@@ -90,7 +93,7 @@ function Tenants() {
       }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [refreshKey]);
 
   const pgNames = useMemo(() => {
     const unique = [...new Set(tenants.map(t => t.pgName))];
@@ -277,11 +280,21 @@ function Tenants() {
                       </td>
 
                       <td className="px-fluid-2 py-fluid-2">
-                        <ChevronRight
-                          size={16}
-                          className={`text-[#1C6C41] transition-all duration-150
-                                      ${hoveredRow === tenant.id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-1'}`}
-                        />
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setEditingTenantId(tenant.id)}
+                            className="p-1.5 rounded-md text-[#8B7355] hover:text-[#1C6C41] hover:bg-[#1C6C41]/8 transition-colors"
+                            aria-label={`Edit ${tenant.name}`}
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <ChevronRight
+                            size={16}
+                            className={`text-[#1C6C41] transition-all duration-150
+                                        ${hoveredRow === tenant.id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-1'}`}
+                          />
+                        </div>
                       </td>
                     </motion.tr>
                   );
@@ -298,6 +311,14 @@ function Tenants() {
           onPageChange={setPage}
         />
       </div>
+
+      <EditTenantModal
+        open={!!editingTenantId}
+        onClose={() => setEditingTenantId(null)}
+        tenantId={editingTenantId}
+        rooms={rooms}
+        onSaved={() => setRefreshKey((k) => k + 1)}
+      />
 
       <AddTenantDrawer
         open={isDrawerOpen}

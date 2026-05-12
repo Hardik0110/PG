@@ -1,12 +1,13 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  TrendingUp, Clock, CalendarDays, Download, Plus, Calendar,
+  TrendingUp, Clock, CalendarDays, Download, Plus, Calendar, Pencil,
 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import Badge, { BADGE_MAP } from '../components/ui/Badge';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
 import RecordPaymentModal from '../components/RecordPaymentModal';
+import EditTransactionModal from '../components/EditTransactionModal';
 import Select from '../components/ui/Select';
 import Loader from '../components/ui/Loader';
 import Pagination from '../components/ui/Pagination';
@@ -38,6 +39,8 @@ function Transactions() {
   const [loading, setLoading] = useState(true);
   const [hoveredRow, setHoveredRow] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTxId, setEditingTxId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [page, setPage] = useState(1);
 
   const [tableRef, pageSize] = useTablePageSize({ mobile: 40, tablet: 44, desktop: 48 });
@@ -71,7 +74,7 @@ function Transactions() {
       }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [refreshKey]);
 
   const tenantById = useMemo(() => {
     const m = {};
@@ -306,7 +309,7 @@ function Transactions() {
             <table className="w-full border-collapse">
               <thead className="bg-[#1C6C41]">
                 <tr>
-                  {['Tenant', 'PG', 'Amount', 'Date', 'Status', 'Type'].map(h => (
+                  {['Tenant', 'PG', 'Amount', 'Date', 'Status', 'Type', ''].map(h => (
                     <th
                       key={h}
                       className="text-left px-fluid-2 py-fluid-2 text-[12px] font-semibold text-white/90 uppercase tracking-[0.08em] whitespace-nowrap"
@@ -362,6 +365,16 @@ function Transactions() {
                           {tx.type}
                         </span>
                       </td>
+                      <td className="px-fluid-2 py-fluid-2">
+                        <button
+                          type="button"
+                          onClick={() => setEditingTxId(tx.id)}
+                          className="p-1.5 rounded-md text-[#8B7355] hover:text-[#1C6C41] hover:bg-[#1C6C41]/8 transition-colors"
+                          aria-label="Edit transaction"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                      </td>
                     </motion.tr>
                   );
                 })}
@@ -384,6 +397,13 @@ function Transactions() {
         onSubmit={handleRecordPayment}
         pgs={pgs}
         tenants={tenants}
+      />
+
+      <EditTransactionModal
+        open={!!editingTxId}
+        onClose={() => setEditingTxId(null)}
+        transactionId={editingTxId}
+        onSaved={() => setRefreshKey((k) => k + 1)}
       />
     </motion.div>
   );
