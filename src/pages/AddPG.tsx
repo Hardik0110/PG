@@ -11,7 +11,7 @@ import { apiRequest } from '../lib/api';
 import { pageVariants, fadeUp } from '../lib/animations';
 import { BUILDING_AMENITY_NAMES, filterAmenitiesByNames, syncAmenities, createAmenity, getAmenityIcon } from '../lib/amenities';
 import { formatCurrency } from '../lib/format';
-import { filterPincode, isValidPincode } from '../lib/validation';
+import { filterPincode, isValidPincode, describeTextField } from '../lib/validation';
 import { useFeedback } from '../components/FeedbackProvider';
 import RoomFormModal from '../components/RoomFormModal';
 
@@ -71,15 +71,19 @@ function StepIndicator({ current }) {
 function StepBasics({ value, onChange, onNext, submitting, error }) {
   const setField = (field) => (e) => onChange({ ...value, [field]: e.target.value });
 
-  const valid =
-    value.name.trim() &&
-    value.address.trim() &&
-    value.city.trim() &&
-    value.state.trim() &&
-    isValidPincode(value.pincode);
-
+  const nameError = value.name.length > 0 ? describeTextField(value.name, { minLen: 3, label: 'PG Name' }) : null;
+  const addressError = value.address.length > 0 ? describeTextField(value.address, { minLen: 8, label: 'Address' }) : null;
+  const cityError = value.city.length > 0 ? describeTextField(value.city, { minLen: 2, label: 'City' }) : null;
+  const stateError = value.state.length > 0 ? describeTextField(value.state, { minLen: 2, label: 'State' }) : null;
   const pincodeTouched = value.pincode.length > 0;
   const pincodeError = pincodeTouched && !isValidPincode(value.pincode);
+
+  const valid =
+    !describeTextField(value.name, { minLen: 3, label: 'PG Name' }) &&
+    !describeTextField(value.address, { minLen: 8, label: 'Address' }) &&
+    !describeTextField(value.city, { minLen: 2, label: 'City' }) &&
+    !describeTextField(value.state, { minLen: 2, label: 'State' }) &&
+    isValidPincode(value.pincode);
 
   return (
     <motion.div variants={fadeUp} initial="initial" animate="animate" className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-hidden">
@@ -101,21 +105,25 @@ function StepBasics({ value, onChange, onNext, submitting, error }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="md:col-span-2 lg:col-span-4">
           <label className={LABEL_CLASS}>PG Name *</label>
-          <input type="text" value={value.name} onChange={setField('name')} placeholder="e.g. Sunrise PG" className={INPUT_CLASS} />
+          <input type="text" value={value.name} onChange={setField('name')} placeholder="e.g. Sunrise PG" className={`${INPUT_CLASS} ${nameError ? 'border-red-400' : ''}`} maxLength={100} />
+          {nameError && <p className="mt-1 text-[12px] text-red-500">{nameError}</p>}
         </div>
 
         <div className="md:col-span-2 lg:col-span-4">
           <label className={LABEL_CLASS}>Address *</label>
-          <input type="text" value={value.address} onChange={setField('address')} placeholder="Full street address" className={INPUT_CLASS} />
+          <input type="text" value={value.address} onChange={setField('address')} placeholder="Full street address" className={`${INPUT_CLASS} ${addressError ? 'border-red-400' : ''}`} maxLength={200} />
+          {addressError && <p className="mt-1 text-[12px] text-red-500">{addressError}</p>}
         </div>
 
         <div>
           <label className={LABEL_CLASS}>City *</label>
-          <input type="text" value={value.city} onChange={setField('city')} placeholder="City" className={INPUT_CLASS} />
+          <input type="text" value={value.city} onChange={setField('city')} placeholder="City" className={`${INPUT_CLASS} ${cityError ? 'border-red-400' : ''}`} maxLength={60} />
+          {cityError && <p className="mt-1 text-[12px] text-red-500">{cityError}</p>}
         </div>
         <div>
           <label className={LABEL_CLASS}>State *</label>
-          <input type="text" value={value.state} onChange={setField('state')} placeholder="State" className={INPUT_CLASS} />
+          <input type="text" value={value.state} onChange={setField('state')} placeholder="State" className={`${INPUT_CLASS} ${stateError ? 'border-red-400' : ''}`} maxLength={60} />
+          {stateError && <p className="mt-1 text-[12px] text-red-500">{stateError}</p>}
         </div>
         <div>
           <label className={LABEL_CLASS}>Pincode *</label>

@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
 import { pageVariants, staggerContainer, fadeUp } from '../lib/animations';
-import { filterPhone, isValidEmail, isValidPhone } from '../lib/validation';
+import { filterPhone, filterPincode, isValidEmail, isValidPhone, isValidPincode } from '../lib/validation';
 import Loader from '../components/ui/Loader';
 import { useFeedback } from '../components/FeedbackProvider';
 
@@ -46,6 +46,7 @@ function EditPG() {
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  const [pincode, setPincode] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
   const [totalRooms, setTotalRooms] = useState('');
@@ -63,6 +64,7 @@ function EditPG() {
         setAddress(data.address || '');
         setCity(data.city || '');
         setState(data.state || '');
+        setPincode(data.pincode || '');
         setOwnerPhone(data.owner_phone || '');
         setOwnerEmail(data.owner_email || '');
         setTotalRooms(data.total_rooms?.toString() || '');
@@ -103,11 +105,14 @@ function EditPG() {
     const newErrors: Record<string, string> = {};
     if (!name.trim()) newErrors.name = 'PG Name is required';
     if (!address.trim()) newErrors.address = 'Address is required';
+    if (!city.trim()) newErrors.city = 'City is required';
+    if (!state.trim()) newErrors.state = 'State is required';
+    if (!isValidPincode(pincode)) newErrors.pincode = 'Pincode must be exactly 6 digits';
     if (ownerEmail.trim() && !isValidEmail(ownerEmail)) {
       newErrors.ownerEmail = 'Enter a valid email';
     }
     if (ownerPhone && !isValidPhone(ownerPhone)) {
-      newErrors.ownerPhone = 'Phone must be 10 digits';
+      newErrors.ownerPhone = 'Enter a valid 10-digit Indian mobile (starts with 6-9)';
     }
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -123,6 +128,7 @@ function EditPG() {
           address,
           city,
           state,
+          pincode,
           type: pgType || 'gents',
         },
       }),
@@ -241,24 +247,41 @@ function EditPG() {
               </div>
 
               <div>
-                <label className={LABEL_CLASS}>City</label>
+                <label className={LABEL_CLASS}>City *</label>
                 <input
                   type="text"
                   value={city}
                   onChange={e => setCity(e.target.value)}
                   placeholder="City"
-                  className={INPUT_CLASS}
+                  className={`${INPUT_CLASS} ${errors.city ? 'border-red-400' : ''}`}
                 />
+                {errors.city && <p className="text-xs text-[#F04438] mt-1">{errors.city}</p>}
               </div>
               <div>
-                <label className={LABEL_CLASS}>State</label>
+                <label className={LABEL_CLASS}>State *</label>
                 <input
                   type="text"
                   value={state}
                   onChange={e => setState(e.target.value)}
                   placeholder="State"
-                  className={INPUT_CLASS}
+                  className={`${INPUT_CLASS} ${errors.state ? 'border-red-400' : ''}`}
                 />
+                {errors.state && <p className="text-xs text-[#F04438] mt-1">{errors.state}</p>}
+              </div>
+              <div>
+                <label className={LABEL_CLASS}>Pincode *</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={pincode}
+                  onChange={e => setPincode(filterPincode(e.target.value))}
+                  placeholder="6-digit pincode"
+                  className={`${INPUT_CLASS} ${errors.pincode || (pincode.length > 0 && !isValidPincode(pincode)) ? 'border-red-400' : ''}`}
+                />
+                {(errors.pincode || (pincode.length > 0 && !isValidPincode(pincode))) && (
+                  <p className="text-xs text-[#F04438] mt-1">Pincode must be exactly 6 digits</p>
+                )}
               </div>
             </div>
           </motion.div>
