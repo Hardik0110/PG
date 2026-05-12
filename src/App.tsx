@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { pageVariants } from './lib/animations';
 import AuthPage from './pages/AuthPage';
+import ConfirmEmail from './pages/ConfirmEmail';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import AddPG from './pages/AddPG';
 import EditPG from './pages/EditPG';
@@ -58,6 +60,22 @@ function AppRoutes() {
           element={
             <AnimatedPage>
               <AuthPage />
+            </AnimatedPage>
+          }
+        />
+        <Route
+          path="/confirm-email"
+          element={
+            <AnimatedPage>
+              <ConfirmEmail />
+            </AnimatedPage>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <AnimatedPage>
+              <ResetPassword />
             </AnimatedPage>
           }
         />
