@@ -181,8 +181,8 @@ function StepBasics({ value, onChange, onNext, submitting, error }) {
           className="h-11 px-6 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
                      inline-flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {submitting ? 'Creating PG...' : 'Continue'}
-          {!submitting && <ArrowRight size={16} />}
+          Continue
+          <ArrowRight size={16} />
         </button>
       </div>
       </div>
@@ -355,8 +355,8 @@ function StepBuildingAmenities({
           className="h-11 px-6 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
                      inline-flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
         >
-          {submitting ? 'Saving...' : selectedIds.size > 0 ? 'Continue' : 'Skip & Continue'}
-          {!submitting && <ArrowRight size={16} />}
+          {selectedIds.size > 0 ? 'Continue' : 'Skip & Continue'}
+          <ArrowRight size={16} />
         </button>
       </div>
       </div>
@@ -364,7 +364,7 @@ function StepBuildingAmenities({
   );
 }
 
-function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, deletingRoomId }) {
+function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, submitting }) {
   return (
     <motion.div variants={fadeUp} initial="initial" animate="animate" className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-hidden">
       <img
@@ -401,7 +401,7 @@ function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, deletingR
         <div className="flex flex-col gap-2">
           {rooms.map((r) => (
             <div
-              key={r.id}
+              key={r.tempId}
               className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg bg-[#FAF7F2] border border-[#E8DFD2]"
             >
               <div className="flex items-center gap-3 min-w-0">
@@ -431,7 +431,6 @@ function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, deletingR
                 <button
                   type="button"
                   onClick={() => onDelete(r)}
-                  disabled={deletingRoomId === r.id}
                   className="p-1.5 text-[#A89580] hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer disabled:opacity-50"
                   aria-label="Delete room"
                 >
@@ -447,8 +446,9 @@ function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, deletingR
         <button
           type="button"
           onClick={onBack}
+          disabled={submitting}
           className="h-11 px-5 border border-[#D1D5DB] rounded-lg text-sm font-medium text-[#374151]
-                     bg-white hover:bg-[#F9FAFB] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                     bg-white hover:bg-[#F9FAFB] transition-colors cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
         >
           <ArrowLeft size={14} />
           Back
@@ -456,11 +456,11 @@ function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, deletingR
         <button
           type="button"
           onClick={onFinish}
+          disabled={submitting}
           className="h-11 px-6 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-semibold rounded-lg
-                     inline-flex items-center gap-2 transition-colors cursor-pointer"
+                     inline-flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          <Check size={16} />
-          Finish
+          {submitting ? 'Creating your PG…' : (<><Check size={16} /> Finish</>)}
         </button>
       </div>
       </div>
@@ -473,9 +473,21 @@ function AddPG() {
   const fb = useFeedback();
   const queryClient = useQueryClient();
   const [step, setStep] = useState(1);
-  const [pgId, setPgId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [stepError, setStepError] = useState('');
+
+  // -----------------------------------------------------------------
+  // TRANSACTIONAL DESIGN
+  // -----------------------------------------------------------------
+  // Everything the user enters lives in local state. No backend writes
+  // happen until they hit "Finish" on step 3. That way they can navigate
+  // back and forth between steps, edit anything, and bail out without
+  // leaving a half-created PG on the server.
+  //
+  // The one exception is the master /amenities/ catalog (read-only here):
+  // custom amenities the user adds go into `pendingCustomAmenities` and
+  // are created in the master catalog inside finish() before being linked.
+  // -----------------------------------------------------------------
 
   const [basics, setBasics] = useState({
     name: '',
@@ -490,11 +502,29 @@ function AddPG() {
   const [allAmenities, setAllAmenities] = useState([]);
   const [selectedBuildingIds, setSelectedBuildingIds] = useState<Set<string>>(new Set());
 
-  const [rooms, setRooms] = useState([]);
+  // Names typed via the inline custom-amenity input — created in the
+  // master catalog at finish() time, then linked to this new PG.
+  const [pendingCustomAmenities, setPendingCustomAmenities] = useState<string[]>([]);
+
+  // Rooms held in local state with a temp string id (`temp-1`, `temp-2`,
+  // ...). Persisted to the API only at finish() time.
+  type LocalRoom = {
+    tempId: string;
+    room_number: string;
+    room_sharing: string;
+    is_ac: boolean;
+    floor: number | null;
+    capacity: number;
+    monthly_rent_per_head: number;
+    status: string;
+    notes: string | null;
+    // Either master-amenity uuids OR `pending:<index>` placeholders that
+    // resolve to the new amenity ids created at finish() time.
+    amenityRefs: string[];
+  };
+  const [rooms, setRooms] = useState<LocalRoom[]>([]);
   const [roomModalOpen, setRoomModalOpen] = useState(false);
-  const [editingRoom, setEditingRoom] = useState(null);
-  const [savingRoom, setSavingRoom] = useState(false);
-  const [deletingRoomId, setDeletingRoomId] = useState(null);
+  const [editingRoom, setEditingRoom] = useState<LocalRoom | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -514,18 +544,169 @@ function AddPG() {
     [allAmenities],
   );
 
-  // Only the building amenities the user picked at step 2 are eligible
-  // as room amenities. Each room can subset this list.
-  const selectedBuildingAmenities = useMemo(
-    () => buildingAmenities.filter((a) => selectedBuildingIds.has(a.id)),
-    [buildingAmenities, selectedBuildingIds],
+  // Pseudo-amenity records for the pending custom ones so they look the
+  // same as real master amenities in the UI (chip, room picker, etc.).
+  const pendingAsAmenityRecords = useMemo(
+    () =>
+      pendingCustomAmenities.map((name, idx) => ({
+        id: `pending:${idx}`,
+        name,
+        category: 'building',
+        _pending: true as const,
+      })),
+    [pendingCustomAmenities],
   );
 
-  const handleStep1Submit = async () => {
+  const allBuildingChoices = useMemo(
+    () => [...buildingAmenities, ...pendingAsAmenityRecords],
+    [buildingAmenities, pendingAsAmenityRecords],
+  );
+
+  // Only what the user picked at step 2 is eligible as room amenities.
+  const selectedBuildingAmenities = useMemo(
+    () => allBuildingChoices.filter((a) => selectedBuildingIds.has(a.id)),
+    [allBuildingChoices, selectedBuildingIds],
+  );
+
+  const handleStep1Submit = () => {
+    setStepError('');
+    setStep(2);
+  };
+
+  const handleStep2Submit = () => {
+    setStepError('');
+    setStep(3);
+  };
+
+  const toggleBuildingAmenity = (id) => {
+    setSelectedBuildingIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  /**
+   * Inline custom-amenity creation in step 2. Held locally; not POSTed
+   * to /amenities/ until finish() so a bail-out doesn't pollute the
+   * master catalog with orphans.
+   */
+  const handleCreateAmenity = async (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    // Reject duplicates by name (case-insensitive) against master + pending.
+    const lower = trimmed.toLowerCase();
+    const isDup =
+      buildingAmenities.some((a) => String(a.name).toLowerCase() === lower) ||
+      pendingCustomAmenities.some((n) => n.toLowerCase() === lower);
+    if (isDup) {
+      fb.toast.warning(`'${trimmed}' is already in the list`);
+      return;
+    }
+    setPendingCustomAmenities((prev) => {
+      const next = [...prev, trimmed];
+      // Auto-select the new pending amenity.
+      const pendingId = `pending:${next.length - 1}`;
+      setSelectedBuildingIds((sel) => {
+        const ns = new Set(sel);
+        ns.add(pendingId);
+        return ns;
+      });
+      return next;
+    });
+  };
+
+  const openAddRoom = () => {
+    setEditingRoom(null);
+    setRoomModalOpen(true);
+  };
+
+  const openEditRoom = (room: LocalRoom) => {
+    setEditingRoom(room);
+    setRoomModalOpen(true);
+  };
+
+  // RoomFormModal expects an `amenities` array of {id} records. Map our
+  // flat amenityRefs to that shape for editing.
+  const editingRoomForModal = useMemo(
+    () => (editingRoom ? { ...editingRoom, amenities: editingRoom.amenityRefs.map((id) => ({ id })) } : null),
+    [editingRoom],
+  );
+
+  const closeRoomModal = () => {
+    setRoomModalOpen(false);
+    setEditingRoom(null);
+  };
+
+  const handleRoomSubmit = (payload, amenityChanges) => {
+    const selected: string[] = amenityChanges?.selected ?? amenityChanges?.add ?? [];
+    const draft: LocalRoom = {
+      tempId: editingRoom?.tempId ?? `temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      room_number: String(payload.room_number),
+      room_sharing: payload.room_sharing,
+      is_ac: !!payload.is_ac,
+      floor: payload.floor ?? null,
+      capacity: Number(payload.capacity || 1),
+      monthly_rent_per_head: Number(payload.monthly_rent_per_head || 0),
+      status: payload.status || 'available',
+      notes: payload.notes ?? null,
+      amenityRefs: selected,
+    };
+    setRooms((prev) => {
+      if (editingRoom) {
+        return prev.map((r) => (r.tempId === editingRoom.tempId ? draft : r));
+      }
+      return [...prev, draft];
+    });
+    setRoomModalOpen(false);
+    setEditingRoom(null);
+  };
+
+  const handleRoomDelete = async (room: LocalRoom) => {
+    const ok = await fb.confirm({
+      title: `Remove Room ${room.room_number}?`,
+      message: 'It hasn\'t been saved to the server yet — you can re-add it before finishing.',
+      confirmLabel: 'Remove',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    setRooms((prev) => prev.filter((r) => r.tempId !== room.tempId));
+  };
+
+  /**
+   * Single transactional submit. Order matters:
+   *   1. Create any pending custom amenities in master catalog → real ids
+   *   2. Create the PG → pgId
+   *   3. Link each selected building amenity to the new PG
+   *   4. For each room: POST /rooms/ with pg_id, then link its amenities
+   *
+   * Errors after the PG is created surface as warnings but we still
+   * navigate forward — the PG exists, the user can fix the rest in-page.
+   */
+  const finish = async () => {
     setSubmitting(true);
     setStepError('');
     try {
-      const created = await apiRequest('/api/v1/pg/', {
+      // --- 1. Create pending custom amenities first ---------------------
+      const pendingIdMap: Record<string, string> = {};
+      for (let i = 0; i < pendingCustomAmenities.length; i++) {
+        const name = pendingCustomAmenities[i];
+        try {
+          const created = await createAmenity(name, 'building');
+          if (created?.id) pendingIdMap[`pending:${i}`] = created.id;
+        } catch (err: any) {
+          fb.toast.warning(`Couldn't create amenity '${name}': ${err?.message || 'unknown error'}`);
+        }
+      }
+
+      // Resolve every selected building amenity ref to a real master id.
+      const resolvedBuildingAmenityIds = [...selectedBuildingIds]
+        .map((ref) => (ref.startsWith('pending:') ? pendingIdMap[ref] : ref))
+        .filter(Boolean) as string[];
+
+      // --- 2. Create the PG --------------------------------------------
+      const createdPg = await apiRequest('/api/v1/pg/', {
         method: 'POST',
         body: {
           name: basics.name.trim(),
@@ -538,126 +719,56 @@ function AddPG() {
           is_active: true,
         },
       });
-      setPgId(created?.id);
-      // Tell TanStack the pgs list is stale so OnboardingGuard sees count > 0
-      // immediately and stops redirecting back here on subsequent navigations.
+      const pgId = createdPg?.id;
+      if (!pgId) throw new Error('PG was created but no id returned.');
       queryClient.invalidateQueries({ queryKey: queryKeys.resource('pgs') });
-      setStep(2);
-    } catch (err) {
-      setStepError(err?.message || 'Could not create PG');
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
-  const handleStep2Submit = async () => {
-    if (!pgId) {
-      setStepError('PG not yet created. Go back to step 1.');
-      return;
-    }
-    setSubmitting(true);
-    setStepError('');
-    try {
-      const result = await syncAmenities('pg', pgId, { add: [...selectedBuildingIds] });
-      if (result.failures.length > 0) {
-        fb.toast.warning(`${result.failures.length} amenity link(s) failed`);
-      }
-      setStep(3);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const toggleBuildingAmenity = (id) => {
-    setSelectedBuildingIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const handleCreateAmenity = async (name) => {
-    try {
-      const created = await createAmenity(name, 'building');
-      if (created?.id) {
-        setAllAmenities((prev) => [...prev, created]);
-        setSelectedBuildingIds((prev) => {
-          const next = new Set(prev);
-          next.add(created.id);
-          return next;
-        });
-      }
-    } catch (err) {
-      fb.toast.error(err?.message || 'Could not add amenity');
-    }
-  };
-
-  const openAddRoom = () => {
-    setEditingRoom(null);
-    setRoomModalOpen(true);
-  };
-
-  const openEditRoom = (room) => {
-    setEditingRoom(room);
-    setRoomModalOpen(true);
-  };
-
-  const closeRoomModal = () => {
-    if (savingRoom) return;
-    setRoomModalOpen(false);
-    setEditingRoom(null);
-  };
-
-  const handleRoomSubmit = async (payload, amenityChanges) => {
-    if (!pgId) return;
-    setSavingRoom(true);
-    try {
-      let roomId = editingRoom?.id;
-      if (editingRoom) {
-        await apiRequest(`/api/v1/rooms/${editingRoom.id}`, { method: 'PATCH', body: payload });
-        await syncAmenities('room', editingRoom.id, amenityChanges ?? {});
-      } else {
-        const created = await apiRequest('/api/v1/rooms/', {
-          method: 'POST',
-          body: { ...payload, pg_id: pgId, current_occupancy: 0, is_active: true },
-        });
-        roomId = created?.id;
-        if (roomId && amenityChanges?.selected?.length) {
-          await syncAmenities('room', roomId, { add: amenityChanges.selected });
+      // --- 3. Link building amenities ----------------------------------
+      if (resolvedBuildingAmenityIds.length > 0) {
+        const linkResult = await syncAmenities('pg', pgId, { add: resolvedBuildingAmenityIds });
+        if (linkResult.failures.length > 0) {
+          fb.toast.warning(`${linkResult.failures.length} amenity link(s) failed`);
         }
       }
-      const refreshed = await apiRequest(`/api/v1/rooms/?pg_id=${pgId}`);
-      setRooms(Array.isArray(refreshed) ? refreshed : []);
-      setRoomModalOpen(false);
-      setEditingRoom(null);
-    } finally {
-      setSavingRoom(false);
-    }
-  };
 
-  const handleRoomDelete = async (room) => {
-    const ok = await fb.confirm({
-      title: `Delete Room ${room.room_number}?`,
-      message: 'This cannot be undone.',
-      confirmLabel: 'Delete',
-      variant: 'danger',
-    });
-    if (!ok) return;
-    setDeletingRoomId(room.id);
-    const result = await fb.error(
-      apiRequest(`/api/v1/rooms/${room.id}`, { method: 'DELETE' }),
-      'Could not delete room',
-      'Room deleted',
-    );
-    if (result !== undefined) {
-      setRooms((prev) => prev.filter((r) => r.id !== room.id));
-    }
-    setDeletingRoomId(null);
-  };
+      // --- 4. Create each room + its amenity links ---------------------
+      for (const r of rooms) {
+        let createdRoom;
+        try {
+          createdRoom = await apiRequest('/api/v1/rooms/', {
+            method: 'POST',
+            body: {
+              room_number: r.room_number,
+              room_sharing: r.room_sharing,
+              is_ac: r.is_ac,
+              floor: r.floor,
+              capacity: r.capacity,
+              monthly_rent_per_head: r.monthly_rent_per_head,
+              status: r.status,
+              notes: r.notes,
+              pg_id: pgId,
+              current_occupancy: 0,
+              is_active: true,
+            },
+          });
+        } catch (err: any) {
+          fb.toast.warning(`Couldn't create Room ${r.room_number}: ${err?.message || 'unknown'}`);
+          continue;
+        }
+        const newRoomId = createdRoom?.id;
+        const roomAmenityIds = r.amenityRefs
+          .map((ref) => (ref.startsWith('pending:') ? pendingIdMap[ref] : ref))
+          .filter(Boolean) as string[];
+        if (newRoomId && roomAmenityIds.length > 0) {
+          await syncAmenities('room', newRoomId, { add: roomAmenityIds });
+        }
+      }
 
-  const finish = () => {
-    navigate('/dashboard');
+      navigate(`/pg/${pgId}/rooms`);
+    } catch (err: any) {
+      setStepError(err?.message || 'Could not create PG');
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -685,7 +796,7 @@ function AddPG() {
           </button>
           <h1 className="text-xl sm:text-2xl font-bold text-[#111827] leading-tight">
             Add New PG
-            {pgId && basics.name && (
+            {basics.name && step > 1 && (
               <span className="text-[#6B7280] font-normal text-base sm:text-lg ml-1">
                 / {basics.name}
               </span>
@@ -726,7 +837,7 @@ function AddPG() {
           onDelete={handleRoomDelete}
           onFinish={finish}
           onBack={() => setStep(2)}
-          deletingRoomId={deletingRoomId}
+          submitting={submitting}
         />
       )}
 
@@ -734,8 +845,8 @@ function AddPG() {
         open={roomModalOpen}
         onClose={closeRoomModal}
         onSubmit={handleRoomSubmit}
-        initial={editingRoom}
-        saving={savingRoom}
+        initial={editingRoomForModal}
+        saving={false}
         availableAmenities={selectedBuildingAmenities}
       />
     </motion.div>
