@@ -127,6 +127,50 @@ function SettingsPage() {
               alignItems: 'center',
               gap: '12px'
             }}>
+              <Shield size={20} color='#1C6C41' />
+              Security
+            </h2>
+
+            <button
+              type='button'
+              onClick={handleChangePassword}
+              disabled={sendingReset}
+              style={{
+                padding: '10px 16px',
+                background: 'var(--color-background)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '14px',
+                fontWeight: 500,
+                color: 'var(--color-foreground)',
+                cursor: sendingReset ? 'not-allowed' : 'pointer',
+                opacity: sendingReset ? 0.6 : 1,
+                width: 'fit-content'
+              }}
+            >
+              {sendingReset ? 'Sending…' : 'Change Password'}
+            </button>
+            <p style={{ fontSize: '12px', color: 'var(--color-muted-foreground)', marginTop: '6px' }}>
+              We'll email you a secure reset link to change your password.
+            </p>
+          </div>
+
+          <div style={{
+            background: 'var(--color-card)',
+            borderRadius: 'var(--radius-lg)',
+            padding: '24px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
+            border: '1px solid var(--color-border)'
+          }}>
+            <h2 style={{
+              fontSize: '16px',
+              fontWeight: 600,
+              color: 'var(--color-foreground)',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
               <Bell size={20} color='#1C6C41' />
               Notifications
             </h2>
@@ -187,73 +231,31 @@ function SettingsPage() {
             </div>
           </div>
 
-          <div style={{
-            background: 'var(--color-card)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '24px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
-            border: '1px solid var(--color-border)'
-          }}>
-            <h2 style={{
-              fontSize: '16px',
-              fontWeight: 600,
-              color: 'var(--color-foreground)',
-              marginBottom: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}>
-              <Shield size={20} color='#1C6C41' />
-              Security
-            </h2>
-
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button
-              type='button'
-              onClick={handleChangePassword}
-              disabled={sendingReset}
+              type='submit'
               style={{
-                padding: '10px 16px',
-                background: 'var(--color-background)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-md)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 24px',
+                background: '#1C6C41',
+                border: 'none',
+                borderRadius: '9999px',
+                color: 'white',
                 fontSize: '14px',
-                fontWeight: 500,
-                color: 'var(--color-foreground)',
-                cursor: sendingReset ? 'not-allowed' : 'pointer',
-                opacity: sendingReset ? 0.6 : 1,
-                width: 'fit-content'
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'transform 150ms ease, box-shadow 150ms ease',
+                boxShadow: '0 1px 2px rgba(28,108,65,0.15)'
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 8px rgba(28,108,65,0.25)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 2px rgba(28,108,65,0.15)'; }}
             >
-              {sendingReset ? 'Sending…' : 'Change Password'}
+              <Save size={16} />
+              Save Settings
             </button>
-            <p style={{ fontSize: '12px', color: 'var(--color-muted-foreground)', marginTop: '6px' }}>
-              We'll email you a secure reset link to change your password.
-            </p>
           </div>
-
-          <button
-            type='submit'
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '2px',
-              padding: '14px',
-              background: '#1C6C41',
-              border: 'none',
-              borderRadius: '9999px',
-              color: 'white',
-              fontSize: '15px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'transform 150ms ease'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            <Save size={18} />
-            Save Settings
-          </button>
         </form>
       </div>
     </div>

@@ -260,31 +260,31 @@ function Profile() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '2px',
-              width: '100%',
-              padding: '14px',
-              background: '#1C6C41',
-              border: 'none',
-              borderRadius: '9999px',
-              color: 'white',
-              fontSize: '15px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              marginTop: '24px',
-              transition: 'transform 150ms ease'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            <Save size={18} />
-            Save Changes
-          </button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
+            <button
+              type="submit"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 24px',
+                background: '#1C6C41',
+                border: 'none',
+                borderRadius: '9999px',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'transform 150ms ease, box-shadow 150ms ease',
+                boxShadow: '0 1px 2px rgba(28,108,65,0.15)'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 8px rgba(28,108,65,0.25)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 2px rgba(28,108,65,0.15)'; }}
+            >
+              <Save size={16} />
+              Save Changes
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -224,6 +224,23 @@ function MyPGs() {
               onDelete={handleDelete}
             />
           ))}
+
+          {/* Ghost 'Add another PG' card so the grid never feels empty */}
+          <button
+            type="button"
+            onClick={() => navigate('/pg/add')}
+            className="group flex flex-col items-center justify-center gap-3 min-h-[260px] rounded-2xl border-2 border-dashed border-[#E8DFD2] bg-transparent hover:border-[#1C6C41]/40 hover:bg-[#1C6C41]/[0.03] transition-colors cursor-pointer text-[#8B7355] hover:text-[#1C6C41]"
+            aria-label="Add another PG"
+          >
+            <div className="w-12 h-12 rounded-full bg-[#1C6C41]/10 group-hover:bg-[#1C6C41]/15 flex items-center justify-center transition-colors">
+              <Plus size={24} className="text-[#1C6C41]" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold">Add another PG</p>
+              <p className="text-xs mt-0.5 text-[#A89580]">Set up a new property</p>
+            </div>
+          </button>
+
           {deletingId && (
             <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 pointer-events-none">
               <div className="bg-white rounded-lg px-6 py-4 shadow-xl text-sm text-[#5C4632]">Deleting…</div>
