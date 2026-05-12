@@ -238,14 +238,14 @@ export default function AddTenantDrawer({ open, onClose, onSubmit, pgs = [], roo
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#374151] mb-1">Monthly Rent (₹) *</label>
-                <input required type="number" min="0" placeholder="8000" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.monthly_rent} onChange={(e) => setFormData({ ...formData, monthly_rent: e.target.value })} />
+                <input required type="number" min="0" max="500000" step="100" placeholder="8000" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.monthly_rent} onChange={(e) => setFormData({ ...formData, monthly_rent: e.target.value })} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[#374151] mb-1">Security Deposit (₹) *</label>
-                <input required type="number" min="0" placeholder="16000" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.security_deposit} onChange={(e) => setFormData({ ...formData, security_deposit: e.target.value })} />
+                <input required type="number" min="0" max="2000000" step="100" placeholder="16000" className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C6C41]/20 focus:border-[#1C6C41] text-sm" value={formData.security_deposit} onChange={(e) => setFormData({ ...formData, security_deposit: e.target.value })} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#374151] mb-1">Temp Password</label>

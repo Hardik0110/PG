@@ -18,9 +18,10 @@ import {
   ChevronRight,
   Building,
 } from 'lucide-react';
-import { clearToken, setToken } from '../lib/api';
+import { clearToken, setToken, apiRequest } from '../lib/api';
 import { sidebarVariants, backdropVariants } from '../lib/animations';
 import { useCurrentUser } from '../hooks/use-current-user';
+import { useQuery } from '@tanstack/react-query';
 
 const LS_KEY = 'pg_sidebar_collapsed';
 
@@ -85,7 +86,35 @@ function Sidebar({ mobileOpen, onMobileClose, collapsed: controlledCollapsed, on
 
   const collapsed = controlledCollapsed !== undefined ? controlledCollapsed : storeCollapsed;
 
-  const badges = { notifications: 0, maintenance: 0 };
+  // Live counts. Notifications: any unread (best-effort — backend may not
+  // return read state, so we count items returned by /notifications/).
+  // Maintenance: any open ticket from /tickets/my.
+  const { data: notifications } = useQuery<any[]>({
+    queryKey: ['notifications', 'unread'],
+    queryFn: async () => {
+      const res = await apiRequest('/api/v1/notifications/');
+      return Array.isArray(res) ? res : res?.data ?? [];
+    },
+    staleTime: 60_000,
+    retry: false,
+  });
+  const { data: tickets } = useQuery<any[]>({
+    queryKey: ['tickets', 'open'],
+    queryFn: async () => {
+      const res = await apiRequest('/api/v1/tickets/my');
+      return Array.isArray(res) ? res : res?.data ?? [];
+    },
+    staleTime: 60_000,
+    retry: false,
+  });
+  const badges = {
+    notifications: (notifications ?? []).filter(
+      (n: any) => n?.is_read === false || n?.read === false || n?.status === 'unread',
+    ).length || (notifications ?? []).length,
+    maintenance: (tickets ?? []).filter(
+      (t: any) => t?.status === 'open' || t?.status === 'in_progress',
+    ).length,
+  };
 
   const toggleCollapsed = useCallback(() => {
     if (onToggleCollapse) {

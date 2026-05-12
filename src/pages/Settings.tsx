@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Moon, Sun, Bell, Shield, Palette, Save, Check } from 'lucide-react';
 import { apiRequest, unwrapData } from '../lib/api';
+import { useFeedback } from '../components/FeedbackProvider';
 
 function SettingsPage() {
+  const fb = useFeedback();
   const [settings, setSettings] = useState({
     darkMode: false,
     notifications: {
@@ -14,6 +16,27 @@ function SettingsPage() {
     themeColor: '#10B981'
   });
   const [showSuccess, setShowSuccess] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [sendingReset, setSendingReset] = useState(false);
+
+  const handleChangePassword = async () => {
+    if (!userEmail) {
+      fb.toast.error('Could not determine your email — try refreshing.');
+      return;
+    }
+    setSendingReset(true);
+    try {
+      await apiRequest('/api/v1/auth/forgot-password', {
+        method: 'POST',
+        body: { email: userEmail.toLowerCase() },
+      });
+      fb.toast.success(`Password reset link sent to ${userEmail}`);
+    } catch (err: any) {
+      fb.toast.error(err?.message || 'Could not send reset link');
+    } finally {
+      setSendingReset(false);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -22,6 +45,7 @@ function SettingsPage() {
         const payload = await apiRequest('/api/v1/auth/me');
         const data = unwrapData(payload, {});
         if (!mounted) return;
+        setUserEmail(data.email || '');
         setSettings((prev) => ({
           ...prev,
 
@@ -185,6 +209,8 @@ function SettingsPage() {
 
             <button
               type='button'
+              onClick={handleChangePassword}
+              disabled={sendingReset}
               style={{
                 padding: '10px 16px',
                 background: 'var(--color-background)',
@@ -193,12 +219,16 @@ function SettingsPage() {
                 fontSize: '14px',
                 fontWeight: 500,
                 color: 'var(--color-foreground)',
-                cursor: 'pointer',
+                cursor: sendingReset ? 'not-allowed' : 'pointer',
+                opacity: sendingReset ? 0.6 : 1,
                 width: 'fit-content'
               }}
             >
-              Change Password
+              {sendingReset ? 'Sending…' : 'Change Password'}
             </button>
+            <p style={{ fontSize: '12px', color: 'var(--color-muted-foreground)', marginTop: '6px' }}>
+              We'll email you a secure reset link to change your password.
+            </p>
           </div>
 
           <button

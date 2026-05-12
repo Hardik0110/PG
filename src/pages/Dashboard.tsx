@@ -181,26 +181,39 @@ function Dashboard() {
 
   useEffect(() => {
     let mounted = true
-      ; (async () => {
-        try {
-          const [, tenantsPayload, ticketsPayload, roomsPayload] =
-            await Promise.all([
-              apiRequest("/api/v1/pg/"),
-              apiRequest("/api/v1/tenants/"),
-              apiRequest("/api/v1/tickets/my"),
-              apiRequest("/api/v1/rooms/"),
-            ])
-          if (!mounted) return
-          setTenants(unwrapData(tenantsPayload, []) || [])
-          setRooms(unwrapData(roomsPayload, []) || [])
-          const tk = unwrapData(ticketsPayload, []) || []
-          setTickets(Array.isArray(tk) ? tk.filter((x) => !x.detail) : [])
-        } catch { } finally {
-          if (mounted) setLoading(false)
-        }
-      })()
+    const loadAll = async () => {
+      try {
+        const [, tenantsPayload, ticketsPayload, roomsPayload] =
+          await Promise.all([
+            apiRequest("/api/v1/pg/"),
+            apiRequest("/api/v1/tenants/"),
+            apiRequest("/api/v1/tickets/my"),
+            apiRequest("/api/v1/rooms/"),
+          ])
+        if (!mounted) return
+        setTenants(unwrapData(tenantsPayload, []) || [])
+        setRooms(unwrapData(roomsPayload, []) || [])
+        const tk = unwrapData(ticketsPayload, []) || []
+        setTickets(Array.isArray(tk) ? tk.filter((x) => !x.detail) : [])
+      } catch { } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+
+    loadAll()
+
+    // Re-fetch when the tab regains focus or visibility comes back —
+    // covers the 'user added a transaction, came back to dashboard,
+    // numbers were stale' case without needing TanStack rewiring yet.
+    const onFocus = () => { loadAll() }
+    const onVisibility = () => { if (document.visibilityState === 'visible') loadAll() }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisibility)
+
     return () => {
       mounted = false
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [])
 
