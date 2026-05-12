@@ -173,7 +173,7 @@ function Maintenance() {
     >
 
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl sm:text-2xl font-bold text-[#111827]">Maintenance Tickets</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#111827]">Maintenance Tickets</h1>
         <button
           onClick={() => setIsModalOpen(true)}
           className="inline-flex items-center gap-2 px-4 py-2 bg-[#1C6C41] hover:bg-[#155331] text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"

@@ -181,7 +181,7 @@ function MyPGs() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Building size={24} className="text-[#1C6C41]" />
-          <h1 className="text-xl sm:text-2xl font-bold text-[#1F2937]">My PGs</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1F2937]">My PGs</h1>
         </div>
         <button
           onClick={() => navigate('/pg/add')}

@@ -282,7 +282,7 @@ function Dashboard() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-xs text-muted-foreground">
             {new Date().toLocaleDateString(undefined, {
               weekday: "long",
@@ -356,7 +356,8 @@ function Dashboard() {
             trend: { delta: "−1", direction: "down", sentiment: "positive" },
             progress: null,
             status: "Trending down",
-            semantic: "info",
+            // Fewer tickets is good — use the success palette, not info-blue.
+            semantic: "success",
             imageSrc: "/illustrations/SC4-open-tickets_001.jpg",
           },
         ] satisfies StatCardData[]}
@@ -445,7 +446,7 @@ function Dashboard() {
           }
         >
           {recentTenants.length === 0 ? (
-            <EmptyCardState message="No tenants yet" />
+            <EmptyCardState message="No tenants yet" imageSrc="/illustrations/EZ-people_001.png" />
           ) : (
             <ul className="divide-y divide-border">
               {recentTenants.map((t, idx) => (
@@ -503,7 +504,7 @@ function Dashboard() {
           }
         >
           {filteredTickets.length === 0 ? (
-            <EmptyCardState message="No open tickets" />
+            <EmptyCardState message="No open tickets" imageSrc="/illustrations/EZ-wrench_001.png" />
           ) : (
             <ul className="divide-y divide-border">
               {filteredTickets.map((t) => {

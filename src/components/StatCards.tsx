@@ -111,7 +111,7 @@ export default function StatCards({ cards, className }: StatCardsProps) {
                 </span>
               </div>
 
-              <p className="mt-3 font-mono font-medium leading-none tabular-nums text-foreground text-[clamp(2.25rem,4vw,2.5rem)]">
+              <p className="mt-3 font-mono font-bold leading-none tabular-nums text-foreground text-[clamp(2.25rem,4vw,2.5rem)]">
                 {card.value}
               </p>
 

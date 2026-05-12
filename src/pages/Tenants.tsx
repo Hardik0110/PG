@@ -157,7 +157,7 @@ function Tenants() {
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-[#111827]">Tenants</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#111827]">Tenants</h1>
           <span className="text-sm text-[#8B7355] bg-[#EFE7DA] px-2.5 py-0.5 rounded-full font-medium">
             {filteredTenants.length} total
           </span>

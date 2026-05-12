@@ -88,7 +88,7 @@ function Notifications() {
       <div className="flex items-center justify-between gap-2 mb-8 flex-wrap">
         <div className="flex items-center gap-2">
           <Bell size={24} className="text-[#1C6C41]" />
-          <h1 className="text-xl sm:text-2xl font-bold text-[#1F2937]">Notifications</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1F2937]">Notifications</h1>
           {unreadCount > 0 && (
             <span className="text-[11px] font-semibold text-white bg-[#1C6C41] rounded-full px-2 py-0.5">
               {unreadCount} new

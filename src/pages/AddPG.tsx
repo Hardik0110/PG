@@ -90,7 +90,7 @@ function StepBasics({ value, onChange, onNext, submitting, error }) {
       <img
         src="/illustrations/F1-step-basics_001.jpg"
         alt=""
-        className="block w-full h-40 sm:h-48 object-contain bg-[#F8F5F0]"
+        className="block w-full h-28 sm:h-32 object-contain bg-[#F8F5F0]"
         loading="lazy"
       />
       <div className="p-6">
@@ -225,7 +225,7 @@ function StepBuildingAmenities({
       <img
         src="/illustrations/F2-step-amenities_001.jpg"
         alt=""
-        className="block w-full h-40 sm:h-48 object-contain bg-[#F8F5F0]"
+        className="block w-full h-28 sm:h-32 object-contain bg-[#F8F5F0]"
         loading="lazy"
       />
       <div className="p-6">
@@ -370,7 +370,7 @@ function StepRooms({ rooms, onAdd, onEdit, onDelete, onFinish, onBack, submittin
       <img
         src="/illustrations/F3-step-rooms_001.jpg"
         alt=""
-        className="block w-full h-40 sm:h-48 object-contain bg-[#F8F5F0]"
+        className="block w-full h-28 sm:h-32 object-contain bg-[#F8F5F0]"
         loading="lazy"
       />
       <div className="p-6">

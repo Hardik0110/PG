@@ -249,7 +249,7 @@ function Rooms() {
 
         <div className="flex items-center gap-2">
           <Home size={22} className="text-[#1C6C41] shrink-0" />
-          <h1 className="text-xl sm:text-2xl font-bold text-[#1F2937]">Rooms</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1F2937]">Rooms</h1>
           <span className="text-sm text-[#9CA3AF] ml-1">
             ({filteredRooms.length} total)
           </span>

@@ -182,7 +182,7 @@ function Expenses() {
       className="h-full flex flex-col"
     >
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 gap-3">
-        <h1 className="text-xl sm:text-2xl font-bold text-[#111827]">Expenses</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#111827]">Expenses</h1>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <button
             onClick={handleExportCSV}
