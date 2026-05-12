@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Sparkles } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { clearToken } from '../lib/api';
 
 interface Props {
@@ -44,7 +44,7 @@ export default function MinimalLayout({ children, banner }: Props) {
         <div className="shrink-0 border-b border-[#E5E7EB] bg-gradient-to-r from-[#1C6C41]/8 via-[#A8E6C3]/12 to-transparent">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-start gap-3">
             <div className="w-9 h-9 rounded-full bg-[#1C6C41]/15 flex items-center justify-center shrink-0">
-              <Sparkles size={18} className="text-[#1C6C41]" />
+              <span role="img" aria-label="namaste" className="text-xl leading-none">🙏</span>
             </div>
             <div>
               {banner ?? (
